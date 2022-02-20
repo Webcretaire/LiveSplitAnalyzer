@@ -8,4 +8,7 @@ html, body {
   padding: 0;
   font-family: Roboto, Arial, sans-serif;
   height: 100%;
+  color: white;
+  // See https://stackoverflow.com/questions/1762539/margin-on-child-element-moves-parent-element#answer-1939980
+  overflow: auto;
 }

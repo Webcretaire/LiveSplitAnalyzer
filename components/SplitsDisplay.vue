@@ -18,10 +18,10 @@
 </template>
 
 <script lang="ts">
-import {XMLParser}  from 'fast-xml-parser';
-import {extractPng} from '~/util/pngExtractor';
-import {Segment}    from '~/util/splits';
-import {Vue, Component}        from 'nuxt-property-decorator';
+import {XMLParser}      from 'fast-xml-parser';
+import {extractPng}     from '~/util/pngExtractor';
+import {Segment}        from '~/util/splits';
+import {Vue, Component} from 'nuxt-property-decorator';
 
 // See https://github.com/microsoft/TypeScript/issues/31816#issuecomment-593069149
 export type FileEventTarget = EventTarget & { files: FileList };
@@ -56,7 +56,7 @@ export default class SplitsDisplay extends Vue {
       if (e.target)
         this.splitFile = e.target.result as string;
       else
-        console.error("FileReader error");
+        console.error('FileReader error');
     };
     reader.readAsText(file);
   }
@@ -64,6 +64,10 @@ export default class SplitsDisplay extends Vue {
 </script>
 
 <style scoped lang="scss">
+* {
+  color: black;
+}
+
 img {
   filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 1));
   max-width: 6rem;

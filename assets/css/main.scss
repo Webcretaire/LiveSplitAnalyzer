@@ -11,4 +11,13 @@ html, body {
   color: white;
   // See https://stackoverflow.com/questions/1762539/margin-on-child-element-moves-parent-element#answer-1939980
   overflow: auto;
+  overflow-x: hidden; // Shouldn't be useful but for some reason body gets too wide
+}
+
+h1 {
+  font-family: "Roboto Thin", Arial, sans-serif;
+}
+
+h2, h3 {
+  font-family: "Roboto Light", Arial, sans-serif;
 }

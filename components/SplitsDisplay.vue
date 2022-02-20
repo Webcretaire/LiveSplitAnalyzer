@@ -7,13 +7,22 @@
       drop-placeholder="Drop file here..."
       class="mb-3"
     ></b-form-file>
-    <b-row v-if="splitFile.length">
-      <b-col cols="6" xl="3" lg="4" v-for="split in splits" :key="split.Name">
-        <b-card :title="split.Name" class="text-center mb-3">
-          <img class="mt-3" :alt="split.Name" :src="srcFormattedIcon(split)"/>
-        </b-card>
-      </b-col>
-    </b-row>
+    <div v-if="splitFile.length">
+      <b-card class="text-left mb-3" v-for="split in splits" :key="split.Name">
+        <div class="limit-height">
+          <b-card-img :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
+          <div class="mt-auto mb-auto">
+            <h3>
+              {{ split.Name }}
+            </h3>
+            <p v-if="split.BestSegmentTime">
+              <strong>Best time:</strong> {{ formatTime(split.BestSegmentTime.GameTime) }} (game time) ;
+              {{ formatTime(split.BestSegmentTime.RealTime) }} (real time)
+            </p>
+          </div>
+        </div>
+      </b-card>
+    </div>
   </div>
 </template>
 
@@ -60,6 +69,25 @@ export default class SplitsDisplay extends Vue {
     };
     reader.readAsText(file);
   }
+
+  formatTime(time: string) {
+    const t = time.match(/([0-9]+):([0-9]+):([0-9.]+)/);
+
+    if (!t) return ''; // Should not happen but we need to please TS
+
+    // t[0] contains the whole string
+    const hours = +t[1];
+    const minutes = +t[2];
+    const seconds = +t[3];
+    let out = '';
+    if (hours)
+      out += `${hours}h`;
+    if (minutes)
+      out += `${minutes}m`;
+    out += `${seconds}s`;
+
+    return out;
+  }
 }
 </script>
 
@@ -70,7 +98,18 @@ export default class SplitsDisplay extends Vue {
 
 img {
   filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 1));
-  max-width: 6rem;
-  max-height: 6rem;
+}
+
+.limit-height {
+  max-height: 4rem;
+  display: flex;
+}
+
+.split-icon {
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 256px;
+  width: auto;
+  height: auto;
 }
 </style>

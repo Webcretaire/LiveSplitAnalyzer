@@ -7,8 +7,11 @@
       drop-placeholder="Drop file here..."
       class="mb-3"
     ></b-form-file>
+    <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mb-3">
+      Graphs' Y axis starts at zero
+    </b-form-checkbox>
     <div v-if="splitFile.length">
-      <split-display :split="split" v-for="split in splits" :key="split.Name"/>
+      <split-display :split="split" v-for="split in splits" :key="split.Name" :graphYAxisToZero="graphYAxisToZero" class="mb-3"/>
     </div>
   </div>
 </template>
@@ -25,6 +28,8 @@ export default class SplitsDisplay extends Vue {
   xmlParser: XMLParser = new XMLParser();
 
   splitFile: string = '';
+
+  graphYAxisToZero: boolean = true;
 
   get parsedSplits() {
     return this.xmlParser.parse(this.splitFile);

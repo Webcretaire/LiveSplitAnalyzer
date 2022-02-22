@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card class="text-left mb-2">
+    <b-card class="text-left">
       <div class="limit-height">
         <b-card-img :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
         <div class="mt-auto mb-auto">
@@ -18,42 +18,74 @@
       </div>
     </b-card>
 
-    <b-collapse :id="collapseName" class="mt-2" v-model="collapseVisible">
-      <b-card class="text-left mb-4">
-        <Plotly :data="plot_data()" :layout="layout" :display-mode-bar="true"/>
+    <b-collapse :id="collapseName" class="mt-1" v-model="collapseVisible">
+      <b-card class="text-left">
+        <Plotly v-if="renderGraph" :data="plot_data()" :layout="layout()" :display-mode-bar="true"/>
       </b-card>
     </b-collapse>
   </div>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop} from 'nuxt-property-decorator';
-import {Segment}              from '~/util/splits';
-import {extractPng}           from '~/util/pngExtractor';
-import slugify                from 'slugify';
+import {Vue, Component, Prop, Watch} from 'nuxt-property-decorator';
+import {Segment}                     from '~/util/splits';
+import {extractPng}                  from '~/util/pngExtractor';
+import slugify                       from 'slugify';
+// Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}               from 'vue-plotly';
+import {Plotly}                      from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
   @Prop()
   split!: Segment;
 
+  @Prop()
+  graphYAxisToZero!: boolean;
+
   collapseVisible: boolean = false;
 
-  layout: any = {
+  renderGraph: boolean = true;
+
+  /**
+   * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
+   * be an arrow function otherwise we get `_vm.layout is not a function`
+   */
+  layout = () => ({
     title: 'Time history',
     xaxis: {
       title: 'Attempt number'
     },
     yaxis: {
       title: 'Time (seconds)',
-      rangemode: 'tozero'
+      rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
     }
-  };
+  });
+
+  public constructor() {
+    super();
+    // this.layout = () => ({
+    //   title: 'Time history',
+    //   xaxis: {
+    //     title: 'Attempt number'
+    //   },
+    //   yaxis: {
+    //     title: 'Time (seconds)',
+    //     rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
+    //   }
+    // });
+  }
 
   get collapseName() {
     return 'collapse-' + slugify(this.split.Name);
+  }
+
+  @Watch('graphYAxisToZero')
+  onGraphYAxisToZeroChange() {
+    this.renderGraph = false;
+    this.$nextTick(() => {
+      this.renderGraph = true;
+    });
   }
 
   plot_data() {
@@ -73,7 +105,7 @@ export default class SplitDisplay extends Vue {
       }
     });
 
-    const text_val   = this.split.SegmentHistory.Time.map((t) => {
+    const text_val = this.split.SegmentHistory.Time.map((t) => {
       if (typeof (t) == 'string' || !t.GameTime) {
         return null;
       } else {

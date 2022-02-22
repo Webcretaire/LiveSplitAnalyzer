@@ -12,13 +12,13 @@
             {{ formatTime(split.BestSegmentTime.RealTime) }} (real time)
           </p>
           <b-button style="position: absolute; top: 1rem; right: 1rem" v-b-toggle="collapseName" variant="outline-dark">
-            Time detail
+            {{ collapseVisible ? 'Close' : 'Time detail' }}
           </b-button>
         </div>
       </div>
     </b-card>
 
-    <b-collapse :id="collapseName" class="mt-2">
+    <b-collapse :id="collapseName" class="mt-2" v-model="collapseVisible">
       <b-card class="text-left mb-4">
         <Plotly :data="plot_data()" :layout="layout" :display-mode-bar="true"/>
       </b-card>
@@ -39,6 +39,8 @@ export default class SplitDisplay extends Vue {
   @Prop()
   split!: Segment;
 
+  collapseVisible: boolean = false;
+
   layout: any = {
     title: 'Time history',
     xaxis: {
@@ -55,33 +57,44 @@ export default class SplitDisplay extends Vue {
   }
 
   plot_data() {
+    const y_val = this.split.SegmentHistory.Time.map((t) => {
+      if (typeof (t) == 'string' || !t.GameTime) {
+        return 0;
+      } else {
+        const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
+
+        if (!time) return ''; // Should not happen but we need to please TS
+
+        const hours   = +time[1];
+        const minutes = +time[2];
+        const seconds = +time[3];
+
+        return seconds + 60 * minutes + 3600 * hours;
+      }
+    });
+
+    const text_val   = this.split.SegmentHistory.Time.map((t) => {
+      if (typeof (t) == 'string' || !t.GameTime) {
+        return 'Unknown';
+      } else {
+        return t.GameTime;
+      }
+    });
+
     return [
       {
         x: Array.from({length: this.split.SegmentHistory.Time.length}, (v, k) => k),
-        y: this.split.SegmentHistory.Time.map((t) => {
-          if (typeof (t) == 'string' || !t.GameTime) {
-            return 0;
-          } else {
-            const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
-
-            if (!time) return ''; // Should not happen but we need to please TS
-
-            const hours   = +time[1];
-            const minutes = +time[2];
-            const seconds = +time[3];
-
-            return seconds + 60 * minutes + 3600 * hours;
-          }
-        }),
-        text: this.split.SegmentHistory.Time.map((t) => {
-          if (typeof (t) == 'string' || !t.GameTime) {
-            return 'Unknown';
-          } else {
-            return t.GameTime;
-          }
-        }),
+        y: y_val,
+        text: text_val,
         type: 'scatter',
-        hoverinfo: 'text'
+        hoverinfo: 'text',
+        mode: 'lines+markers',
+        marker: {
+          size: 4
+        },
+        line: {
+          width: 1
+        }
       }
     ];
   }

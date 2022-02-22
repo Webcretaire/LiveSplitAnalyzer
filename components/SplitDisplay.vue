@@ -20,7 +20,7 @@
 
     <b-collapse :id="collapseName" class="mt-2">
       <b-card class="text-left mb-4">
-        <Plotly :data="plot_data()" :layout="layout" :display-mode-bar="false"/>
+        <Plotly :data="plot_data()" :layout="layout" :display-mode-bar="true"/>
       </b-card>
     </b-collapse>
   </div>
@@ -45,7 +45,8 @@ export default class SplitDisplay extends Vue {
       title: 'Attempt number'
     },
     yaxis: {
-      title: 'Time (seconds)'
+      title: 'Time (seconds)',
+      rangemode: 'tozero'
     }
   };
 
@@ -56,25 +57,31 @@ export default class SplitDisplay extends Vue {
   plot_data() {
     return [
       {
-        x: Array.from({length: this.split.SegmentHistory.Time.length + 1}, (v, k) => k),
-        y: [
-          0, ...this.split.SegmentHistory.Time.map((t) => {
-            if (typeof (t) == 'string' || !t.GameTime) {
-              return 0;
-            } else {
-              const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
+        x: Array.from({length: this.split.SegmentHistory.Time.length}, (v, k) => k),
+        y: this.split.SegmentHistory.Time.map((t) => {
+          if (typeof (t) == 'string' || !t.GameTime) {
+            return 0;
+          } else {
+            const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
 
-              if (!time) return ''; // Should not happen but we need to please TS
+            if (!time) return ''; // Should not happen but we need to please TS
 
-              const hours   = +time[1];
-              const minutes = +time[2];
-              const seconds = +time[3];
+            const hours   = +time[1];
+            const minutes = +time[2];
+            const seconds = +time[3];
 
-              return seconds + 60 * minutes + 3600 * hours;
-            }
-          })
-        ],
-        type: 'scatter'
+            return seconds + 60 * minutes + 3600 * hours;
+          }
+        }),
+        text: this.split.SegmentHistory.Time.map((t) => {
+          if (typeof (t) == 'string' || !t.GameTime) {
+            return 'Unknown';
+          } else {
+            return t.GameTime;
+          }
+        }),
+        type: 'scatter',
+        hoverinfo: 'text'
       }
     ];
   }

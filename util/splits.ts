@@ -23,15 +23,15 @@ export interface SegmentHistory {
 }
 
 export interface SplitTimes {
-  'SplitTime': RealAndGameTime,
-  'BestSegmentTime': RealAndGameTime,
-  'SegmentHistory': SegmentHistory
+  'SplitTime': RealAndGameTime
 }
 
 export interface Segment {
   'Name': string,
   'Icon': string,
-  'SplitTimes': SplitTimes
+  'SplitTimes': SplitTimes,
+  'BestSegmentTime': RealAndGameTime,
+  'SegmentHistory': SegmentHistory
 }
 
 export interface Segments {

@@ -59,7 +59,7 @@ export default class SplitDisplay extends Vue {
   plot_data() {
     const y_val = this.split.SegmentHistory.Time.map((t) => {
       if (typeof (t) == 'string' || !t.GameTime) {
-        return 0;
+        return null;
       } else {
         const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
 
@@ -75,7 +75,7 @@ export default class SplitDisplay extends Vue {
 
     const text_val   = this.split.SegmentHistory.Time.map((t) => {
       if (typeof (t) == 'string' || !t.GameTime) {
-        return 'Unknown';
+        return null;
       } else {
         return t.GameTime;
       }

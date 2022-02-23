@@ -11,6 +11,8 @@
       Graphs' Y axis starts at zero
     </b-form-checkbox>
     <div v-if="splitFile.length">
+      <split-file-overview :run="parsedSplits.Run" class="mb-4"/>
+
       <split-display :split="split" v-for="split in splits" :key="split.Name" :graphYAxisToZero="graphYAxisToZero" class="mb-3"/>
     </div>
   </div>
@@ -25,7 +27,12 @@ export type FileEventTarget = EventTarget & { files: FileList };
 
 @Component
 export default class SplitsDisplay extends Vue {
-  xmlParser: XMLParser = new XMLParser();
+  xmlParser: XMLParser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix : "@_",
+    parseAttributeValue: true,
+    allowBooleanAttributes: true
+  });
 
   splitFile: string = '';
 

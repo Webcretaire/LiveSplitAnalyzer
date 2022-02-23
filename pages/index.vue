@@ -15,7 +15,7 @@
         <span class="username"><span class="username-dark username-gradient"
                                      style="color: #09B876; background-image: linear-gradient(90deg, #09B876, #8AC951)">Webcretaire</span></span>
       </a>. It's source code is available on
-      <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-normal" target="_blank">GitHub</a>
+      <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">GitHub</a>
     </footer>
   </div>
 </template>
@@ -34,7 +34,6 @@ main {
 }
 
 footer {
-  opacity: 0.75;
   font-weight: 300;
 }
 

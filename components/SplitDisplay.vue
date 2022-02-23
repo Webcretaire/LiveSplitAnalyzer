@@ -27,13 +27,13 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop, Watch} from 'nuxt-property-decorator';
-import {Segment}                     from '~/util/splits';
-import {extractPng}                  from '~/util/pngExtractor';
-import slugify                       from 'slugify';
+import {Vue, Component, Prop, Watch}              from 'nuxt-property-decorator';
+import {Segment, stringTimeToSeconds, formatTime} from '~/util/splits';
+import {extractPng}                               from '~/util/pngExtractor';
+import slugify                                    from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                      from 'vue-plotly';
+import {Plotly}                                   from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -62,20 +62,6 @@ export default class SplitDisplay extends Vue {
     }
   });
 
-  public constructor() {
-    super();
-    // this.layout = () => ({
-    //   title: 'Time history',
-    //   xaxis: {
-    //     title: 'Attempt number'
-    //   },
-    //   yaxis: {
-    //     title: 'Time (seconds)',
-    //     rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
-    //   }
-    // });
-  }
-
   get collapseName() {
     return 'collapse-' + slugify(this.split.Name);
   }
@@ -90,27 +76,14 @@ export default class SplitDisplay extends Vue {
 
   plot_data() {
     const y_val = this.split.SegmentHistory.Time.map((t) => {
-      if (typeof (t) == 'string' || !t.GameTime) {
+      if (!t.GameTime)
         return null;
-      } else {
-        const time = t.GameTime.match(/([0-9]+):([0-9]+):([0-9.]+)/);
-
-        if (!time) return ''; // Should not happen but we need to please TS
-
-        const hours   = +time[1];
-        const minutes = +time[2];
-        const seconds = +time[3];
-
-        return seconds + 60 * minutes + 3600 * hours;
-      }
+      else
+        return stringTimeToSeconds(t.GameTime) || null;
     });
 
     const text_val = this.split.SegmentHistory.Time.map((t) => {
-      if (typeof (t) == 'string' || !t.GameTime) {
-        return null;
-      } else {
-        return t.GameTime;
-      }
+      return t.GameTime || null;
     });
 
     return [
@@ -139,24 +112,7 @@ export default class SplitDisplay extends Vue {
     ) : null;
   }
 
-  formatTime(time: string) {
-    const t = time.match(/([0-9]+):([0-9]+):([0-9.]+)/);
-
-    if (!t) return ''; // Should not happen but we need to please TS
-
-    // t[0] contains the whole string
-    const hours   = +t[1];
-    const minutes = +t[2];
-    const seconds = +t[3];
-    let out       = '';
-    if (hours)
-      out += `${hours}h`;
-    if (minutes)
-      out += `${minutes}m`;
-    out += `${seconds}s`;
-
-    return out;
-  }
+  formatTime = formatTime;
 };
 </script>
 

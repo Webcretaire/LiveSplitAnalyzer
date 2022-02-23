@@ -11,8 +11,8 @@
             <strong>Best time:</strong> {{ formatTime(split.BestSegmentTime.GameTime) }} (game time) ;
             {{ formatTime(split.BestSegmentTime.RealTime) }} (real time)
           </p>
-          <b-button style="position: absolute; top: 1rem; right: 1rem" v-b-toggle="collapseName" variant="outline-dark">
-            {{ collapseVisible ? 'Close' : 'Time detail' }}
+          <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
+            <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
           </b-button>
         </div>
       </div>
@@ -137,5 +137,11 @@ img {
   max-height: 256px;
   width: auto;
   height: auto;
+}
+
+.toggle-collapse {
+  position: absolute;
+  top: 1rem;
+  right: 1rem
 }
 </style>

@@ -11,7 +11,7 @@
       Graphs' Y axis starts at zero
     </b-form-checkbox>
     <div v-if="splitFile.length">
-      <split-file-overview :run="parsedSplits.Run" class="mb-4"/>
+      <personal-best-overview :run="parsedSplits.Run" class="mb-4"/>
 
       <split-display :split="split" v-for="split in splits" :key="split.Name" :graphYAxisToZero="graphYAxisToZero" class="mb-3"/>
     </div>
@@ -23,7 +23,7 @@ import {XMLParser}      from 'fast-xml-parser';
 import {Vue, Component} from 'nuxt-property-decorator';
 
 // See https://github.com/microsoft/TypeScript/issues/31816#issuecomment-593069149
-export type FileEventTarget = EventTarget & { files: FileList };
+export type FileEventTarget = EventTarget & { dataTransfer: FileList };
 
 @Component
 export default class SplitsDisplay extends Vue {
@@ -46,8 +46,10 @@ export default class SplitsDisplay extends Vue {
     return this.parsedSplits.Run.Segments.Segment;
   }
 
-  fileChange(ev: Event) {
-    const file   = (<FileEventTarget>ev.target).files[0];
+  // There isn't a good type for form events which contain files unfortunately
+  fileChange(ev: any) {
+    // If the user drag & drops the file we'll get it in `dataTransfer`, otherwise it'll be in `target`
+    const file   = (ev.dataTransfer || ev.target).files[0];
     const reader = new FileReader();
 
     reader.onload = e => {

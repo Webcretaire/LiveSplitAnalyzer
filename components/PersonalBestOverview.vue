@@ -1,11 +1,16 @@
 <template>
   <b-card class="text-left" title="Personal Best">
-    <hr/>
-    <h3 class="text-center">PB Overview</h3>
-    <Plotly v-if="renderGraph" :data="plotDataPB()" :layout="layout()" :display-mode-bar="true"/>
-    <hr/>
-    <h3 class="text-center">Possible timesave ({{ secondsToFormattedString(PBTimesave) }} total)</h3>
-    <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout()" :display-mode-bar="true"/>
+    <b-button v-b-toggle="'collapse-pb-overview'" class="toggle-collapse" variant="outline-secondary" pill>
+      <font-awesome-icon icon="chevron-left" :rotation="visible ? 270 : null"/>
+    </b-button>
+    <b-collapse v-model="visible" id="collapse-pb-overview">
+      <hr/>
+      <h3 class="text-center">PB Overview ({{ secondsToFormattedString(PBTime) }} total)</h3>
+      <Plotly v-if="renderGraph" :data="plotDataPB()" :layout="layout()" :display-mode-bar="true"/>
+      <hr/>
+      <h3 class="text-center">Possible timesave ({{ secondsToFormattedString(PBTimesave) }} total)</h3>
+      <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout()" :display-mode-bar="true"/>
+    </b-collapse>
   </b-card>
 </template>
 
@@ -18,7 +23,7 @@ import {formatTime, stringTimeToSeconds, secondsToFormattedString} from '~/util/
 import {Plotly}                                                    from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
-export default class SplitFileOverview extends Vue {
+export default class PersonalBestOverview extends Vue {
   @Prop()
   run!: Run;
 
@@ -26,6 +31,8 @@ export default class SplitFileOverview extends Vue {
   graphYAxisToZero!: boolean;
 
   renderGraph: boolean = true;
+
+  visible: boolean = false;
 
   /**
    * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
@@ -117,5 +124,11 @@ export default class SplitFileOverview extends Vue {
 <style scoped lang="scss">
 * {
   color: black;
+}
+
+.toggle-collapse {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
 }
 </style>

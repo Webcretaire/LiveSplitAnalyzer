@@ -36,7 +36,7 @@ export default class SplitsDisplay extends Vue {
 
   splitFile: string = '';
 
-  graphYAxisToZero: boolean = true;
+  graphYAxisToZero: boolean = false;
 
   get parsedSplits() {
     return this.xmlParser.parse(this.splitFile);

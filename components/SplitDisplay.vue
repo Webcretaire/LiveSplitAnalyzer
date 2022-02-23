@@ -27,13 +27,14 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop, Watch}              from 'nuxt-property-decorator';
-import {Segment, stringTimeToSeconds, formatTime} from '~/util/splits';
-import {extractPng}                               from '~/util/pngExtractor';
-import slugify                                    from 'slugify';
+import {Vue, Component, Prop, Watch}     from 'nuxt-property-decorator';
+import {Segment}                         from '~/util/splits';
+import {formatTime, stringTimeToSeconds} from '~/util/durations';
+import {extractPng}                      from '~/util/pngExtractor';
+import slugify                           from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                   from 'vue-plotly';
+import {Plotly}                          from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {

@@ -5,22 +5,26 @@
     </b-button>
     <b-collapse v-model="visible" id="collapse-pb-overview">
       <hr/>
-      <h3 class="text-center">PB Overview ({{ secondsToFormattedString(PBTime) }} total)</h3>
-      <Plotly v-if="renderGraph" :data="plotDataPB()" :layout="layout()" :display-mode-bar="true"/>
+      <h3 class="text-center mb-3">PB Overview ({{ secondsToFormattedString(PBTime) }} total)</h3>
+      <Plotly v-if="renderGraph" :data="plotDataPB()" :layout="layout" :display-mode-bar="true"/>
       <hr/>
-      <h3 class="text-center">Possible timesave ({{ secondsToFormattedString(PBTimesave) }} total)</h3>
-      <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout()" :display-mode-bar="true"/>
+      <h3 class="text-center mb-3">Possible timesave ({{ secondsToFormattedString(PBTimesave) }} total)</h3>
+      <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
     </b-collapse>
   </b-card>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop, Watch}                               from 'nuxt-property-decorator';
-import {Run}                                                       from '~/util/splits';
-import {formatTime, stringTimeToSeconds, secondsToFormattedString} from '~/util/durations';
+import {
+  formatTime,
+  stringTimeToSeconds,
+  secondsToFormattedString
+}                             from '~/util/durations';
+import {Vue, Component, Prop} from 'nuxt-property-decorator';
+import {Run}                  from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                                    from 'vue-plotly';
+import {Plotly}               from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class PersonalBestOverview extends Vue {
@@ -34,21 +38,7 @@ export default class PersonalBestOverview extends Vue {
 
   visible: boolean = false;
 
-  /**
-   * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
-   * be an arrow function otherwise we get `_vm.layout is not a function`
-   */
-  layout = () => ({
-    margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}
-  });
-
-  @Watch('graphYAxisToZero')
-  onGraphYAxisToZeroChange() {
-    this.renderGraph = false;
-    this.$nextTick(() => {
-      this.renderGraph = true;
-    });
-  }
+  layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
   get PBSplitTimes() {
     let timeSoFar = 0;

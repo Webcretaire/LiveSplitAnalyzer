@@ -69,6 +69,7 @@ export default class SplitDisplay extends Vue {
 
   @Watch('graphYAxisToZero')
   onGraphYAxisToZeroChange() {
+    // This trick is needed because otherwise Vue doesn't detect the data change, so we're forcing the redraw
     this.renderGraph = false;
     this.$nextTick(() => {
       this.renderGraph = true;

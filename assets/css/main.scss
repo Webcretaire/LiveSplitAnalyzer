@@ -1,3 +1,8 @@
+// For some reason fontawesome only works if it's imported here: it's not automatically imported as it should,
+// and it doesn't do anything when added to the "css" property of nuxt config (also this issue is only when
+// using `nuxt generate`, everything is imported automatically in dev apparently)
+@import "@fortawesome/fontawesome-svg-core/styles.css";
+
 body {
   background-color: #262626;
   box-shadow: inset 0 0 8rem 1rem black;

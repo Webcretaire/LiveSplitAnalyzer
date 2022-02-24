@@ -7,13 +7,20 @@
       drop-placeholder="Drop file here..."
       class="mb-3"
     ></b-form-file>
-    <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mb-3">
-      Graphs' Y axis starts at zero
-    </b-form-checkbox>
     <div v-if="splitFile.length">
+      <run-overview :run="parsedSplits.Run" class="mb-4"/>
+
       <personal-best-overview :run="parsedSplits.Run" class="mb-4"/>
 
-      <split-display :split="split" v-for="split in splits" :key="split.Name" :graphYAxisToZero="graphYAxisToZero" class="mb-3"/>
+      <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mb-4">
+        Graphs' Y axis starts at zero
+      </b-form-checkbox>
+
+      <split-display :split="split"
+                     v-for="split in splits"
+                     :key="split.Name"
+                     :graphYAxisToZero="graphYAxisToZero"
+                     class="mb-3"/>
     </div>
   </div>
 </template>
@@ -21,6 +28,7 @@
 <script lang="ts">
 import {XMLParser}      from 'fast-xml-parser';
 import {Vue, Component} from 'nuxt-property-decorator';
+import {SplitFile}      from '~/util/splits';
 
 // See https://github.com/microsoft/TypeScript/issues/31816#issuecomment-593069149
 export type FileEventTarget = EventTarget & { dataTransfer: FileList };
@@ -29,7 +37,7 @@ export type FileEventTarget = EventTarget & { dataTransfer: FileList };
 export default class SplitsDisplay extends Vue {
   xmlParser: XMLParser = new XMLParser({
     ignoreAttributes: false,
-    attributeNamePrefix : "@_",
+    attributeNamePrefix: '@_',
     parseAttributeValue: true,
     allowBooleanAttributes: true
   });
@@ -38,7 +46,7 @@ export default class SplitsDisplay extends Vue {
 
   graphYAxisToZero: boolean = false;
 
-  get parsedSplits() {
+  get parsedSplits(): SplitFile {
     return this.xmlParser.parse(this.splitFile);
   }
 

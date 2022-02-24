@@ -18,17 +18,6 @@ export const extractPng = (base64data: string) => {
     10
   ]);
 
-  const IEND_CHUNK: Uint8Array = new Uint8Array([
-    0x00, // Size (0)
-    0x00,
-    0x00,
-    0x00,
-    0x49, // Name (IEND)
-    0x45,
-    0x4e,
-    0x44
-  ]);
-
   let signatureCurIdx = 0, pngStart = 0;
   let foundPngStart   = false;
   let i;
@@ -39,7 +28,6 @@ export const extractPng = (base64data: string) => {
       if (signatureCurIdx == 0) pngStart = i;
       if (signatureCurIdx == PNG_SIGNATURE.length - 1) {
         foundPngStart = true;
-        console.log('Found beginning of PNG file at position ' + pngStart);
       } else {
         signatureCurIdx++;
       }
@@ -71,7 +59,6 @@ export const extractPng = (base64data: string) => {
     buf = new Uint8Array([data[i - 3], data[i - 2], data[i - 1], data[i]]);
 
     const name = new TextDecoder().decode(buf);
-    console.log(`Got chunk ${name} of size ${size}`);
 
     i += size; // Chunk data
     i += 4; // CRC

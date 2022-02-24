@@ -55,13 +55,51 @@ export default class SplitDisplay extends Vue {
   layout = () => ({
     title: 'Time history',
     xaxis: {
-      title: 'Attempt number'
+      title: `Finished number (${this.split.SegmentHistory.Time.length} total)`
     },
     yaxis: {
       title: 'Time (seconds)',
       rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
-    }
+    },
+    annotations: [
+      {
+        x: this.gold.x,
+        y: this.gold.y,
+        text: 'Gold',
+        font: {
+          color: '#ffc400'
+        },
+        arrowhead: 2,
+        arrowsize: 1,
+        arrowwidth: 2,
+        arrowcolor: '#ffc400',
+        ax: 0,
+        ay: 30,
+      }
+    ]
   });
+
+  get gold() {
+    let goldX = 0;
+    let goldY = 999999;
+    for (let i = 0; i < this.timesSeconds.length; ++i) {
+      const t = this.timesSeconds[i];
+      if (t && t < goldY) {
+        goldX = i;
+        goldY = t;
+      }
+    }
+    return {x: goldX, y: goldY};
+  }
+
+  get timesSeconds(): Array<number | null> {
+    return this.split.SegmentHistory.Time.map((t) => {
+      if (!t.GameTime)
+        return null;
+      else
+        return stringTimeToSeconds(t.GameTime) || null;
+    });
+  }
 
   get collapseName() {
     return 'collapse-' + slugify(this.split.Name);
@@ -77,13 +115,6 @@ export default class SplitDisplay extends Vue {
   }
 
   plot_data() {
-    const y_val = this.split.SegmentHistory.Time.map((t) => {
-      if (!t.GameTime)
-        return null;
-      else
-        return stringTimeToSeconds(t.GameTime) || null;
-    });
-
     const text_val = this.split.SegmentHistory.Time.map((t) => {
       return t.GameTime || null;
     });
@@ -91,7 +122,7 @@ export default class SplitDisplay extends Vue {
     return [
       {
         x: Array.from({length: this.split.SegmentHistory.Time.length}, (v, k) => k),
-        y: y_val,
+        y: this.timesSeconds,
         text: text_val,
         type: 'scatter',
         hoverinfo: 'text',

@@ -31,6 +31,7 @@ import {Vue, Component, Prop, Watch}     from 'nuxt-property-decorator';
 import {Segment}                         from '~/util/splits';
 import {formatTime, stringTimeToSeconds} from '~/util/durations';
 import {extractPng}                      from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR}          from '~/util/plot';
 import slugify                           from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
@@ -67,14 +68,14 @@ export default class SplitDisplay extends Vue {
         y: this.gold.y,
         text: 'Gold',
         font: {
-          color: '#ffc400'
+          color: GOLD_COLOR
         },
         arrowhead: 2,
         arrowsize: 1,
         arrowwidth: 2,
-        arrowcolor: '#ffc400',
+        arrowcolor: GOLD_COLOR,
         ax: 0,
-        ay: 30,
+        ay: 30
       }
     ]
   });
@@ -90,6 +91,18 @@ export default class SplitDisplay extends Vue {
       }
     }
     return {x: goldX, y: goldY};
+  }
+
+  get goldsMap() {
+    let curGold = 999999;
+
+    return this.timesSeconds.map(t => {
+      if (t && t < curGold) {
+        curGold = t;
+        return true;
+      }
+      return false;
+    });
   }
 
   get timesSeconds(): Array<number | null> {
@@ -128,9 +141,11 @@ export default class SplitDisplay extends Vue {
         hoverinfo: 'text',
         mode: 'lines+markers',
         marker: {
-          size: 4
+          color: this.goldsMap.map(b => b ? GOLD_COLOR : LINE_COLOR),
+          size: this.goldsMap.map(b => b ? 5 : 3)
         },
         line: {
+          color: LINE_COLOR,
           width: 1
         }
       }

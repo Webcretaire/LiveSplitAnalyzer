@@ -26,7 +26,7 @@ export interface RunMetadataVariable {
 }
 
 export interface RunMetadataVariables {
-  'Variable': RunMetadataVariable[];
+  'Variable': RunMetadataVariable[] | RunMetadataVariable;
 }
 
 export interface RunMetadataPlatform {

@@ -5,7 +5,7 @@
     </b-button>
     <b-collapse v-model="visible" id="collapse-run-overview" visible>
       <p>{{ run.AttemptCount }} attempts</p>
-      <p v-for="m in run.Metadata.Variables.Variable" :key="`metadata-var-${m['@_name']}`" class="m-0">
+      <p v-for="m in runMetadata" class="m-0">
         <strong>{{ m['@_name'] }}:</strong> {{ m['#text'] }}
       </p>
     </b-collapse>
@@ -20,6 +20,11 @@ import {Run}                  from '~/util/splits';
 export default class RunOverview extends Vue {
   @Prop()
   run!: Run;
+
+  get runMetadata() {
+    const v = this.run.Metadata.Variables.Variable;
+    return Array.isArray(v) ? v : [v];
+  }
 
   visible: boolean = true;
 };

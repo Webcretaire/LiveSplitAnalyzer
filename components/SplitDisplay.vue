@@ -27,23 +27,29 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop, Watch}     from 'nuxt-property-decorator';
-import {Segment}                         from '~/util/splits';
-import {formatTime, stringTimeToSeconds} from '~/util/durations';
-import {extractPng}                      from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR}          from '~/util/plot';
-import slugify                           from 'slugify';
+import {Vue, Component, Prop}             from 'nuxt-property-decorator';
+import {Segment, SegmentHistoryTime}      from '~/util/splits';
+import {formatTime, stringTimeToSeconds}  from '~/util/durations';
+import {extractPng}                       from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, PB_COLOR} from '~/util/plot';
+import slugify                            from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                          from 'vue-plotly';
+import {Plotly}                           from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
   @Prop()
   split!: Segment;
 
-  @Prop()
+  @Prop({default: false})
   graphYAxisToZero!: boolean;
+
+  @Prop({default: false})
+  graphPBHline!: boolean;
+
+  @Prop()
+  pbAttemptNumber?: number;
 
   collapseVisible: boolean = false;
 
@@ -53,32 +59,53 @@ export default class SplitDisplay extends Vue {
    * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
    * be an arrow function otherwise we get `_vm.layout is not a function`
    */
-  layout = () => ({
-    title: 'Time history',
-    xaxis: {
-      title: `Finished number (${this.split.SegmentHistory.Time.length} total)`
-    },
-    yaxis: {
-      title: 'Time (seconds)',
-      rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
-    },
-    annotations: [
-      {
-        x: this.gold.x,
-        y: this.gold.y,
-        text: 'Gold',
-        font: {
-          color: GOLD_COLOR
-        },
-        arrowhead: 2,
-        arrowsize: 1,
-        arrowwidth: 2,
-        arrowcolor: GOLD_COLOR,
-        ax: 0,
-        ay: 30
-      }
-    ]
-  });
+  layout = () => {
+    const l: any = {
+      title: 'Time history',
+      xaxis: {
+        title: `Finished number (${this.split.SegmentHistory.Time.length} total)`
+      },
+      yaxis: {
+        title: 'Time (seconds)',
+        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
+      },
+      annotations: [
+        {
+          x: this.gold.x,
+          y: this.gold.y,
+          text: 'Gold',
+          font: {
+            color: GOLD_COLOR
+          },
+          arrowhead: 2,
+          arrowsize: 1,
+          arrowwidth: 2,
+          arrowcolor: GOLD_COLOR,
+          ax: 0,
+          ay: 30
+        }
+      ]
+    };
+
+    if (this.graphPBHline && this.pbAttemptNumber && this.PB?.GameTime) {
+      l.shapes = [
+        {
+          type: 'line',
+          x0: 0,
+          y0: stringTimeToSeconds(this.PB.GameTime),
+          x1: this.timesSeconds.length - 1,
+          y1: stringTimeToSeconds(this.PB.GameTime),
+          line: {
+            color: PB_COLOR,
+            width: 1,
+            dash: 'dot'
+          }
+        }
+      ];
+    }
+
+    return l;
+  };
 
   get gold() {
     let goldX = 0;
@@ -91,6 +118,10 @@ export default class SplitDisplay extends Vue {
       }
     }
     return {x: goldX, y: goldY};
+  }
+
+  get PB(): SegmentHistoryTime | undefined {
+    return this.split.SegmentHistory.Time.find(t => t['@_id'] === this.pbAttemptNumber);
   }
 
   get goldsMap() {
@@ -118,13 +149,22 @@ export default class SplitDisplay extends Vue {
     return 'collapse-' + slugify(this.split.Name);
   }
 
-  @Watch('graphYAxisToZero')
-  onGraphYAxisToZeroChange() {
-    // This trick is needed because otherwise Vue doesn't detect the data change, so we're forcing the redraw
-    this.renderGraph = false;
-    this.$nextTick(() => {
-      this.renderGraph = true;
-    });
+  get markerColors() {
+    let out = [];
+    for (let i = 0; i < this.split.SegmentHistory.Time.length; ++i) {
+      if (this.split.SegmentHistory.Time[i]['@_id'] == this.PB?.['@_id']) out.push(PB_COLOR);
+      else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
+    }
+    return out;
+  }
+
+  get markerSizes() {
+    let out = [];
+    for (let i = 0; i < this.split.SegmentHistory.Time.length; ++i) {
+      if (this.split.SegmentHistory.Time[i]['@_id'] == this.PB?.['@_id']) out.push(6);
+      else out.push(this.goldsMap[i] ? 5 : 3);
+    }
+    return out;
   }
 
   plot_data() {
@@ -141,8 +181,8 @@ export default class SplitDisplay extends Vue {
         hoverinfo: 'text',
         mode: 'lines+markers',
         marker: {
-          color: this.goldsMap.map(b => b ? GOLD_COLOR : LINE_COLOR),
-          size: this.goldsMap.map(b => b ? 5 : 3)
+          color: this.markerColors,
+          size: this.markerSizes
         },
         line: {
           color: LINE_COLOR,

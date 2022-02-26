@@ -3,6 +3,9 @@
 // using `nuxt generate`, everything is imported automatically in dev apparently)
 @import "@fortawesome/fontawesome-svg-core/styles.css";
 
+@import "vue-slider-component/dist-css/vue-slider-component.css";
+@import "vue-slider-component/theme/default.css";
+
 body {
   background-color: #262626;
   box-shadow: inset 0 0 8rem 1rem black;

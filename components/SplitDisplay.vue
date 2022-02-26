@@ -49,7 +49,7 @@ export default class SplitDisplay extends Vue {
   graphPBHline!: boolean;
 
   @Prop()
-  pbAttemptNumber?: number;
+  currentAttemptNumber?: number;
 
   collapseVisible: boolean = false;
 
@@ -87,7 +87,7 @@ export default class SplitDisplay extends Vue {
       ]
     };
 
-    if (this.graphPBHline && this.pbAttemptNumber && this.PB?.GameTime) {
+    if (this.graphPBHline && this.currentAttemptNumber && this.PB?.GameTime) {
       l.shapes = [
         {
           type: 'line',
@@ -121,7 +121,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get PB(): SegmentHistoryTime | undefined {
-    return this.split.SegmentHistory.Time.find(t => t['@_id'] === this.pbAttemptNumber);
+    return this.split.SegmentHistory.Time.find(t => t['@_id'] === this.currentAttemptNumber);
   }
 
   get goldsMap() {

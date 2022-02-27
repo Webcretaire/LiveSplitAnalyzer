@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop}                    from 'nuxt-property-decorator';
+import {Component, Prop, Vue}                    from 'nuxt-property-decorator';
 import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
 import {formatTime, stringTimeToSeconds}         from '~/util/durations';
 import {extractPng}                              from '~/util/pngExtractor';
@@ -180,7 +180,9 @@ export default class SplitDisplay extends Vue {
 
   plot_data() {
     const text_val = this.split.SegmentHistory.Time.map((t) => {
-      return `${selectTime(t)} (attempt ${t['@_id']})`;
+      const time = selectTime(t);
+      if (!time) return '';
+      return `${formatTime(time)} (attempt ${t['@_id']})`;
     });
 
     return [

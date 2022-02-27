@@ -10,6 +10,7 @@ export const stringTimeToSeconds = (time: string): number => {
 
   return seconds + 60 * minutes + 3600 * hours;
 };
+
 export const formatTime = (time: string): string => {
   const t = time.match(/([0-9]+):([0-9]+):([0-9.]+)/);
 

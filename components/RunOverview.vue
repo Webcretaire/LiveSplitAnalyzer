@@ -47,7 +47,7 @@ export default class RunOverview extends Vue {
   }
 
   get runMetadata() {
-    const v = this.run.Metadata.Variables.Variable;
+    const v = this.run.Metadata.Variables?.Variable;
     return Array.isArray(v) ? v : [v];
   }
 

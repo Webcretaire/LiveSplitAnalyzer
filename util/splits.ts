@@ -39,7 +39,7 @@ export interface RunMetadata {
   'Run': IdAttributeOnly;
   'Platform': RunMetadataPlatform;
   'Region': string;
-  'Variables': RunMetadataVariables;
+  'Variables'?: RunMetadataVariables;
 }
 
 export interface IdAttributeOnly {

@@ -2,14 +2,13 @@
   <div>
     <b-card class="text-left">
       <div class="limit-height">
-        <b-card-img :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
+        <b-card-img v-if="srcFormattedIcon(split)" :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
         <div class="mt-auto mb-auto">
           <h3>
             {{ split.Name }}
           </h3>
           <p v-if="split.BestSegmentTime">
-            <strong>Best time:</strong> {{ formatTime(split.BestSegmentTime.GameTime) }} (game time) ;
-            {{ formatTime(split.BestSegmentTime.RealTime) }} (real time)
+            <strong>Best time:</strong> {{ bestTimeDisplay }}
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -27,15 +26,15 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop}             from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime}      from '~/util/splits';
-import {formatTime, stringTimeToSeconds}  from '~/util/durations';
-import {extractPng}                       from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR, PB_COLOR} from '~/util/plot';
-import slugify                            from 'slugify';
+import {Vue, Component, Prop}                    from 'nuxt-property-decorator';
+import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
+import {formatTime, stringTimeToSeconds}         from '~/util/durations';
+import {extractPng}                              from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, PB_COLOR}        from '~/util/plot';
+import slugify                                   from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                           from 'vue-plotly';
+import {Plotly}                                  from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -87,14 +86,15 @@ export default class SplitDisplay extends Vue {
       ]
     };
 
-    if (this.graphPBHline && this.currentAttemptNumber && this.PB?.GameTime) {
+    const t = selectTime(this.PB);
+    if (this.graphPBHline && this.currentAttemptNumber && t) {
       l.shapes = [
         {
           type: 'line',
           x0: 0,
-          y0: stringTimeToSeconds(this.PB.GameTime),
+          y0: stringTimeToSeconds(t),
           x1: this.timesSeconds.length - 1,
-          y1: stringTimeToSeconds(this.PB.GameTime),
+          y1: stringTimeToSeconds(t),
           line: {
             color: PB_COLOR,
             width: 1,
@@ -106,6 +106,15 @@ export default class SplitDisplay extends Vue {
 
     return l;
   };
+
+  get bestTimeDisplay() {
+    let out = '';
+    if (this.split.BestSegmentTime.GameTime)
+      out += `${this.formatTime(this.split.BestSegmentTime.GameTime)} (game time) ; `;
+    if (this.split.BestSegmentTime.RealTime)
+      out += `${this.formatTime(this.split.BestSegmentTime.RealTime)} (real time)`;
+    return out;
+  }
 
   get gold() {
     let goldX = 0;
@@ -138,10 +147,8 @@ export default class SplitDisplay extends Vue {
 
   get timesSeconds(): Array<number | null> {
     return this.split.SegmentHistory.Time.map((t) => {
-      if (!t.GameTime)
-        return null;
-      else
-        return stringTimeToSeconds(t.GameTime) || null;
+      const time = selectTime(t);
+      return time ? stringTimeToSeconds(time) : null;
     });
   }
 
@@ -169,7 +176,7 @@ export default class SplitDisplay extends Vue {
 
   plot_data() {
     const text_val = this.split.SegmentHistory.Time.map((t) => {
-      return t.GameTime || null;
+      return selectTime(t);
     });
 
     return [

@@ -5,7 +5,7 @@
     </b-button>
     <b-collapse v-model="visible" id="collapse-run-overview" visible>
       <p>{{ run.AttemptCount }} attempts</p>
-      <p v-for="m in runMetadata" class="m-0">
+      <p v-for="m in runMetadata" class="m-0" v-if="m">
         <strong>{{ m['@_name'] }}:</strong> {{ m['#text'] }}
       </p>
     </b-collapse>

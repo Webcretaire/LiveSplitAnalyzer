@@ -1,14 +1,14 @@
 export interface RealAndGameTime {
   'RealTime': string;
-  'GameTime': string;
+  'GameTime'?: string;
 }
 
-export interface OptionnalRealAndGameTime {
+export interface OptionalRealAndGameTime {
   'RealTime'?: string;
   'GameTime'?: string;
 }
 
-export interface Attempt extends OptionnalRealAndGameTime {
+export interface Attempt extends OptionalRealAndGameTime {
   '@_id': number;
   '@_started': number;
   '@_isStartedSynced': string;
@@ -45,7 +45,7 @@ export interface IdAttributeOnly {
   '@_id': string;
 }
 
-export interface SegmentHistoryTime extends OptionnalRealAndGameTime {
+export interface SegmentHistoryTime extends OptionalRealAndGameTime {
   '@_id': number;
 }
 
@@ -107,3 +107,9 @@ export interface SplitFile {
   '?xml': XmlMetadata;
   'Run': Run;
 }
+
+export type TimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistoryTime;
+
+export type OptionalTimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistoryTime | null | undefined;
+
+export const selectTime = (t: OptionalTimeLike): string | null => t?.GameTime || t?.RealTime || null;

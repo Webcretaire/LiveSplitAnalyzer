@@ -21,12 +21,12 @@ import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds
-}                             from '~/util/durations';
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import {Attempt, Run}         from '~/util/splits';
+}                                 from '~/util/durations';
+import {Component, Prop, Vue}     from 'nuxt-property-decorator';
+import {Attempt, Run, selectTime} from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}               from 'vue-plotly';
+import {Plotly}                   from 'vue-plotly';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {
@@ -58,9 +58,10 @@ export default class AttemptOverview extends Vue {
 
   get AttemptSplitTimes() {
     return this.AttemptSegments.map(s => {
-      if (!s?.GameTime) return null;
+      const t = selectTime(s);
 
-      return stringTimeToSeconds(s.GameTime);
+      return t ? stringTimeToSeconds(t) : null;
+
     });
   }
 
@@ -72,11 +73,13 @@ export default class AttemptOverview extends Vue {
     let timeSaveSoFar = 0;
 
     return this.run.Segments.Segment.map((segment, index) => {
-      const s = this.AttemptSegments[index];
-      if (!s?.GameTime) return null;
+      const s          = this.AttemptSegments[index];
+      const seg_t      = selectTime(s);
+      const best_seg_t = selectTime(segment.BestSegmentTime);
+      if (!seg_t || !best_seg_t) return null;
 
-      let out = stringTimeToSeconds(s.GameTime);
-      out -= stringTimeToSeconds(segment.BestSegmentTime.GameTime);
+      let out = stringTimeToSeconds(seg_t);
+      out -= stringTimeToSeconds(best_seg_t);
       timeSaveSoFar += out;
 
       return out;
@@ -107,7 +110,10 @@ export default class AttemptOverview extends Vue {
     return this.makePlotData(
       'Split times',
       this.AttemptSplitTimes,
-      this.run.Segments.Segment.map((segment) => `${segment.Name} (${formatTime(segment.SplitTimes.SplitTime.GameTime)})`)
+      this.run.Segments.Segment.map((segment) => {
+        const t = selectTime(segment.SplitTimes.SplitTime);
+        return t ? `${segment.Name} (${formatTime(t)})` : segment.Name;
+      })
     );
   }
 

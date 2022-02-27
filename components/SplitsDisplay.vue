@@ -51,11 +51,11 @@
 </template>
 
 <script lang="ts">
-import {XMLParser}             from 'fast-xml-parser';
-import {Vue, Component, Watch} from 'nuxt-property-decorator';
-import {Attempt, SplitFile}    from '~/util/splits';
-import {stringTimeToSeconds}   from '~/util/durations';
-import VueSlider               from 'vue-slider-component';
+import {XMLParser}                      from 'fast-xml-parser';
+import {Vue, Component, Watch}          from 'nuxt-property-decorator';
+import {Attempt, selectTime, SplitFile} from '~/util/splits';
+import {stringTimeToSeconds}            from '~/util/durations';
+import VueSlider                        from 'vue-slider-component';
 
 // See https://github.com/microsoft/TypeScript/issues/31816#issuecomment-593069149
 export type FileEventTarget = EventTarget & { dataTransfer: FileList };
@@ -95,9 +95,10 @@ export default class SplitsDisplay extends Vue {
 
   get PB() {
     return this.parsedSplits.Run.AttemptHistory.Attempt.reduce((curLowest: Attempt | null, cur: Attempt) => {
-      if (!cur?.GameTime) return curLowest;
-      const compare = curLowest?.GameTime || '999:59:59.9999';
-      return !curLowest || stringTimeToSeconds(cur.GameTime) < stringTimeToSeconds(compare) ? cur : curLowest;
+      const curTime = selectTime(cur);
+      if (!curTime) return curLowest;
+      const compare = selectTime(curLowest) || '999:59:59.9999';
+      return !curLowest || stringTimeToSeconds(curTime) < stringTimeToSeconds(compare) ? cur : curLowest;
     }, null);
   }
 

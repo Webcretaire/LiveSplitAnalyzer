@@ -180,7 +180,7 @@ export default class SplitDisplay extends Vue {
 
   plot_data() {
     const text_val = this.split.SegmentHistory.Time.map((t) => {
-      return selectTime(t);
+      return `${selectTime(t)} (attempt ${t['@_id']})`;
     });
 
     return [

@@ -13,10 +13,12 @@
       <b-card class="mb-4" title="Options" style="color: black">
         <div class="d-flex mt-4 mb-2">
           <b-form inline class="text-center m-auto">
-            <b-input-group prepend="Current displayed run">
+            <b-input-group prepend="Currently displayed run">
               <b-form-input type="number" v-model.number="currentAttemptNumber" :max="latestAttemptNumber" min="1"/>
             </b-input-group>
-            <b-button variant="outline-dark" class="ml-2" @click="currentAttemptNumber = PB['@_id']">Go to PB</b-button>
+            <b-button variant="outline-info" class="ml-2" @click="currentAttemptNumber = PB['@_id']" :disabled="isPb">
+              Go to PB
+            </b-button>
           </b-form>
         </div>
         <vue-slider
@@ -36,7 +38,7 @@
 
       <attempt-overview :run="parsedSplits.Run"
                         :attempt="currentAttempt"
-                        :is-pb="currentAttemptNumber === PB['@_id']"
+                        :is-pb="isPb"
                         class="mb-4"/>
 
       <split-display :split="split"
@@ -76,6 +78,10 @@ export default class SplitsDisplay extends Vue {
   graphPBHline: boolean = false;
 
   currentAttemptNumber: number = 1;
+
+  get isPb(): boolean {
+    return this.currentAttemptNumber === this.PB?.['@_id'];
+  }
 
   get latestAttemptNumber(): number {
     return Math.max(...this.parsedSplits.Run.AttemptHistory.Attempt.map(a => a['@_id']));

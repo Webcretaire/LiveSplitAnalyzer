@@ -5,7 +5,7 @@
         <b-card-img v-if="srcFormattedIcon(split)" :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
         <div class="mt-auto mb-auto">
           <h3>
-            {{ split.Name }}
+            {{ isSubsplit ? split.Name.substring(1) : split.Name }} <small v-if="isSubsplit">(subsplit)</small>
           </h3>
           <p v-if="split.BestSegmentTime">
             <strong>Best time:</strong> {{ bestTimeDisplay }}
@@ -106,6 +106,10 @@ export default class SplitDisplay extends Vue {
 
     return l;
   };
+
+  get isSubsplit() {
+    return this.split.Name.startsWith('-');
+  }
 
   get bestTimeDisplay() {
     let out = '';
@@ -237,5 +241,10 @@ img {
   position: absolute;
   top: 1rem;
   right: 1rem
+}
+
+small {
+  color: #6b6b6b;
+  font-size: 1rem;
 }
 </style>

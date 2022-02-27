@@ -14,6 +14,7 @@ export interface Attempt extends OptionalRealAndGameTime {
   '@_isStartedSynced': string;
   '@_ended': string;
   '@_isEndedSynced': string;
+  'PauseTime'?: string;
 }
 
 export interface AttemptHistory {

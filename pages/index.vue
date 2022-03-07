@@ -18,14 +18,26 @@
       </a>. Its source code is available on
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">GitHub</a>
     </footer>
+    <loading-modal v-if="loading"/>
   </div>
 </template>
 
 <script lang="ts">
-import {Vue, Component} from 'nuxt-property-decorator';
+import {Vue, Component}     from 'nuxt-property-decorator';
+import {GlobalEventEmitter} from '~/util/globalEvents';
 
 @Component
 export default class IndexPage extends Vue {
+  loading: boolean = false;
+
+  created() {
+    GlobalEventEmitter.$on('startLoading', () => {
+      this.loading = true;
+    });
+    GlobalEventEmitter.$on('stopLoading', () => {
+      this.loading = false;
+    });
+  }
 };
 </script>
 

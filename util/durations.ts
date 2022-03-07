@@ -1,4 +1,3 @@
-
 export const stringTimeToSeconds = (time: string): number => {
   const t = time.match(/([0-9]+):([0-9]+):([0-9.]+)/);
 
@@ -48,6 +47,22 @@ export const secondsToFormattedString = (time: number): string => {
 
   // Math.abs is mostly here to avoid -0 seconds, just 0 is prettier
   out += `${(!secondsOnly && time < 10) ? '0' : ''}${Math.abs(+time.toFixed(2))}s`;
+
+  return out;
+};
+
+export const secondsToLivesplitFormat = (time: number): string => {
+  let out = '';
+
+  out += `${Math.floor(time / 3600)}:`;
+  time = time % 3600;
+
+  const minutes = Math.floor(time / 60);
+  out += `${minutes < 10 ? '0' : ''}${minutes}:`;
+  time          = time % 60;
+
+  // Math.abs is mostly here to avoid -0 seconds, just 0 is prettier
+  out += `${(time < 10) ? '0' : ''}${Math.abs(+time.toFixed(6))}`;
 
   return out;
 };

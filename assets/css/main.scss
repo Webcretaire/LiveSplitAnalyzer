@@ -29,3 +29,12 @@ h1 {
 h2, h3 {
   font-family: "Roboto Light", Arial, sans-serif;
 }
+
+.help-question {
+  font-size: 1.5rem;
+  color: grey;
+  cursor: help;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}

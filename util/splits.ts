@@ -59,7 +59,7 @@ export interface SplitTime extends RealAndGameTime {
 }
 
 export interface SplitTimes {
-  'SplitTime': SplitTime;
+  'SplitTime': SplitTime | SplitTime[];
 }
 
 export interface Segment {

@@ -14,7 +14,8 @@
         <div class="d-flex mt-4 mb-2">
           <b-form inline class="text-center m-auto">
             <b-input-group prepend="Currently displayed run">
-              <b-form-input type="number" v-model.number="currentAttemptNumber" :max="latestAttemptNumber" min="1"/>
+              <b-form-input type="number" v-model.number="currentAttemptNumber" :max="latestAttemptNumber" min="1"
+                            debounce="500"/>
             </b-input-group>
             <b-button variant="outline-info" class="ml-2" @click="currentAttemptNumber = PB['@_id']" :disabled="isPb">
               Go to PB

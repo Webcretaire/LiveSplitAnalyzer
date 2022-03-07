@@ -62,7 +62,7 @@ export default class SplitDisplay extends Vue {
     const l: any = {
       title: 'Time history',
       xaxis: {
-        title: `Finished number (${this.split.SegmentHistory.Time.length} total)`
+        title: `Finished number (${this.timesWithPositiveIds.length} total)`
       },
       yaxis: {
         title: 'Time (seconds)',
@@ -134,7 +134,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get PB(): SegmentHistoryTime | undefined {
-    return this.split.SegmentHistory.Time.find(t => t['@_id'] === this.currentAttemptNumber);
+    return this.timesWithPositiveIds.find(t => t['@_id'] === this.currentAttemptNumber);
   }
 
   get goldsMap() {
@@ -150,10 +150,12 @@ export default class SplitDisplay extends Vue {
   }
 
   get timesSeconds(): Array<number | null> {
-    return this.split.SegmentHistory.Time.map((t) => {
-      const time = selectTime(t);
-      return time ? stringTimeToSeconds(time) : null;
-    });
+    return this.timesWithPositiveIds
+      .filter(t => t['@_id'] > 0)
+      .map((t) => {
+        const time = selectTime(t);
+        return time ? stringTimeToSeconds(time) : null;
+      });
   }
 
   get collapseName() {
@@ -162,8 +164,8 @@ export default class SplitDisplay extends Vue {
 
   get markerColors() {
     let out = [];
-    for (let i = 0; i < this.split.SegmentHistory.Time.length; ++i) {
-      if (this.split.SegmentHistory.Time[i]['@_id'] == this.PB?.['@_id']) out.push(PB_COLOR);
+    for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
+      if (this.timesWithPositiveIds[i]['@_id'] == this.PB?.['@_id']) out.push(PB_COLOR);
       else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
     }
     return out;
@@ -171,15 +173,19 @@ export default class SplitDisplay extends Vue {
 
   get markerSizes() {
     let out = [];
-    for (let i = 0; i < this.split.SegmentHistory.Time.length; ++i) {
-      if (this.split.SegmentHistory.Time[i]['@_id'] == this.PB?.['@_id']) out.push(6);
+    for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
+      if (this.timesWithPositiveIds[i]['@_id'] == this.PB?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;
   }
 
+  get timesWithPositiveIds() {
+    return this.split.SegmentHistory.Time.filter(t => t['@_id'] > 0);
+  }
+
   plot_data() {
-    const text_val = this.split.SegmentHistory.Time.map((t) => {
+    const text_val = this.timesWithPositiveIds.map((t) => {
       const time = selectTime(t);
       if (!time) return '';
       return `${formatTime(time)} (attempt ${t['@_id']})`;
@@ -187,7 +193,7 @@ export default class SplitDisplay extends Vue {
 
     return [
       {
-        x: Array.from({length: this.split.SegmentHistory.Time.length}, (v, k) => k),
+        x: Array.from({length: this.timesWithPositiveIds.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
         type: 'scatter',

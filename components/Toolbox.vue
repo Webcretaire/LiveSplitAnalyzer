@@ -85,11 +85,9 @@ export default class Toolbox extends Vue {
     return currentPBattempt;
   }
 
-  // Lots of ts-ignore in this function because TS isn't good enough to see that what we're doing is safe, and we can't
-  // introduce intermediate variables because we want to mutate the object, so we avoid value copies
   fixPB() {
     whithLoad(() => {
-      const realPB = this.pbFromSplitHistory || this.pbFromAttemptHistory;
+      const realPB = this.pbFromAttemptHistory || this.pbFromSplitHistory;
       const id     = realPB?.['@_id'];
       if (!id) {
         console.error('Couldn\'t find a PB in your splits, did you finish a run?');

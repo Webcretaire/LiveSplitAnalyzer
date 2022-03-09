@@ -40,8 +40,8 @@
                         class="mb-4"/>
 
       <split-display :split="split"
-                     v-for="split in splits"
-                     :key="split.Name"
+                     v-for="(split, key) in splits"
+                     :key="`split-${key}`"
                      :graphYAxisToZero="graphYAxisToZero"
                      :graphPBHline="graphPBHline"
                      :currentAttemptNumber="currentAttemptNumber"
@@ -98,7 +98,7 @@ export default class SplitsDisplay extends Vue {
     return this.parsedSplits.Run.AttemptHistory.Attempt.reduce((curLowest: Attempt | null, cur: Attempt) => {
       const curTime = selectTime(cur);
       if (!curTime) return curLowest;
-      const compare = selectTime(curLowest) || '999:59:59.9999';
+      const compare = selectTime(curLowest) || '999:59:59.99';
       return !curLowest || stringTimeToSeconds(curTime) < stringTimeToSeconds(compare) ? cur : curLowest;
     }, null);
   }

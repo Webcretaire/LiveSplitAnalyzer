@@ -34,24 +34,15 @@
 
 <script lang="ts">
 import {Component, Vue} from 'nuxt-property-decorator';
-import {BModal}         from 'bootstrap-vue';
+import BaseModal        from '~/components/BaseModal.vue';
 
-@Component
+@Component({mixins: [BaseModal]})
 export default class LoadingModal extends Vue {
   modalRef: string = 'LoadingModal';
-
-  mounted() {
-    const m = this.$refs[this.modalRef] as BModal;
-    if (m) m.show();
-  }
 };
 </script>
 
 <style lang="scss" scoped>
-* {
-  color: black;
-}
-
 svg path,
 svg rect {
   fill: #FF6700;

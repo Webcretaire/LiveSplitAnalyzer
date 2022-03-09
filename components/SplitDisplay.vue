@@ -9,6 +9,7 @@
           </h3>
           <p v-if="split.BestSegmentTime">
             <strong>Best time:</strong> {{ bestTimeDisplay }}
+            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="ml-2">Fix fake golds</b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -35,6 +36,8 @@ import slugify                                   from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                                  from 'vue-plotly';
+import {GlobalEventEmitter}                      from '~/util/globalEvents';
+import {singleSplitState}                        from '~/util/singleSplit';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -217,6 +220,12 @@ export default class SplitDisplay extends Vue {
       new Uint8Array(png)
         .reduce((data, byte) => data + String.fromCharCode(byte), '')
     ) : null;
+  }
+
+  fixGoldsModal() {
+    GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal');
+    singleSplitState.currentSplit = this.split;
+    GlobalEventEmitter.$emit('setCurrentSplit', this.split);
   }
 
   formatTime = formatTime;

@@ -18,6 +18,8 @@
       </a>. Its source code is available on
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">GitHub</a>
     </footer>
+
+    <div v-if="currentModal" :is="componentInstance"/>
     <loading-modal v-if="loading"/>
   </div>
 </template>
@@ -30,12 +32,24 @@ import {GlobalEventEmitter} from '~/util/globalEvents';
 export default class IndexPage extends Vue {
   loading: boolean = false;
 
+  currentModal: string = '';
+
+  get componentInstance() {
+    return () => import(`~/components/${this.currentModal}`);
+  }
+
   created() {
     GlobalEventEmitter.$on('startLoading', () => {
       this.loading = true;
     });
     GlobalEventEmitter.$on('stopLoading', () => {
       this.loading = false;
+    });
+    GlobalEventEmitter.$on('openModal', (modal: string) => {
+      this.currentModal = modal;
+    });
+    GlobalEventEmitter.$on('closeModal', () => {
+      this.currentModal = '';
     });
   }
 };

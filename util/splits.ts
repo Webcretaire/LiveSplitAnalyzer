@@ -111,6 +111,6 @@ export interface SplitFile {
 
 export type TimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistoryTime;
 
-export type OptionalTimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistoryTime | null | undefined;
+export type OptionalTimeLike = TimeLike | null | undefined;
 
 export const selectTime = (t: OptionalTimeLike): string | null => t?.GameTime || t?.RealTime || null;

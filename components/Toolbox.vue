@@ -56,7 +56,7 @@ export default class Toolbox extends Vue {
 
     let currentPBtime = stringTimeToSeconds('999:59:59.99');
     let currentPBid   = 0;
-    completedRunsTimes.map(({id, time}) => {
+    completedRunsTimes.forEach(({id, time}) => {
       if (id > 0 && time < currentPBtime) {
         currentPBtime = time;
         currentPBid   = id;
@@ -69,16 +69,16 @@ export default class Toolbox extends Vue {
   get pbFromAttemptHistory(): Attempt | undefined {
     let currentPBtime = stringTimeToSeconds('999:59:59.99');
     let currentPBattempt;
-    this.value.Run.AttemptHistory.Attempt.map(a => {
-      if (a['@_id'] <= 0) return;
+    this.value.Run.AttemptHistory.Attempt.forEach(attempt => {
+      if (attempt['@_id'] <= 0) return;
 
-      const t = selectTime(a);
+      const t = selectTime(attempt);
       if (!t) return;
 
       const seconds = stringTimeToSeconds(t);
       if (seconds > 1 && seconds < currentPBtime) {
         currentPBtime    = seconds;
-        currentPBattempt = a;
+        currentPBattempt = attempt;
       }
     });
 

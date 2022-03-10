@@ -1,7 +1,7 @@
 <template>
   <div class="p-3">
     <b-form-file
-      @change="fileChange"
+      v-model="splitFile"
       accept=".lss"
       placeholder="Choose a file or drop it here..."
       drop-placeholder="Drop file here..."
@@ -60,6 +60,8 @@ import {whithLoadAsync}                 from '~/util/loading';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
+  splitFile: File | null = null;
+
   parsedSplits: SplitFile | null = null;
 
   graphYAxisToZero: boolean = false;
@@ -103,21 +105,12 @@ export default class SplitsDisplay extends Vue {
     }, null);
   }
 
-  // There isn't a good type for form events which contain files unfortunately
-  fileChange(ev: any) {
+  @Watch('splitFile')
+  fileChange(newVal: File) {
     whithLoadAsync((endLoad: Function) => {
-      // If the user drag & drops the file we'll get it in `dataTransfer`, otherwise it'll be in `target`
-      const file   = (ev.dataTransfer || ev.target).files[0];
-      const reader = new FileReader();
-
-      reader.onload = e => {
-        if (e.target)
-          this.parsedSplits = xmlParser.parse(e.target.result as string);
-        else
-          console.error('FileReader error');
-        endLoad();
-      };
-      reader.readAsText(file);
+      newVal.text()
+        .then(text => this.parsedSplits = xmlParser.parse(text))
+        .finally(() => endLoad());
     });
   }
 

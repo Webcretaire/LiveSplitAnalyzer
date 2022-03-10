@@ -1,15 +1,18 @@
 <template>
   <b-modal :ref="modalRef" title="Fix golds" class="text-center" @hidden="destroyModal" hide-footer centered size="lg">
     <div v-if="split" class="text-center" style="max-height: 80vh; overflow: auto">
-      <h2>Best attempts for split <em>{{ split.Name }}</em></h2>
-      <div v-for="(attempt, key) in history" :key="`split-attempt-${key}`">
-        <h3>{{ formatTime(attempt) }}
-          <b-button pill variant="danger" size="sm" @click="deleteAttempt(attempt)" v-b-tooltip:hover
+      <h3 class="mb-3">Best attempts for split <em>{{ split.Name }}</em></h3>
+      <b-table small :fields="fields" :items="history" responsive="sm">
+        <template #cell(time)="data">
+          {{ formatTime(data.item) }}
+        </template>
+        <template #cell(actions)="data">
+          <b-button pill variant="danger" size="sm" @click="deleteAttempt(data.item)" v-b-tooltip:hover
                     title="Delete this attempt">
             <font-awesome-icon icon="trash"/>
           </b-button>
-        </h3>
-      </div>
+        </template>
+      </b-table>
     </div>
   </b-modal>
 </template>
@@ -22,12 +25,19 @@ import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
 import {GlobalEventEmitter}                      from '~/util/globalEvents';
 import {singleSplitState}                        from '~/util/singleSplit';
 import {formatTime, stringTimeToSeconds}         from '~/util/durations';
+import {whithLoadAsync}                          from '~/util/loading';
 
 @Component({mixins: [BaseModal]})
 export default class ManualGoldUpdateModal extends Vue {
   modalRef: string = 'ManualGoldUpdateModal';
 
   split: Segment | null = null;
+
+  fields = [
+    {key: '@_id', label: 'Attempt #'},
+    {key: 'time', label: 'Time'},
+    {key: 'actions', label: 'Actions'}
+  ];
 
   get history() {
     return [...this.split?.SegmentHistory.Time || []] // Make a copy otherwise sort acts in place and messes up the whole page
@@ -45,17 +55,21 @@ export default class ManualGoldUpdateModal extends Vue {
   }
 
   deleteAttempt(attempt: SegmentHistoryTime) {
-    // Delete split in attempts
-    if (this.split?.SegmentHistory.Time)
-      this.split.SegmentHistory.Time = this.split.SegmentHistory.Time.filter(a => a['@_id'] != attempt['@_id']);
+    whithLoadAsync((endLoad: Function) => {
+      // Delete split in attempts
+      if (this.split?.SegmentHistory.Time)
+        this.split.SegmentHistory.Time = this.split.SegmentHistory.Time.filter(a => a['@_id'] != attempt['@_id']);
 
-    if (!this.split?.BestSegmentTime) return;
+      if (!this.split?.BestSegmentTime) return;
 
-    // Update actual gold
-    if (this.history[0].RealTime)
-      this.split.BestSegmentTime = {RealTime: this.history[0].RealTime};
-    if (this.history[0].GameTime)
-      this.split.BestSegmentTime.GameTime = this.history[0].GameTime;
+      // Update actual gold
+      if (this.history[0].RealTime)
+        this.split.BestSegmentTime = {RealTime: this.history[0].RealTime};
+      if (this.history[0].GameTime)
+        this.split.BestSegmentTime.GameTime = this.history[0].GameTime;
+
+      this.$nextTick(() => endLoad());
+    });
   }
 
   created() {
@@ -65,3 +79,9 @@ export default class ManualGoldUpdateModal extends Vue {
   }
 };
 </script>
+
+<style scoped lang="scss">
+em {
+  text-decoration: underline;
+}
+</style>

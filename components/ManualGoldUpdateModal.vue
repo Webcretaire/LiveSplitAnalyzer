@@ -68,7 +68,16 @@ export default class ManualGoldUpdateModal extends Vue {
       if (this.history[0].GameTime)
         this.split.BestSegmentTime.GameTime = this.history[0].GameTime;
 
-      this.$nextTick(() => endLoad());
+      this.$nextTick(() => {
+        endLoad();
+
+        this.$bvToast.toast(`Attempt #${attempt['@_id']} has been deleted`, {
+          title: this.split?.Name,
+          autoHideDelay: 5000,
+          appendToast: false,
+          variant: 'success'
+        });
+      });
     });
   }
 

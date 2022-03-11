@@ -1,13 +1,13 @@
 <template>
-  <collapsible-card class="text-left" :title="title">
+  <collapsible-card class="text-left" :title="title" starts-open>
     <hr/>
     <h3 class="text-center mb-3">
       {{ isPb ? 'PB' : 'Attempt' }} Overview ({{ secondsToFormattedString(AttemptTime) }} total)
     </h3>
-    <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout()" :display-mode-bar="true"/>
+    <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
     <hr/>
     <h3 class="text-center mb-3">Possible timesave ({{ secondsToFormattedString(AttemptTimesave) }} total)</h3>
-    <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout()" :display-mode-bar="true"/>
+    <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
   </collapsible-card>
 </template>
 
@@ -44,7 +44,7 @@ export default class AttemptOverview extends Vue {
 
   visible: boolean = false;
 
-  layout = () => ({margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}, height: this.run.Segments.Segment.length * 5 + 400});
+  layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
   get title() {
     return this.isPb ? 'Personal Best' : `Attempt n°${this.attempt['@_id']}`;

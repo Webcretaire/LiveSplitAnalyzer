@@ -123,6 +123,7 @@ export default class SplitsDisplay extends Vue {
   @Watch('parsedSplits')
   onSplitFileLoad() {
     this.currentAttemptNumber = this.PB?.['@_id'] || this.latestAttemptNumber;
+    this.displayLabels        = (this.parsedSplits?.Run.Segments.Segment.length || 0) <= 30;
     this.showDetail           = false;
     this.$nextTick(() => this.showDetail = true);
   }

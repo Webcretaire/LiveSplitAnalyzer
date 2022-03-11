@@ -1,5 +1,5 @@
 <template>
-  <collapsible-card class="text-center" :title="run.GameName + ' - ' + run.CategoryName">
+  <collapsible-card class="text-center" :title="run.GameName + ' - ' + run.CategoryName" starts-open>
     <p>{{ run.AttemptCount }} attempts</p>
     <p class="m-0"><strong>Finished runs:</strong> {{ finishedRuns }}</p>
     <p class="m-0"><strong>Number of PBs:</strong> {{ PBs.length }}</p>

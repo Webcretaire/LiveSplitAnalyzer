@@ -38,7 +38,7 @@ export default class AttemptOverview extends Vue {
   isPb!: boolean;
 
   @Prop()
-  textinfoValue!: string;
+  displayLabels!: boolean;
 
   renderGraph: boolean = true;
 
@@ -100,7 +100,7 @@ export default class AttemptOverview extends Vue {
         type: 'pie',
         sort: false,
         automargin: true,
-        textinfo: this.textinfoValue
+        textinfo: this.displayLabels ? 'percent' : 'none'
       }
     ];
   }

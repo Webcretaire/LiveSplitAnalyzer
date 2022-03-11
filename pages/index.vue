@@ -13,10 +13,14 @@
     <footer>
       This LiveSplit Analyzer is a tool made by
       <a class="font-weight-normal" href="https://speedrun.com/user/Webcretaire" target="_blank">
-        <span class="username"><span class="username-dark username-gradient"
-                                     style="color: #09B876; background-image: linear-gradient(90deg, #09B876, #8AC951)">Webcretaire</span></span>
-      </a>. Its source code is available on
-      <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">GitHub</a>
+        <span class="username"><span class="username-dark username-gradient webcretaire-color">Webcretaire</span></span>
+      </a> with help from these
+      <a href="https://github.com/Webcretaire/LiveSplitAnalyzer/graphs/contributors" class="text-white font-weight-bold"
+         target="_blank">
+        awesome contributors</a>. Its source code is available on
+      <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">
+        GitHub
+      </a>
     </footer>
 
     <div v-if="currentModal" :is="componentInstance"/>
@@ -62,6 +66,11 @@ main {
 
 footer {
   font-weight: 300;
+}
+
+.webcretaire-color {
+  color: #09B876;
+  background-image: linear-gradient(90deg, #09B876, #8AC951);
 }
 
 .username-gradient {

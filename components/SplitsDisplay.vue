@@ -30,6 +30,9 @@
         <b-form-checkbox v-model="graphPBHline" name="check-button" switch class="mb-2">
           Current attempt times' horizontal line in graphs
         </b-form-checkbox>
+        <b-form-checkbox v-model="textinfoValue" name="check-button" switch class="mb-2" value="percent" unchecked-value="none">
+          Display labels for doughnut charts
+        </b-form-checkbox>
       </collapsible-card>
 
       <toolbox v-model="parsedSplits" class="mb-4"/>
@@ -37,6 +40,7 @@
       <attempt-overview :run="parsedSplits.Run"
                         :attempt="currentAttempt"
                         :is-pb="isPb"
+                        :textinfo-value="textinfoValue"
                         class="mb-4"/>
 
       <split-display :split="split"
@@ -67,6 +71,8 @@ export default class SplitsDisplay extends Vue {
   graphYAxisToZero: boolean = false;
 
   graphPBHline: boolean = false;
+
+  textinfoValue: string = "none";
 
   currentAttemptNumber: number = 1;
 

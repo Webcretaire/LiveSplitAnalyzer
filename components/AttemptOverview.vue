@@ -37,6 +37,9 @@ export default class AttemptOverview extends Vue {
   @Prop()
   isPb!: boolean;
 
+  @Prop()
+  textinfoValue!: string;
+
   renderGraph: boolean = true;
 
   visible: boolean = false;
@@ -96,7 +99,8 @@ export default class AttemptOverview extends Vue {
         hole: .6,
         type: 'pie',
         sort: false,
-        automargin: true
+        automargin: true,
+        textinfo: this.textinfoValue
       }
     ];
   }

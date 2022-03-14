@@ -9,7 +9,6 @@
     ></b-form-file>
     <div v-if="parsedSplits && showDetail">
       <run-overview :run="parsedSplits.Run" class="mb-4"/>
-
       <collapsible-card title="Options">
         <div class="d-flex mt-4 mb-2">
           <b-form inline class="text-center m-auto">
@@ -33,6 +32,12 @@
         <b-form-checkbox v-model="displayLabels" name="check-button" switch class="mb-2">
           Display labels for doughnut charts
         </b-form-checkbox>
+        <h6 class = "mt-4">Size of info panels</h6>
+        <b-row>
+          <b-col cols="12" xl="8" offset-xl="2">
+            <vue-slider v-model="sliderValue" :min="0" :max="3" lazy/>
+          </b-col>
+        </b-row>
       </collapsible-card>
 
       <toolbox v-model="parsedSplits" class="mb-4"/>
@@ -50,6 +55,8 @@
                      :graphPBHline="graphPBHline"
                      :currentAttemptNumber="currentAttemptNumber"
                      class="mb-3"/>
+      
+      <index-page :slider-value="sliderValue"/>
     </div>
   </div>
 </template>
@@ -75,6 +82,8 @@ export default class SplitsDisplay extends Vue {
   displayLabels: boolean = false;
 
   currentAttemptNumber: number = 1;
+
+  cardSize: number = 1;
 
   showDetail: boolean = false;
 

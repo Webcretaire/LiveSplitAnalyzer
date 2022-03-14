@@ -21,6 +21,13 @@ export default class CollapsibleCard extends Vue {
   @Prop()
   title!: string;
 
+  @Prop({default: false})
+  startsOpen!: boolean;
+
+  created() {
+    this.visible = this.startsOpen;
+  }
+
   mounted() {
     this.id = `collapse-${Math.floor(Math.random() * 10000)}`;
   }

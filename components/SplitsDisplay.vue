@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Watch, Prop}    from 'nuxt-property-decorator';
+import {Vue, Component, Watch}          from 'nuxt-property-decorator';
 import {Attempt, selectTime, SplitFile} from '~/util/splits';
 import {stringTimeToSeconds}            from '~/util/durations';
 import {xmlParser}                      from '~/util/xml';

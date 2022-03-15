@@ -1,62 +1,66 @@
 <template>
-  <div class="p-3">
-    <b-form-file
-      v-model="splitFile"
-      accept=".lss"
-      placeholder="Choose a file or drop it here..."
-      drop-placeholder="Drop file here..."
-      class="mb-3"
-    ></b-form-file>
-    <div v-if="parsedSplits && showDetail">
-      <run-overview :run="parsedSplits.Run" class="mb-4"/>
-      <collapsible-card title="Options">
-        <div class="d-flex mt-4 mb-2">
-          <b-form inline class="text-center m-auto">
-            <b-input-group prepend="Currently displayed run">
-              <b-form-input type="number" v-model.number="currentAttemptNumber" :max="latestAttemptNumber" min="1"
-                            debounce="500"/>
-            </b-input-group>
-            <b-button variant="outline-info" class="ml-2" @click="currentAttemptNumber = PB['@_id']" :disabled="isPb">
-              Go to PB
-            </b-button>
-          </b-form>
+  <b-row align-v="center">
+    <b-col cols="12" :xl="panelSize" :offset-xl="panelOffset" lg="10" offset-lg="1">
+      <div class="p-3">
+        <b-form-file
+          v-model="splitFile"
+          accept=".lss"
+          placeholder="Choose a file or drop it here..."
+          drop-placeholder="Drop file here..."
+          class="mb-3"
+        ></b-form-file>
+        <div v-if="parsedSplits && showDetail">
+          <run-overview :run="parsedSplits.Run" class="mb-4"/>
+          <collapsible-card title="Options">
+            <div class="d-flex mt-4 mb-2">
+              <b-form inline class="text-center m-auto">
+                <b-input-group prepend="Currently displayed run">
+                  <b-form-input type="number" v-model.number="currentAttemptNumber" :max="latestAttemptNumber" min="1"
+                                debounce="500"/>
+                </b-input-group>
+                <b-button variant="outline-info" class="ml-2" @click="currentAttemptNumber = PB['@_id']" :disabled="isPb">
+                  Go to PB
+                </b-button>
+              </b-form>
+            </div>
+            <vue-slider v-model="currentAttemptNumber" :min="1" :max="latestAttemptNumber" lazy/>
+            <hr/>
+            <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mt-4 mb-2">
+              Graphs' Y axis starts at zero
+            </b-form-checkbox>
+            <b-form-checkbox v-model="graphPBHline" name="check-button" switch class="mb-2">
+              Current attempt times' horizontal line in graphs
+            </b-form-checkbox>
+            <b-form-checkbox v-model="displayLabels" name="check-button" switch class="mb-2">
+              Display labels for doughnut charts
+            </b-form-checkbox>
+            <h6 class = "mt-4">Size of info panels</h6>
+            <b-row>
+              <b-col cols="12" xl="8" offset-xl="2">
+                <vue-slider v-model="widthValue" :min="0" :max="3" adsorb/>
+              </b-col>
+            </b-row>
+          </collapsible-card>
+
+          <toolbox v-model="parsedSplits" class="mb-4"/>
+
+          <attempt-overview :run="parsedSplits.Run"
+                            :attempt="currentAttempt"
+                            :is-pb="isPb"
+                            :display-labels="displayLabels"
+                            class="mb-4"/>
+
+          <split-display :split="split"
+                        v-for="(split, key) in splits"
+                        :key="`split-${key}`"
+                        :graphYAxisToZero="graphYAxisToZero"
+                        :graphPBHline="graphPBHline"
+                        :currentAttemptNumber="currentAttemptNumber"
+                        class="mb-3"/>
         </div>
-        <vue-slider v-model="currentAttemptNumber" :min="1" :max="latestAttemptNumber" lazy/>
-        <hr/>
-        <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mt-4 mb-2">
-          Graphs' Y axis starts at zero
-        </b-form-checkbox>
-        <b-form-checkbox v-model="graphPBHline" name="check-button" switch class="mb-2">
-          Current attempt times' horizontal line in graphs
-        </b-form-checkbox>
-        <b-form-checkbox v-model="displayLabels" name="check-button" switch class="mb-2">
-          Display labels for doughnut charts
-        </b-form-checkbox>
-        <h6 class = "mt-4">Size of info panels</h6>
-        <b-row>
-          <b-col cols="12" xl="8" offset-xl="2">
-            <vue-slider v-model="sliderValue" :min="0" :max="3" lazy/>
-          </b-col>
-        </b-row>
-      </collapsible-card>
-
-      <toolbox v-model="parsedSplits" class="mb-4"/>
-
-      <attempt-overview :run="parsedSplits.Run"
-                        :attempt="currentAttempt"
-                        :is-pb="isPb"
-                        :display-labels="displayLabels"
-                        class="mb-4"/>
-
-      <split-display :split="split"
-                     v-for="(split, key) in splits"
-                     :key="`split-${key}`"
-                     :graphYAxisToZero="graphYAxisToZero"
-                     :graphPBHline="graphPBHline"
-                     :currentAttemptNumber="currentAttemptNumber"
-                     class="mb-3"/>
-    </div>
-  </div>
+      </div>
+    </b-col>
+  </b-row>
 </template>
 
 <script lang="ts">
@@ -83,8 +87,15 @@ export default class SplitsDisplay extends Vue {
 
   showDetail: boolean = false;
 
-  @Prop()
-  sliderValue!: number;
+  widthValue: number = 0;
+
+  get panelOffset(){
+    return(0-(this.widthValue - 3));
+  }
+
+  get panelSize() {
+    return(12 - (2*this.panelOffset));
+  }
 
   get isPb(): boolean {
     return this.currentAttemptNumber === this.PB?.['@_id'];
@@ -134,12 +145,6 @@ export default class SplitsDisplay extends Vue {
     this.displayLabels        = (this.parsedSplits?.Run.Segments.Segment.length || 0) <= 30;
     this.showDetail           = false;
     this.$nextTick(() => this.showDetail = true);
-  }
-
-  @Watch('sliderValue')
-  sendToIndex(){
-    this.$emit('input',this.sliderValue);
-    console.log(this.sliderValue);
   }
 }
 </script>

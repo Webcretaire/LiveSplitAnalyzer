@@ -55,14 +55,12 @@
                      :graphPBHline="graphPBHline"
                      :currentAttemptNumber="currentAttemptNumber"
                      class="mb-3"/>
-      
-      <index-page :slider-value="sliderValue"/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Watch}          from 'nuxt-property-decorator';
+import {Vue, Component, Watch, Prop}    from 'nuxt-property-decorator';
 import {Attempt, selectTime, SplitFile} from '~/util/splits';
 import {stringTimeToSeconds}            from '~/util/durations';
 import {xmlParser}                      from '~/util/xml';
@@ -70,7 +68,7 @@ import VueSlider                        from 'vue-slider-component';
 import {whithLoadAsync}                 from '~/util/loading';
 
 @Component({components: {VueSlider}})
-export default class SplitsDisplay extends Vue {
+export default class SplitsDisplay extends Vue {  
   splitFile: File | null = null;
 
   parsedSplits: SplitFile | null = null;
@@ -83,9 +81,10 @@ export default class SplitsDisplay extends Vue {
 
   currentAttemptNumber: number = 1;
 
-  cardSize: number = 1;
-
   showDetail: boolean = false;
+
+  @Prop()
+  sliderValue!: number;
 
   get isPb(): boolean {
     return this.currentAttemptNumber === this.PB?.['@_id'];
@@ -135,6 +134,12 @@ export default class SplitsDisplay extends Vue {
     this.displayLabels        = (this.parsedSplits?.Run.Segments.Segment.length || 0) <= 30;
     this.showDetail           = false;
     this.$nextTick(() => this.showDetail = true);
+  }
+
+  @Watch('sliderValue')
+  sendToIndex(){
+    this.$emit('input',this.sliderValue);
+    console.log(this.sliderValue);
   }
 }
 </script>

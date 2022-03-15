@@ -1,6 +1,6 @@
 <template>
   <b-row>
-    <b-col cols="12" :xl="panelSize" :offset-xl="panelOffset" lg="10" offset-lg="1">
+    <b-col cols="12" :lg="panelSize" :offset-lg="panelOffset">
       <div class="p-3">
         <b-form-file
           v-model="splitFile"
@@ -38,7 +38,7 @@
             <h6 class = "mt-4">Size of info panels</h6>
             <b-row>
               <b-col cols="12" xl="8" offset-xl="2">
-                <vue-slider v-model="widthValue" :min="0" :max="3" adsorb/>
+                <vue-slider v-model="widthValue" :min="0" :max="3" lazy adsorb/>
               </b-col>
             </b-row>
           </collapsible-card>

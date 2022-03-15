@@ -4,11 +4,7 @@
       <h1 class="mt-4">LiveSplit Analyzer</h1>
       <p>This tools extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
-      <b-row>
-        <b-col cols="12" xl="6" offset-xl="3" lg="10" offset-lg="1">
-          <SplitsDisplay/>
-        </b-col>
-      </b-row>
+      <SplitsDisplay/>
     </main>
     <footer>
       This LiveSplit Analyzer is a tool made by

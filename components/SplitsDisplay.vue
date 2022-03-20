@@ -51,6 +51,8 @@
                             :display-labels="displayLabels"
                             class="mb-4"/>
 
+          <comparisons-display :segments="parsedSplits.Run.Segments"/>
+
           <split-display :split="split"
                         v-for="(split, key) in splits"
                         :key="`split-${key}`"

@@ -1,33 +1,42 @@
 <template>
   <collapsible-card title="Comparisons">
-    <b-select v-model="selectedComparison" :options="selectOptions"></b-select>
+    <multiselect v-model="referenceComparison" :options="comparisons" placeholder="Pick a reference comparison"
+                 class="mb-2"/>
+    <multiselect v-model="otherComparisons" :options="multipleSelectOptions" placeholder="Pick additional comparisons"
+                 multiple/>
 
-    <b-table v-if="selectedComparison" striped hover :items="timesForSelectedComparison"/>
+    <b-table v-if="referenceComparison" striped hover :items="tableData">
+      <template v-for="slot in otherComparisons" v-slot:[`cell(${slot})`]="slotProps">
+        {{ slotProps.value.time }}
+        <small :class="slotProps.value.isDeltaNegative ? 'text-green' : 'text-red'">
+          ({{ slotProps.value.isDeltaNegative ? '-' : '+' }}{{ slotProps.value.delta }})
+        </small>
+      </template>
+    </b-table>
   </collapsible-card>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}         from 'nuxt-property-decorator';
-import { formatTime } from '~/util/durations';
-import {Segment, Segments, SplitTime} from '~/util/splits';
+import {
+  formatTime,
+  secondsToFormattedString,
+  stringTimeToSeconds
+}                                                 from '~/util/durations';
+import {Component, Prop, Vue}                     from 'nuxt-property-decorator';
+import {Segment, Segments, selectTime, SplitTime} from '~/util/splits';
+import Multiselect                                from 'vue-multiselect';
 
-@Component
+@Component({components: {Multiselect}})
 export default class ComparisonsDisplay extends Vue {
   @Prop()
   segments!: Segments;
 
-  selectedComparison: string = '';
+  referenceComparison: string = '';
 
-  get selectOptions() {
-    const out = [
-      {value: '', text: 'Select a comparison to display'}
-    ];
+  otherComparisons: string[] = [];
 
-    this.comparisons.forEach(comp => {
-      out.push({value: comp, text: comp});
-    });
-
-    return out;
+  get multipleSelectOptions() {
+    return this.comparisons.filter(c => c != this.referenceComparison);
   }
 
   get comparisons() {
@@ -43,15 +52,40 @@ export default class ComparisonsDisplay extends Vue {
     }, []);
   }
 
-  get timesForSelectedComparison() {
-    return this.segments.Segment.map(segment => {
+  get tableData() {
+    const out: any = this.segments.Segment.map(s => ({split: s.Name}));
+
+    this.segments.Segment.forEach((segment, index) => {
       const splitTime = Array.isArray(segment.SplitTimes.SplitTime) ? segment.SplitTimes.SplitTime : [segment.SplitTimes.SplitTime];
 
-      return splitTime.find((st) => st['@_name'] === this.selectedComparison);
-    }).map(data => ({
-      RealTime: formatTime(data?.RealTime || ''),
-      GameTime: formatTime(data?.GameTime || '')
-    }));
+      const timeForReferenceComparison = selectTime(splitTime.find((st) => st['@_name'] === this.referenceComparison));
+
+      if (!timeForReferenceComparison) return;
+
+      const referenceSeconds = stringTimeToSeconds(timeForReferenceComparison);
+
+      out[index][this.referenceComparison] = formatTime(timeForReferenceComparison);
+
+      this.otherComparisons.forEach(other => {
+        const timeForOtherComparison = selectTime(splitTime.find((st) => st['@_name'] === other));
+
+        if (!timeForOtherComparison) return;
+
+
+        let delta             = stringTimeToSeconds(timeForOtherComparison) - referenceSeconds;
+        const isDeltaNegative = delta < 0;
+        if (isDeltaNegative)
+          delta = -delta;
+
+        out[index][other] = {
+          time: formatTime(timeForOtherComparison),
+          isDeltaNegative: isDeltaNegative,
+          delta: secondsToFormattedString(delta)
+        };
+      });
+    });
+
+    return out;
   }
 };
 </script>

@@ -5,6 +5,7 @@
 
 @import "vue-slider-component/dist-css/vue-slider-component.css";
 @import "vue-slider-component/theme/default.css";
+@import "vue-multiselect/dist/vue-multiselect.min.css";
 
 body {
   background-color: #262626;
@@ -41,4 +42,12 @@ h2, h3 {
 
 .modal {
   color: black;
+}
+
+.text-red {
+  color: red;
+}
+
+.text-green {
+  color: green;
 }

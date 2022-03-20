@@ -22,6 +22,7 @@
     "sass": "^1.49.8",
     "slugify": "^1.6.5",
     "vue": "^2.6.14",
+    "vue-multiselect": "^2.1.6",
     "vue-plotly": "^1.1.0",
     "vue-server-renderer": "^2.6.14",
     "vue-slider-component": "^3.2.15",

@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-// Ignore TS errors for libs with no types
 import {Vue, Component, Prop}                               from 'nuxt-property-decorator';
 import {Attempt, Segment, selectTime, SplitFile, SplitTime} from '~/util/splits';
 import {xmlBuilder}                                         from '~/util/xml';
 import {secondsToLivesplitFormat, stringTimeToSeconds}      from '~/util/durations';
 import {whithLoad}                                          from '~/util/loading';
+import {asArray}                                            from '~/util/util';
 
 @Component
 export default class Toolbox extends Vue {
@@ -96,7 +96,7 @@ export default class Toolbox extends Vue {
       let timeSoFar = {RealTime: 0, GameTime: 0};
       for (let i = 0; i < this.value.Run.Segments.Segment.length; ++i) {
         const st                 = this.splits[i].SplitTimes.SplitTime || [];
-        const times: SplitTime[] = Array.isArray(st) ? st : [st];
+        const times: SplitTime[] = asArray(st);
         const realPBTime         = this.splits[i].SegmentHistory.Time.find(t => t['@_id'] == realPB?.['@_id']);
         const out                = times.filter(t => t['@_name'] != 'Personal Best'); // Remove pre-existing PB time
 

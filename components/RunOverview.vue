@@ -16,6 +16,7 @@
 import {Vue, Component, Prop} from 'nuxt-property-decorator';
 import {Run, selectTime}      from '~/util/splits';
 import {stringTimeToSeconds}  from '~/util/durations';
+import {asArray}              from '~/util/util';
 
 @Component
 export default class RunOverview extends Vue {
@@ -42,8 +43,7 @@ export default class RunOverview extends Vue {
   }
 
   get runMetadata() {
-    const v = this.run.Metadata.Variables?.Variable;
-    return Array.isArray(v) ? v : [v];
+    return asArray(this.run.Metadata.Variables?.Variable);
   }
 
   visible: boolean = true;

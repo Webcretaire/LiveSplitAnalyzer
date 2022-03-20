@@ -2,29 +2,35 @@
   <collapsible-card title="Comparisons">
     <multiselect v-model="referenceComparison" :options="comparisons" placeholder="Pick a reference comparison"
                  class="mb-2"/>
-    <multiselect v-model="otherComparisons" :options="multipleSelectOptions" placeholder="Pick additional comparisons"
-                 multiple/>
+    <div v-if="referenceComparison">
+      <multiselect v-model="otherComparisons" :options="multipleSelectOptions" placeholder="Pick additional comparisons"
+                   multiple class="mb-2"/>
 
-    <b-table v-if="referenceComparison" striped hover :items="tableData">
-      <template v-for="slot in otherComparisons" v-slot:[`cell(${slot})`]="slotProps">
-        {{ slotProps.value.time }}
-        <small :class="slotProps.value.isDeltaNegative ? 'text-green' : 'text-red'">
-          ({{ slotProps.value.isDeltaNegative ? '-' : '+' }}{{ slotProps.value.delta }})
-        </small>
-      </template>
-    </b-table>
+      <b-table striped hover :items="tableData">
+        <template v-for="slot in otherComparisons" v-slot:[`cell(${slot})`]="slotProps">
+          {{ slotProps.value.time }}
+          <small :class="slotProps.value.isDeltaNegative ? 'text-green' : 'text-red'">
+            ({{ slotProps.value.isDeltaNegative ? '-' : '+' }}{{ slotProps.value.delta }})
+          </small>
+        </template>
+      </b-table>
+    </div>
   </collapsible-card>
 </template>
 
 <script lang="ts">
-import {
-  formatTime,
-  secondsToFormattedString,
-  stringTimeToSeconds
-}                                                 from '~/util/durations';
-import {Component, Prop, Vue}                     from 'nuxt-property-decorator';
-import {Segment, Segments, selectTime, SplitTime} from '~/util/splits';
-import Multiselect                                from 'vue-multiselect';
+import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
+import Multiselect                                     from 'vue-multiselect';
+import {secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {Segment, Segments, selectTime, SplitTime}      from '~/util/splits';
+import {asArray}                                       from '~/util/util';
+
+const SOB_LABEL = 'Sum of Best';
+
+interface NameTime {
+  name: string,
+  time: number | null
+}
 
 @Component({components: {Multiselect}})
 export default class ComparisonsDisplay extends Vue {
@@ -41,7 +47,7 @@ export default class ComparisonsDisplay extends Vue {
 
   get comparisons() {
     return this.segments.Segment.reduce((acc: string[], segment: Segment) => {
-      const splitTime = Array.isArray(segment.SplitTimes.SplitTime) ? segment.SplitTimes.SplitTime : [segment.SplitTimes.SplitTime];
+      const splitTime = asArray(segment.SplitTimes.SplitTime);
 
       splitTime.forEach((s: SplitTime) => {
         if (!acc.includes(s['@_name']))
@@ -49,36 +55,64 @@ export default class ComparisonsDisplay extends Vue {
       });
 
       return acc;
-    }, []);
+    }, [SOB_LABEL]);
+  }
+
+  get sumOfBests(): Array<number | null> {
+    let timeSoFar = 0;
+
+    return this.segments.Segment.map((segment) => {
+      const best_seg_t = selectTime(segment.BestSegmentTime);
+      if (!best_seg_t) return null;
+
+      timeSoFar += stringTimeToSeconds(best_seg_t);
+
+      return timeSoFar;
+    });
+  }
+
+  get splitTimeswithSoB(): NameTime[][] {
+    return this.segments.Segment.map(
+      (segment, index) => [
+        ...asArray(segment.SplitTimes.SplitTime).map(t => {
+          let outTime    = null;
+          const selected = selectTime(t);
+
+          if (selected) outTime = stringTimeToSeconds(selected);
+
+          return {name: t['@_name'], time: outTime};
+        }),
+        {name: SOB_LABEL, time: this.sumOfBests[index]}
+      ]
+    );
   }
 
   get tableData() {
     const out: any = this.segments.Segment.map(s => ({split: s.Name}));
 
     this.segments.Segment.forEach((segment, index) => {
-      const splitTime = Array.isArray(segment.SplitTimes.SplitTime) ? segment.SplitTimes.SplitTime : [segment.SplitTimes.SplitTime];
-
-      const timeForReferenceComparison = selectTime(splitTime.find((st) => st['@_name'] === this.referenceComparison));
+      // Add reference data
+      const timeForReferenceComparison = this.splitTimeswithSoB[index].find(st => st.name === this.referenceComparison)?.time;
 
       if (!timeForReferenceComparison) return;
 
-      const referenceSeconds = stringTimeToSeconds(timeForReferenceComparison);
+      out[index][this.referenceComparison] = secondsToFormattedString(timeForReferenceComparison);
 
-      out[index][this.referenceComparison] = formatTime(timeForReferenceComparison);
-
+      // Add other comparisons
       this.otherComparisons.forEach(other => {
-        const timeForOtherComparison = selectTime(splitTime.find((st) => st['@_name'] === other));
+        const timeForOtherComparison = this.splitTimeswithSoB[index].find(st => st.name === other)?.time;
 
         if (!timeForOtherComparison) return;
 
-
-        let delta             = stringTimeToSeconds(timeForOtherComparison) - referenceSeconds;
+        let delta             = timeForOtherComparison - timeForReferenceComparison;
         const isDeltaNegative = delta < 0;
+
+        // Make delta always positive so that secondsToFormattedString works
         if (isDeltaNegative)
           delta = -delta;
 
         out[index][other] = {
-          time: formatTime(timeForOtherComparison),
+          time: secondsToFormattedString(timeForOtherComparison),
           isDeltaNegative: isDeltaNegative,
           delta: secondsToFormattedString(delta)
         };

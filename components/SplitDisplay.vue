@@ -38,6 +38,7 @@ import slugify                                   from 'slugify';
 import {Plotly}                                  from 'vue-plotly';
 import {GlobalEventEmitter}                      from '~/util/globalEvents';
 import {singleSplitState}                        from '~/util/singleSplit';
+import {asArray}                                 from '~/util/util';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -184,7 +185,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get timesWithPositiveIds() {
-    return this.split.SegmentHistory.Time.filter(t => t['@_id'] > 0);
+    return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
   }
 
   plot_data() {

@@ -24,13 +24,13 @@ export default class RunOverview extends Vue {
   run!: Run;
 
   get finishedRuns() {
-    return this.run.AttemptHistory.Attempt.filter(a => selectTime(a)).length;
+    return asArray(this.run.AttemptHistory.Attempt).filter(a => selectTime(a)).length;
   }
 
   get PBs() {
     let curPB = 999999;
 
-    return this.run.AttemptHistory.Attempt.filter(a => {
+    return asArray(this.run.AttemptHistory.Attempt).filter(a => {
       const t = selectTime(a);
       if (!t) return false;
       const time = stringTimeToSeconds(t);

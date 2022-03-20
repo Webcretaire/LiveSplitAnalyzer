@@ -73,6 +73,7 @@ import {stringTimeToSeconds}            from '~/util/durations';
 import {xmlParser}                      from '~/util/xml';
 import VueSlider                        from 'vue-slider-component';
 import {whithLoadAsync}                 from '~/util/loading';
+import {asArray}                        from '~/util/util';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -106,7 +107,7 @@ export default class SplitsDisplay extends Vue {
   get latestAttemptNumber(): number {
     if (!this.parsedSplits) return 0;
 
-    return Math.max(...this.parsedSplits.Run.AttemptHistory.Attempt.map(a => a['@_id']));
+    return Math.max(...this.allRunAttempts.map(a => a['@_id']));
   }
 
   get splits() {
@@ -118,13 +119,17 @@ export default class SplitsDisplay extends Vue {
   get currentAttempt() {
     if (!this.parsedSplits) return null;
 
-    return this.parsedSplits.Run.AttemptHistory.Attempt.find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
+    return asArray(this.parsedSplits.Run.AttemptHistory.Attempt).find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
+  }
+
+  get allRunAttempts(): Attempt[] {
+    return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt);
   }
 
   get PB() {
     if (!this.parsedSplits) return null;
 
-    return this.parsedSplits.Run.AttemptHistory.Attempt.reduce((curLowest: Attempt | null, cur: Attempt) => {
+    return this.allRunAttempts.reduce((curLowest: Attempt | null, cur: Attempt) => {
       const curTime = selectTime(cur);
       if (!curTime) return curLowest;
       const compare = selectTime(curLowest) || '999:59:59.99';

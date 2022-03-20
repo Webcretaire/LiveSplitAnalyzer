@@ -22,6 +22,7 @@ import {Attempt, Run, selectTime} from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                   from 'vue-plotly';
+import {asArray}                  from '~/util/util';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {
@@ -51,7 +52,7 @@ export default class AttemptOverview extends Vue {
   }
 
   get AttemptSegments() {
-    return this.run.Segments.Segment.map((segment) => segment.SegmentHistory.Time.find(segment => segment['@_id'] == this.attempt['@_id']));
+    return this.run.Segments.Segment.map((segment) => asArray(segment.SegmentHistory.Time).find(segment => segment['@_id'] == this.attempt['@_id']));
   }
 
   get AttemptSplitTimes() {
@@ -110,7 +111,7 @@ export default class AttemptOverview extends Vue {
       'Split times',
       this.AttemptSplitTimes,
       this.run.Segments.Segment.map((segment) => {
-        const t = selectTime(segment.SegmentHistory.Time.find(t => t['@_id'] == this.attempt['@_id']));
+        const t = selectTime(asArray(segment.SegmentHistory.Time).find(t => t['@_id'] == this.attempt['@_id']));
         return t ? `${segment.Name} (${formatTime(t)})` : segment.Name;
       })
     );

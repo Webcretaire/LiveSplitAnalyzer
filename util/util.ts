@@ -1,1 +1,1 @@
-export const asArray = (input: any): Array<any> => Array.isArray(input) ? input : [input];
+export const asArray = (input: any): Array<any> => input == null ? [] : (Array.isArray(input) ? input : [input]);

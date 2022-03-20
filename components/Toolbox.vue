@@ -40,14 +40,18 @@ export default class Toolbox extends Vue {
 
   reconstructAttemptTime(id: number) {
     return this.splits.reduce((curTime: number, s: Segment) => {
-      const time = selectTime(s.SegmentHistory.Time.find(t => t['@_id'] == id));
+      const time = selectTime(asArray(s.SegmentHistory.Time).find(t => t['@_id'] == id));
       if (!time) return curTime;
       return stringTimeToSeconds(time) + curTime;
     }, 0);
   }
 
+  get allRunAttempts(): Attempt[] {
+    return asArray(this.value.Run.AttemptHistory.Attempt);
+  }
+
   get pbFromSplitHistory(): Attempt | undefined {
-    const completedRunsTimes = this.splits[this.splits.length - 1].SegmentHistory.Time.map(
+    const completedRunsTimes = asArray(this.splits[this.splits.length - 1].SegmentHistory.Time).map(
       t => ({
         id: t['@_id'],
         time: this.reconstructAttemptTime(t['@_id'])
@@ -63,13 +67,13 @@ export default class Toolbox extends Vue {
       }
     });
 
-    return this.value.Run.AttemptHistory.Attempt.find(a => a['@_id'] == currentPBid);
+    return this.allRunAttempts.find(a => a['@_id'] == currentPBid);
   }
 
   get pbFromAttemptHistory(): Attempt | undefined {
     let currentPBtime = stringTimeToSeconds('999:59:59.99');
     let currentPBattempt;
-    this.value.Run.AttemptHistory.Attempt.forEach(attempt => {
+    this.allRunAttempts.forEach(attempt => {
       if (attempt['@_id'] <= 0) return;
 
       const t = selectTime(attempt);
@@ -97,7 +101,7 @@ export default class Toolbox extends Vue {
       for (let i = 0; i < this.value.Run.Segments.Segment.length; ++i) {
         const st                 = this.splits[i].SplitTimes.SplitTime || [];
         const times: SplitTime[] = asArray(st);
-        const realPBTime         = this.splits[i].SegmentHistory.Time.find(t => t['@_id'] == realPB?.['@_id']);
+        const realPBTime         = asArray(this.splits[i].SegmentHistory.Time).find(t => t['@_id'] == realPB?.['@_id']);
         const out                = times.filter(t => t['@_name'] != 'Personal Best'); // Remove pre-existing PB time
 
         if (realPBTime) {

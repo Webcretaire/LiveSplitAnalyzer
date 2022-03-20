@@ -26,6 +26,7 @@ import {GlobalEventEmitter}                      from '~/util/globalEvents';
 import {singleSplitState}                        from '~/util/singleSplit';
 import {formatTime, stringTimeToSeconds}         from '~/util/durations';
 import {whithLoadAsync}                          from '~/util/loading';
+import {asArray}                                 from '~/util/util';
 
 @Component({mixins: [BaseModal]})
 export default class ManualGoldUpdateModal extends Vue {
@@ -40,7 +41,7 @@ export default class ManualGoldUpdateModal extends Vue {
   ];
 
   get history() {
-    return [...this.split?.SegmentHistory.Time || []] // Make a copy otherwise sort acts in place and messes up the whole page
+    return [...asArray(this.split?.SegmentHistory.Time)] // Make a copy otherwise sort acts in place and messes up the whole page
       .filter(t => selectTime(t))
       .sort((t1, t2) => {
         const t1s = selectTime(t1);
@@ -58,7 +59,7 @@ export default class ManualGoldUpdateModal extends Vue {
     whithLoadAsync((endLoad: Function) => {
       // Delete split in attempts
       if (this.split?.SegmentHistory.Time)
-        this.split.SegmentHistory.Time = this.split.SegmentHistory.Time.filter(a => a['@_id'] != attempt['@_id']);
+        this.split.SegmentHistory.Time = asArray(this.split.SegmentHistory.Time).filter(a => a['@_id'] != attempt['@_id']);
 
       if (!this.split?.BestSegmentTime) return;
 

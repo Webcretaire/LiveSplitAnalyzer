@@ -18,7 +18,7 @@ export interface Attempt extends OptionalRealAndGameTime {
 }
 
 export interface AttemptHistory {
-  'Attempt': Attempt[];
+  'Attempt': Attempt | Attempt[];
 }
 
 export interface RunMetadataVariable {
@@ -51,7 +51,7 @@ export interface SegmentHistoryTime extends OptionalRealAndGameTime {
 }
 
 export interface SegmentHistory {
-  'Time': SegmentHistoryTime[];
+  'Time': SegmentHistoryTime | SegmentHistoryTime[];
 }
 
 export interface SplitTime extends RealAndGameTime {

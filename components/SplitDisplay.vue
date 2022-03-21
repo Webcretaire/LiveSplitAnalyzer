@@ -40,7 +40,6 @@ import {GlobalEventEmitter}                      from '~/util/globalEvents';
 import {singleSplitState}                        from '~/util/singleSplit';
 import {asArray}                                 from '~/util/util';
 
-
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
   @Prop()

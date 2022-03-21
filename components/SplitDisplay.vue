@@ -117,7 +117,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get bestTimeDisplay() {
-    return this.formatTime(selectTime(this.split.BestSegmentTime) || ' ');
+    return this.formatTime(selectTime(this.split.BestSegmentTime) || '');
   }
 
   get gold() {

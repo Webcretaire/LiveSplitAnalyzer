@@ -39,7 +39,6 @@ import {Plotly}                                  from 'vue-plotly';
 import {GlobalEventEmitter}                      from '~/util/globalEvents';
 import {singleSplitState}                        from '~/util/singleSplit';
 import {asArray}                                 from '~/util/util';
-import store                                     from '~/util/store'
 
 
 @Component({components: {'Plotly': Plotly}})
@@ -118,12 +117,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get bestTimeDisplay() {
-    let out = '';
-    if (store.state.useRealTime)
-      out += `${this.formatTime(this.split.BestSegmentTime.RealTime)} (real time)`;
-    if (this.split.BestSegmentTime.GameTime && !store.state.useRealTime)
-      out += `${this.formatTime(this.split.BestSegmentTime.GameTime)} (game time) ; `;
-    return out;
+    return this.formatTime(selectTime(this.split.BestSegmentTime) || ' ');
   }
 
   get gold() {

@@ -1,3 +1,5 @@
+import store from '~/store'
+
 export interface RealAndGameTime {
   'RealTime': string;
   'GameTime'?: string;
@@ -113,4 +115,4 @@ export type TimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistor
 
 export type OptionalTimeLike = TimeLike | null | undefined;
 
-export const selectTime = (t: OptionalTimeLike): string | null => t?.GameTime || t?.RealTime || null;
+export const selectTime = store.state.useRealTime ? (t: OptionalTimeLike): string | null => t?.RealTime || null : (t: OptionalTimeLike): string | null => t?.GameTime || t?.RealTime || null;

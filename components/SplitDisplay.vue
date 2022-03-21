@@ -215,7 +215,7 @@ export default class SplitDisplay extends Vue {
     ];
   }
 
-  srcFormattedIcon(split: Segment): String | null {
+  srcFormattedIcon(split: Segment): string | null {
     const png = extractPng(split.Icon);
     return png ? 'data:image/jpeg;base64,' + btoa(
       new Uint8Array(png)

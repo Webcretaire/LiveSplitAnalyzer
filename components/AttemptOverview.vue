@@ -52,7 +52,9 @@ export default class AttemptOverview extends Vue {
   }
 
   get AttemptSegments() {
-    return this.run.Segments.Segment.map((segment) => asArray(segment.SegmentHistory.Time).find(segment => segment['@_id'] == this.attempt['@_id']));
+    return this.run.Segments.Segment.map(
+      segment => asArray(segment.SegmentHistory.Time).find(segmentTime => segmentTime['@_id'] == this.attempt['@_id'])
+    );
   }
 
   get AttemptSplitTimes() {
@@ -110,9 +112,9 @@ export default class AttemptOverview extends Vue {
     return this.makePlotData(
       'Split times',
       this.AttemptSplitTimes,
-      this.run.Segments.Segment.map((segment) => {
-        const t = selectTime(asArray(segment.SegmentHistory.Time).find(t => t['@_id'] == this.attempt['@_id']));
-        return t ? `${segment.Name} (${formatTime(t)})` : segment.Name;
+      this.run.Segments.Segment.map(segment => {
+        const time = selectTime(asArray(segment.SegmentHistory.Time).find(t => t['@_id'] == this.attempt['@_id']));
+        return time ? `${segment.Name} (${formatTime(time)})` : segment.Name;
       })
     );
   }

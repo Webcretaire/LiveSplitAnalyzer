@@ -1,10 +1,10 @@
 export const extractPng = (base64data: string) => {
-  const binaryData = atob(base64data); // Buffer.from(base64data, "base64").toString(); // atob(base64data);
+  const binaryData = atob(base64data);
 
   const len  = binaryData.length;
   const data = new Uint8Array(len);
-  for (let i = 0; i < len; i++)
-    data[i] = binaryData.charCodeAt(i);
+  for (let j = 0; j < len; j++)
+    data[j] = binaryData.charCodeAt(j);
 
 
   const PNG_SIGNATURE: Uint8Array = new Uint8Array([

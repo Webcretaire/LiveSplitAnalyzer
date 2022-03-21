@@ -26,16 +26,16 @@
             </div>
             <vue-slider v-model="currentAttemptNumber" :min="1" :max="latestAttemptNumber" lazy/>
             <hr/>
-            <b-form-checkbox v-model="graphYAxisToZero" name="check-button" switch class="mt-4 mb-2">
+            <b-form-checkbox v-model="graphYAxisToZero" switch class="mt-4 mb-2">
               Graphs' Y axis starts at zero
             </b-form-checkbox>
-            <b-form-checkbox v-model="graphPBHline" name="check-button" switch class="mb-2">
+            <b-form-checkbox v-model="graphPBHline" switch class="mb-2">
               Current attempt times' horizontal line in graphs
             </b-form-checkbox>
-            <b-form-checkbox v-model="displayLabels" name="check-button" switch class="mb-2">
+            <b-form-checkbox v-model="displayLabels" switch class="mb-2">
               Display labels for doughnut charts
             </b-form-checkbox>
-            <b-form-checkbox v-model="globalState.useRealTime" name="check-button" switch class="mb-2">
+            <b-form-checkbox v-if="hasGameTime" v-model="globalState.useRealTime" switch class="mb-2">
               Use real time instead of game time
             </b-form-checkbox>
             <h6 class = "mt-4">Size of info panels</h6>
@@ -95,6 +95,8 @@ export default class SplitsDisplay extends Vue {
 
   showDetail: boolean = false;
 
+  hasGameTime: boolean = false;
+
   globalState = store.state;
 
   widthValue: number = 0;
@@ -147,7 +149,11 @@ export default class SplitsDisplay extends Vue {
   fileChange(newVal: File) {
     whithLoadAsync((endLoad: Function) => {
       newVal.text()
-        .then(text => this.parsedSplits = xmlParser.parse(text))
+        .then(text => {
+          this.hasGameTime = text.includes('<GameTime>');
+          store.state.useRealTime = !this.hasGameTime;
+          this.parsedSplits = xmlParser.parse(text);
+        })
         .finally(() => endLoad());
     });
   }

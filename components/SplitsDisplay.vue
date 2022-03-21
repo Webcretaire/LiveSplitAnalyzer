@@ -35,6 +35,9 @@
             <b-form-checkbox v-model="displayLabels" name="check-button" switch class="mb-2">
               Display labels for doughnut charts
             </b-form-checkbox>
+            <b-form-checkbox v-model="useRealTime" name="check-button" switch class="mb-2">
+              Use real time instead of game time
+            </b-form-checkbox>
             <h6 class = "mt-4">Size of info panels</h6>
             <b-row>
               <b-col cols="12" xl="8" offset-xl="2">
@@ -74,6 +77,7 @@ import {xmlParser}                      from '~/util/xml';
 import VueSlider                        from 'vue-slider-component';
 import {whithLoadAsync}                 from '~/util/loading';
 import {asArray}                        from '~/util/util';
+import store                            from '~/store'
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -90,6 +94,8 @@ export default class SplitsDisplay extends Vue {
   currentAttemptNumber: number = 1;
 
   showDetail: boolean = false;
+
+  useRealTime = store.state.useRealTime;
 
   widthValue: number = 0;
 

@@ -132,5 +132,5 @@ export default class AttemptOverview extends Vue {
   }
 
   secondsToFormattedString = secondsToFormattedString;
-};
+}
 </script>

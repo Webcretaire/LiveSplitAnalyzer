@@ -121,5 +121,5 @@ export default class ComparisonsDisplay extends Vue {
 
     return out;
   }
-};
+}
 </script>

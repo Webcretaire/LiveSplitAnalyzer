@@ -87,7 +87,7 @@ export default class ManualGoldUpdateModal extends Vue {
       this.split = singleSplitState.currentSplit;
     GlobalEventEmitter.$on('setCurrentSplit', (split: Segment) => this.split = split);
   }
-};
+}
 </script>
 
 <style scoped lang="scss">

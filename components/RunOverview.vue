@@ -47,5 +47,5 @@ export default class RunOverview extends Vue {
   }
 
   visible: boolean = true;
-};
+}
 </script>

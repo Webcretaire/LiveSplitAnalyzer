@@ -153,5 +153,5 @@ export default class Toolbox extends Vue {
 
     document.body.removeChild(element);
   }
-};
+}
 </script>

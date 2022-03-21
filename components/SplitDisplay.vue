@@ -230,7 +230,7 @@ export default class SplitDisplay extends Vue {
   }
 
   formatTime = formatTime;
-};
+}
 </script>
 
 <style scoped lang="scss">

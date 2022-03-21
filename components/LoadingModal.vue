@@ -39,7 +39,7 @@ import BaseModal        from '~/components/BaseModal.vue';
 @Component({mixins: [BaseModal]})
 export default class LoadingModal extends Vue {
   modalRef: string = 'LoadingModal';
-};
+}
 </script>
 
 <style lang="scss" scoped>

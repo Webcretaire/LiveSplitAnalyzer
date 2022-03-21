@@ -52,7 +52,7 @@ export default class IndexPage extends Vue {
       this.currentModal = '';
     });
   }
-};
+}
 </script>
 
 <style scoped lang="scss">

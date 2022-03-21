@@ -31,7 +31,7 @@ export default class CollapsibleCard extends Vue {
   mounted() {
     this.id = `collapse-${Math.floor(Math.random() * 10000)}`;
   }
-};
+}
 </script>
 
 <style scoped lang="scss">

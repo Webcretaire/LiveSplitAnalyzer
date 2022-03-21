@@ -121,9 +121,8 @@ export default class SplitDisplay extends Vue {
     let out = '';
     if (store.state.useRealTime)
       out += `${this.formatTime(this.split.BestSegmentTime.RealTime)} (real time)`;
-    if (this.split.BestSegmentTime.GameTime)
-      if (!store.state.useRealTime)
-        out += `${this.formatTime(this.split.BestSegmentTime.GameTime)} (game time) ; `;
+    if (this.split.BestSegmentTime.GameTime && !store.state.useRealTime)
+      out += `${this.formatTime(this.split.BestSegmentTime.GameTime)} (game time) ; `;
     return out;
   }
 

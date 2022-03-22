@@ -59,7 +59,7 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
   text-align: center;
   vertical-align: -.125em;
   width: 1em; }
-  .fa-layers svg.svg-inline--fa {
+  svg.svg-inline--fa {
     -webkit-transform-origin: center center;
             transform-origin: center center; }
 

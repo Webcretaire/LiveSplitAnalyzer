@@ -22,7 +22,3 @@ export default class LoadingSwitch extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -1,5 +1,8 @@
 <template>
   <collapsible-card title="Comparisons">
+    <b-button variant="outline-info" @click="openComparisonEditor" class="mb-2">
+      Edit comparisons
+    </b-button>
     <multiselect v-model="referenceComparison" :options="comparisons" placeholder="Pick a reference comparison"
                  class="mb-2"/>
     <div v-if="referenceComparison">
@@ -19,11 +22,17 @@
 </template>
 
 <script lang="ts">
+import {
+  availableComparisons,
+  cumulatedSumOfBests,
+  Segments,
+  selectTime
+}                                                      from '~/util/splits';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import Multiselect                                     from 'vue-multiselect';
 import {secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
-import {Segment, Segments, selectTime, SplitTime}      from '~/util/splits';
 import {asArray}                                       from '~/util/util';
+import {GlobalEventEmitter}                            from '~/util/globalEvents';
 
 const SOB_LABEL = 'Sum of Best';
 
@@ -46,29 +55,11 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get comparisons() {
-    return this.segments.Segment.reduce((acc: string[], segment: Segment) => {
-      const splitTime = asArray(segment.SplitTimes.SplitTime);
-
-      splitTime.forEach((s: SplitTime) => {
-        if (!acc.includes(s['@_name']))
-          acc.push(s['@_name']);
-      });
-
-      return acc;
-    }, [SOB_LABEL]);
+    return [...availableComparisons(this.segments), SOB_LABEL];
   }
 
   get sumOfBests(): Array<number | null> {
-    let timeSoFar = 0;
-
-    return this.segments.Segment.map((segment) => {
-      const best_seg_t = selectTime(segment.BestSegmentTime);
-      if (!best_seg_t) return null;
-
-      timeSoFar += stringTimeToSeconds(best_seg_t);
-
-      return timeSoFar;
-    });
+    return cumulatedSumOfBests(this.segments);
   }
 
   get splitTimeswithSoB(): NameTime[][] {
@@ -120,6 +111,10 @@ export default class ComparisonsDisplay extends Vue {
     });
 
     return out;
+  }
+
+  openComparisonEditor() {
+    GlobalEventEmitter.$emit('openModal', 'ComparisonEditorModal');
   }
 }
 </script>

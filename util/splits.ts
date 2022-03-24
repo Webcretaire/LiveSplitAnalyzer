@@ -1,4 +1,6 @@
-import store from '~/util/store'
+import store                 from '~/util/store';
+import {stringTimeToSeconds} from '~/util/durations';
+import {asArray}             from '~/util/util';
 
 export interface RealAndGameTime {
   'RealTime': string;
@@ -120,4 +122,33 @@ export const selectTime = (t: OptionalTimeLike): string | null => {
     return t.GameTime;
 
   return t?.RealTime || null;
+};
+
+export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | null = null): Array<number> => {
+  let timeSoFar = 0;
+
+  return segments.Segment.map((segment) => {
+    let best_seg_t;
+    if (useGameTime === true) best_seg_t = segment.BestSegmentTime.GameTime;
+    else if (useGameTime === false) best_seg_t = segment.BestSegmentTime.RealTime;
+    else best_seg_t = selectTime(segment.BestSegmentTime);
+
+    if (best_seg_t)
+      timeSoFar += stringTimeToSeconds(best_seg_t);
+
+    return timeSoFar;
+  });
+};
+
+export const availableComparisons = (segments: Segments) => {
+  return segments.Segment.reduce((acc: string[], segment: Segment) => {
+    const splitTime = asArray(segment.SplitTimes.SplitTime);
+
+    splitTime.forEach((s: SplitTime) => {
+      if (!acc.includes(s['@_name']))
+        acc.push(s['@_name']);
+    });
+
+    return acc;
+  }, []);
 }

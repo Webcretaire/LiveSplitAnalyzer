@@ -19,24 +19,26 @@
       </a>
     </footer>
 
-    <div v-if="currentModal" :is="componentInstance"/>
+    <div v-if="componentInstance" :is="componentInstance"/>
     <loading-modal v-if="loading"/>
+    <confirm-modal v-if="confirmMessage" :message="confirmMessage" :callback="confirmCallback"/>
   </div>
 </template>
 
 <script lang="ts">
 import {Vue, Component}     from 'nuxt-property-decorator';
 import {GlobalEventEmitter} from '~/util/globalEvents';
+import {whithLoadAsync}     from '~/util/loading';
 
 @Component
 export default class IndexPage extends Vue {
   loading: boolean = false;
 
-  currentModal: string = '';
+  componentInstance: Function | null = null;
 
-  get componentInstance() {
-    return () => import(`~/components/${this.currentModal}`);
-  }
+  confirmMessage: string = '';
+
+  confirmCallback: Function | null = null;
 
   created() {
     GlobalEventEmitter.$on('startLoading', () => {
@@ -46,10 +48,22 @@ export default class IndexPage extends Vue {
       this.loading = false;
     });
     GlobalEventEmitter.$on('openModal', (modal: string) => {
-      this.currentModal = modal;
+      whithLoadAsync((endLoad: Function) => {
+        // This needs to be an attribute because if it's a getter it gets cached way too aggressively
+        this.componentInstance = () => import(`~/components/${modal}`);
+        this.$nextTick(() => endLoad());
+      });
     });
     GlobalEventEmitter.$on('closeModal', () => {
-      this.currentModal = '';
+      this.componentInstance = null;
+    });
+    GlobalEventEmitter.$on('openConfirm', (text: string, callback: Function) => {
+      this.confirmCallback = callback;
+      this.confirmMessage = text;
+    });
+    GlobalEventEmitter.$on('closeConfirm', () => {
+      this.confirmMessage = '';
+      this.confirmCallback = null;
     });
   }
 }

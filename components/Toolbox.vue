@@ -7,8 +7,8 @@
       </b-button>
       <span v-b-tooltip.hover title="Fix PB split time for each segment, if your PB comparison is currently broken"
             class="help-question">
-          <font-awesome-icon icon="circle-question"/>
-        </span>
+        <font-awesome-icon icon="circle-question"/>
+      </span>
     </p>
     <p>
       <b-button variant="success" @click="downloadSplits">

@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue}                          from 'nuxt-property-decorator';
+import {Component, mixins}                       from 'nuxt-property-decorator';
 import {BModal}                                  from 'bootstrap-vue';
 import BaseModal                                 from '~/components/BaseModal.vue';
 import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
@@ -28,8 +28,8 @@ import {formatTime, stringTimeToSeconds}         from '~/util/durations';
 import {whithLoadAsync}                          from '~/util/loading';
 import {asArray}                                 from '~/util/util';
 
-@Component({mixins: [BaseModal]})
-export default class ManualGoldUpdateModal extends Vue {
+@Component
+export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   modalRef: string = 'ManualGoldUpdateModal';
 
   split: Segment | null = null;
@@ -55,30 +55,35 @@ export default class ManualGoldUpdateModal extends Vue {
     return formatTime(selectTime(attempt) || '00:00:00.000000');
   }
 
-  deleteAttempt(attempt: SegmentHistoryTime) {
-    whithLoadAsync((endLoad: Function) => {
-      // Delete split in attempts
-      if (this.split?.SegmentHistory.Time)
-        this.split.SegmentHistory.Time = asArray(this.split.SegmentHistory.Time).filter(a => a['@_id'] != attempt['@_id']);
+  doDeleteAttempt(attempt: SegmentHistoryTime, callback: Function) {
+    // Delete split in attempts
+    if (this.split?.SegmentHistory.Time)
+      this.split.SegmentHistory.Time = asArray(this.split.SegmentHistory.Time).filter(a => a['@_id'] != attempt['@_id']);
 
-      if (!this.split?.BestSegmentTime) return;
+    if (!this.split?.BestSegmentTime) return;
 
-      // Update actual gold
-      if (this.history[0].RealTime)
-        this.split.BestSegmentTime = {RealTime: this.history[0].RealTime};
-      if (this.history[0].GameTime)
-        this.split.BestSegmentTime.GameTime = this.history[0].GameTime;
+    // Update actual gold
+    if (this.history[0].RealTime)
+      this.split.BestSegmentTime = {RealTime: this.history[0].RealTime};
+    if (this.history[0].GameTime)
+      this.split.BestSegmentTime.GameTime = this.history[0].GameTime;
 
-      this.$nextTick(() => {
-        endLoad();
+    this.$nextTick(() => {
+      callback();
 
-        this.$bvToast.toast(`Attempt #${attempt['@_id']} has been deleted`, {
-          title: this.split?.Name,
-          autoHideDelay: 5000,
-          appendToast: false,
-          variant: 'success'
-        });
+      this.$bvToast.toast(`Attempt #${attempt['@_id']} has been deleted`, {
+        title: this.split?.Name,
+        autoHideDelay: 5000,
+        appendToast: false,
+        variant: 'success'
       });
+    });
+  }
+
+  deleteAttempt(attempt: SegmentHistoryTime) {
+    GlobalEventEmitter.$emit('openConfirm', `Delete attempt #${attempt['@_id']}?`, () => {
+      whithLoadAsync((endLoad: Function) => this.doDeleteAttempt(attempt, endLoad));
+      GlobalEventEmitter.$emit('closeConfirm');
     });
   }
 

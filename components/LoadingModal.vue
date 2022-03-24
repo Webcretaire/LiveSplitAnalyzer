@@ -33,11 +33,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'nuxt-property-decorator';
-import BaseModal        from '~/components/BaseModal.vue';
+import {Component, mixins} from 'nuxt-property-decorator';
+import BaseModal           from '~/components/BaseModal.vue';
 
-@Component({mixins: [BaseModal]})
-export default class LoadingModal extends Vue {
+@Component
+export default class LoadingModal extends mixins(BaseModal) {
   modalRef: string = 'LoadingModal';
 }
 </script>

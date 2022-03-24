@@ -36,7 +36,7 @@
             <loading-switch v-model="displayLabels" class="mb-2">
               Display labels for doughnut charts
             </loading-switch>
-            <loading-switch v-if="hasGameTime" v-model="globalState.useRealTime" class="mb-2">
+            <loading-switch v-if="globalState.hasGameTime" v-model="globalState.useRealTime" class="mb-2">
               Use real time instead of game time
             </loading-switch>
             <h6 class="mt-4">Size of info panels</h6>
@@ -96,8 +96,6 @@ export default class SplitsDisplay extends Vue {
 
   showDetail: boolean = false;
 
-  hasGameTime: boolean = false;
-
   globalState = store.state;
 
   widthValue: number = 0;
@@ -152,9 +150,11 @@ export default class SplitsDisplay extends Vue {
     whithLoadAsync((endLoad: Function) => {
       newVal.text()
         .then(text => {
-          this.hasGameTime        = text.includes('<GameTime>');
-          store.state.useRealTime = !this.hasGameTime;
+          store.state.hasGameTime = text.includes('<GameTime>');
+          store.state.useRealTime = !store.state;
           this.parsedSplits       = xmlParser.parse(text);
+          if (this.parsedSplits?.Run)
+            store.state.run = this.parsedSplits.Run;
         })
         .finally(() => endLoad());
     });

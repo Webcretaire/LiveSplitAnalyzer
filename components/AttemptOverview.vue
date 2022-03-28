@@ -7,7 +7,7 @@
     <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
     <hr/>
     <h3 class="text-center mb-3">Possible timesave ({{ secondsToFormattedString(AttemptTimesave) }} total)</h3>
-    <loading-switch v-model="sortBySize" class = "mt-2 mb-4">
+    <loading-switch v-model="sortByTimesave" class = "mt-2 mb-4">
       Sort by possible timesave
     </loading-switch>
     <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
@@ -48,7 +48,7 @@ export default class AttemptOverview extends Vue {
 
   visible: boolean = false;
 
-  sortBySize: boolean = false;
+  sortByTimesave: boolean = false;
 
   layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
@@ -96,7 +96,7 @@ export default class AttemptOverview extends Vue {
     return this.AttemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  makePlotData(title: string, data: Array<number | null>, labels: string[], sortBySize: boolean) {
+  makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {
     return [
       {
         values: data,
@@ -106,7 +106,7 @@ export default class AttemptOverview extends Vue {
         hoverinfo: 'label+percent',
         hole: .6,
         type: 'pie',
-        sort: sortBySize,
+        sort: sortByTimesave,
         automargin: true,
         textinfo: this.displayLabels ? 'percent' : 'none'
       }
@@ -136,7 +136,7 @@ export default class AttemptOverview extends Vue {
       'Attempt compared to golds',
       this.AttemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
       labels,
-      this.sortBySize
+      this.sortByTimesave
     );
   }
 

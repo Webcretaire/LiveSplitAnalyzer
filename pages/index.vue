@@ -19,7 +19,7 @@
       </a>
     </footer>
 
-    <download-splits v-if="splitFileIsModified"/>
+    <download-splits v-if="canDownload"/>
 
     <div v-if="componentInstance" :is="componentInstance"/>
     <loading-modal v-if="loading"/>
@@ -43,8 +43,8 @@ export default class IndexPage extends Vue {
 
   confirmCallback: Function | null = null;
 
-  get splitFileIsModified() {
-    return store.state.splitFileIsModified;
+  get canDownload() {
+    return store.state.splitFile?.Run != undefined;
   }
 
   created() {

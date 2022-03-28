@@ -1,6 +1,6 @@
 <template>
-  <b-button class="dl-button" v-b-tooltip.hover="'Download splits'" pill size="lg" variant="light"
-            @click="downloadSplits">
+  <b-button v-b-tooltip.hover="'Download splits'" pill size="lg" :variant="variant"
+            @click="downloadSplits" :class="classList">
     <font-awesome-icon icon="floppy-disk"/>
   </b-button>
 </template>
@@ -10,28 +10,40 @@ import {Component, Vue}      from 'nuxt-property-decorator';
 import {xmlBuilder}          from '~/util/xml';
 import store                 from '~/util/store';
 import {splitFileIsModified} from '~/util/splits';
+import {whithLoad}           from '~/util/loading';
 
 @Component
 export default class DownloadSplits extends Vue {
+  get variant() {
+    return store.state.splitFileIsModified ? 'success' : 'light';
+  }
+
+  get classList() {
+    return store.state.splitFileIsModified ? 'dl-button-modified dl-button' : 'dl-button';
+  }
+
   downloadSplits() {
-    let element = document.createElement('a');
-    element.setAttribute('href', 'data:binary/octet-stream,' + encodeURIComponent(xmlBuilder.build(store.state.splitFile)));
-    element.setAttribute('download', 'splits.lss');
+    whithLoad(() => {
+      let element = document.createElement('a');
+      element.setAttribute('href', 'data:binary/octet-stream,' + encodeURIComponent(xmlBuilder.build(store.state.splitFile)));
+      element.setAttribute('download', 'splits.lss');
 
-    element.style.display = 'none';
-    document.body.appendChild(element);
+      element.style.display = 'none';
+      document.body.appendChild(element);
 
-    splitFileIsModified(false);
+      splitFileIsModified(false);
 
-    element.click();
+      element.click();
 
-    document.body.removeChild(element);
+      document.body.removeChild(element);
+    });
   }
 }
 </script>
 
 <style lang="scss">
 .dl-button {
+  transition: all 500ms;
   width: 4rem;
   height: 4rem;
   font-size: 1.5rem;
@@ -39,5 +51,11 @@ export default class DownloadSplits extends Vue {
   bottom: 1rem;
   right: 1rem;
   filter: drop-shadow(0 0 0.5rem black);
+}
+
+.dl-button.dl-button-modified {
+  width: 5rem;
+  height: 5rem;
+  font-size: 2rem;
 }
 </style>

@@ -68,11 +68,11 @@
 import {
   availableComparisons,
   cumulatedSumOfBests,
+  splitFileIsModified,
   Segments,
   SplitTime
 }                                 from '~/util/splits';
 import {Component, mixins}        from 'nuxt-property-decorator';
-import {BModal}                   from 'bootstrap-vue';
 import BaseModal                  from '~/components/BaseModal.vue';
 import store                      from '~/util/store';
 import {asArray}                  from '~/util/util';
@@ -96,13 +96,13 @@ export default class ComparisonEditorModal extends mixins(BaseModal) {
   useTargetTime: boolean = false;
 
   get deletableComparisons() {
-    if (!store.state.run?.Segments) return [];
+    if (!store.state.splitFile.Run?.Segments) return [];
 
-    return availableComparisons(store.state.run?.Segments).filter(s => s != 'Personal Best');
+    return availableComparisons(store.state.splitFile.Run?.Segments).filter(s => s != 'Personal Best');
   }
 
   get segments(): Segments {
-    if (!store.state.run?.Segments) {
+    if (!store.state.splitFile.Run?.Segments) {
       this.$bvToast.toast(`No splitfile selected`, {
         title: 'Error',
         autoHideDelay: 5000,
@@ -112,7 +112,7 @@ export default class ComparisonEditorModal extends mixins(BaseModal) {
       return {Segment: []};
     }
 
-    return store.state.run.Segments;
+    return store.state.splitFile.Run.Segments;
   }
 
   get selectedSobTotal() {
@@ -138,6 +138,8 @@ export default class ComparisonEditorModal extends mixins(BaseModal) {
         });
         return;
       }
+
+      splitFileIsModified(true);
 
       const actualFactor = this.useTargetTime
         ? ((this.targetTime / this.selectedSobTotal) - 1) * 100
@@ -180,6 +182,8 @@ export default class ComparisonEditorModal extends mixins(BaseModal) {
 
   deleteComparisons() {
     GlobalEventEmitter.$emit('openConfirm', `Delete ${this.comparisonsToDelete.join(', ')}?`, () => {
+      splitFileIsModified(true);
+
       this.segments.Segment.forEach((segment, index, segArray) => {
         const splitTimes = asArray(segArray[index].SplitTimes.SplitTime);
 

@@ -19,6 +19,8 @@
       </a>
     </footer>
 
+    <download-splits v-if="splitFileIsModified"/>
+
     <div v-if="componentInstance" :is="componentInstance"/>
     <loading-modal v-if="loading"/>
     <confirm-modal v-if="confirmMessage" :message="confirmMessage" :callback="confirmCallback"/>
@@ -29,6 +31,7 @@
 import {Vue, Component}     from 'nuxt-property-decorator';
 import {GlobalEventEmitter} from '~/util/globalEvents';
 import {whithLoadAsync}     from '~/util/loading';
+import store                from '~/util/store';
 
 @Component
 export default class IndexPage extends Vue {
@@ -39,6 +42,10 @@ export default class IndexPage extends Vue {
   confirmMessage: string = '';
 
   confirmCallback: Function | null = null;
+
+  get splitFileIsModified() {
+    return store.state.splitFileIsModified;
+  }
 
   created() {
     GlobalEventEmitter.$on('startLoading', () => {
@@ -59,10 +66,10 @@ export default class IndexPage extends Vue {
     });
     GlobalEventEmitter.$on('openConfirm', (text: string, callback: Function) => {
       this.confirmCallback = callback;
-      this.confirmMessage = text;
+      this.confirmMessage  = text;
     });
     GlobalEventEmitter.$on('closeConfirm', () => {
-      this.confirmMessage = '';
+      this.confirmMessage  = '';
       this.confirmCallback = null;
     });
   }

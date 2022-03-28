@@ -71,14 +71,19 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Watch}          from 'nuxt-property-decorator';
-import {Attempt, selectTime, SplitFile} from '~/util/splits';
-import {stringTimeToSeconds}            from '~/util/durations';
-import {xmlParser}                      from '~/util/xml';
-import VueSlider                        from 'vue-slider-component';
-import {whithLoadAsync}                 from '~/util/loading';
-import {asArray}                        from '~/util/util';
-import store                            from '~/util/store';
+import {
+  Attempt,
+  selectTime,
+  SplitFile,
+  splitFileIsModified
+}                              from '~/util/splits';
+import {Vue, Component, Watch} from 'nuxt-property-decorator';
+import {stringTimeToSeconds}   from '~/util/durations';
+import {xmlParser}             from '~/util/xml';
+import VueSlider               from 'vue-slider-component';
+import {whithLoadAsync}        from '~/util/loading';
+import {asArray}               from '~/util/util';
+import store                   from '~/util/store';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -150,11 +155,15 @@ export default class SplitsDisplay extends Vue {
     whithLoadAsync((endLoad: Function) => {
       newVal.text()
         .then(text => {
+          this.parsedSplits = xmlParser.parse(text);
+
+          if (!this.parsedSplits) // Should never happen, but it's important for type safety
+            return;
+
           store.state.hasGameTime = text.includes('<GameTime>');
-          store.state.useRealTime = !store.state;
-          this.parsedSplits       = xmlParser.parse(text);
-          if (this.parsedSplits?.Run)
-            store.state.run = this.parsedSplits.Run;
+          store.state.useRealTime = !store.state.hasGameTime;
+          store.state.splitFile   = this.parsedSplits;
+          splitFileIsModified(false);
         })
         .finally(() => endLoad());
     });

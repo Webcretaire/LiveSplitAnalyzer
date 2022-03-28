@@ -10,22 +10,22 @@
         <font-awesome-icon icon="circle-question"/>
       </span>
     </p>
-    <p>
-      <b-button variant="success" @click="downloadSplits">
-        <font-awesome-icon icon="floppy-disk"/>
-        Download splits
-      </b-button>
-    </p>
   </collapsible-card>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop}                               from 'nuxt-property-decorator';
-import {Attempt, Segment, selectTime, SplitFile, SplitTime} from '~/util/splits';
-import {xmlBuilder}                                         from '~/util/xml';
-import {secondsToLivesplitFormat, stringTimeToSeconds}      from '~/util/durations';
-import {whithLoad}                                          from '~/util/loading';
-import {asArray}                                            from '~/util/util';
+import {
+  Attempt,
+  Segment,
+  selectTime,
+  SplitFile,
+  splitFileIsModified,
+  SplitTime
+}                                                      from '~/util/splits';
+import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
+import {whithLoad}                                     from '~/util/loading';
+import {asArray}                                       from '~/util/util';
+import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 
 @Component
 export default class Toolbox extends Vue {
@@ -91,6 +91,8 @@ export default class Toolbox extends Vue {
 
   fixPB() {
     whithLoad(() => {
+      splitFileIsModified(true);
+
       const realPB = this.pbFromAttemptHistory || this.pbFromSplitHistory;
       const id     = realPB?.['@_id'];
       if (!id) {
@@ -139,19 +141,6 @@ export default class Toolbox extends Vue {
         variant: 'success'
       });
     });
-  }
-
-  downloadSplits() {
-    let element = document.createElement('a');
-    element.setAttribute('href', 'data:binary/octet-stream,' + encodeURIComponent(xmlBuilder.build(this.value)));
-    element.setAttribute('download', 'splits.lss');
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
   }
 }
 </script>

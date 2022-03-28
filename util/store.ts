@@ -1,16 +1,18 @@
-import Vue   from 'vue';
-import {Run} from '~/util/splits';
+import Vue         from 'vue';
+import {SplitFile} from '~/util/splits';
 
 interface Store {
   hasGameTime: boolean,
   useRealTime: boolean,
-  run: Run | null
+  splitFile: SplitFile,
+  splitFileIsModified: boolean
 }
 
 const state = Vue.observable({
   hasGameTime: false,
   useRealTime: false,
-  run: null
+  splitFile: {},
+  splitFileIsModified: false
 } as Store);
 
 export default {

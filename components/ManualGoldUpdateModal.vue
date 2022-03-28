@@ -18,15 +18,20 @@
 </template>
 
 <script lang="ts">
-import {Component, mixins}                       from 'nuxt-property-decorator';
-import {BModal}                                  from 'bootstrap-vue';
-import BaseModal                                 from '~/components/BaseModal.vue';
-import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
-import {GlobalEventEmitter}                      from '~/util/globalEvents';
-import {singleSplitState}                        from '~/util/singleSplit';
-import {formatTime, stringTimeToSeconds}         from '~/util/durations';
-import {whithLoadAsync}                          from '~/util/loading';
-import {asArray}                                 from '~/util/util';
+
+import {
+  Segment,
+  SegmentHistoryTime,
+  selectTime,
+  splitFileIsModified
+}                                        from '~/util/splits';
+import {Component, mixins}               from 'nuxt-property-decorator';
+import BaseModal                         from '~/components/BaseModal.vue';
+import {GlobalEventEmitter}              from '~/util/globalEvents';
+import {singleSplitState}                from '~/util/singleSplit';
+import {formatTime, stringTimeToSeconds} from '~/util/durations';
+import {whithLoadAsync}                  from '~/util/loading';
+import {asArray}                         from '~/util/util';
 
 @Component
 export default class ManualGoldUpdateModal extends mixins(BaseModal) {
@@ -56,6 +61,8 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   }
 
   doDeleteAttempt(attempt: SegmentHistoryTime, callback: Function) {
+    splitFileIsModified(true);
+
     // Delete split in attempts
     if (this.split?.SegmentHistory.Time)
       this.split.SegmentHistory.Time = asArray(this.split.SegmentHistory.Time).filter(a => a['@_id'] != attempt['@_id']);

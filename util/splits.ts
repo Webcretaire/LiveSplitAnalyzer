@@ -1,6 +1,6 @@
-import store                 from '~/util/store';
-import {stringTimeToSeconds} from '~/util/durations';
-import {asArray}             from '~/util/util';
+import store                              from '~/util/store';
+import {stringTimeToSeconds}              from '~/util/durations';
+import {asArray, confirmQuit, quitIsSafe} from '~/util/util';
 
 export interface RealAndGameTime {
   'RealTime': string;
@@ -151,4 +151,10 @@ export const availableComparisons = (segments: Segments) => {
 
     return acc;
   }, []);
-}
+};
+
+export const splitFileIsModified = (modified: boolean) => {
+  store.state.splitFileIsModified = modified;
+  if (modified) confirmQuit();
+  else quitIsSafe();
+};

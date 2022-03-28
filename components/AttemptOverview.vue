@@ -7,6 +7,9 @@
     <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
     <hr/>
     <h3 class="text-center mb-3">Possible timesave ({{ secondsToFormattedString(AttemptTimesave) }} total)</h3>
+    <loading-switch v-model="sortBySize" class = "mt-2 mb-4">
+      Sort by possible timesave
+    </loading-switch>
     <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
   </collapsible-card>
 </template>
@@ -44,6 +47,8 @@ export default class AttemptOverview extends Vue {
   renderGraph: boolean = true;
 
   visible: boolean = false;
+
+  sortBySize: boolean = false;
 
   layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
@@ -91,7 +96,7 @@ export default class AttemptOverview extends Vue {
     return this.AttemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  makePlotData(title: string, data: Array<number | null>, labels: string[]) {
+  makePlotData(title: string, data: Array<number | null>, labels: string[], isTimesaveGraph: boolean, sortBySize: boolean) {
     return [
       {
         values: data,
@@ -101,7 +106,7 @@ export default class AttemptOverview extends Vue {
         hoverinfo: 'label+percent',
         hole: .6,
         type: 'pie',
-        sort: false,
+        sort: (isTimesaveGraph && sortBySize),
         automargin: true,
         textinfo: this.displayLabels ? 'percent' : 'none'
       }
@@ -115,7 +120,9 @@ export default class AttemptOverview extends Vue {
       this.run.Segments.Segment.map(segment => {
         const time = selectTime(asArray(segment.SegmentHistory.Time).find(t => t['@_id'] == this.attempt['@_id']));
         return time ? `${segment.Name} (${formatTime(time)})` : segment.Name;
-      })
+      }),
+      false,
+      this.sortBySize
     );
   }
 
@@ -129,7 +136,9 @@ export default class AttemptOverview extends Vue {
     return this.makePlotData(
       'Attempt compared to golds',
       this.AttemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
-      labels
+      labels,
+      true,
+      this.sortBySize
     );
   }
 

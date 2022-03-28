@@ -96,7 +96,7 @@ export default class AttemptOverview extends Vue {
     return this.AttemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  makePlotData(title: string, data: Array<number | null>, labels: string[], isTimesaveGraph: boolean, sortBySize: boolean) {
+  makePlotData(title: string, data: Array<number | null>, labels: string[], isTimesaveChart: boolean, sortBySize: boolean) {
     return [
       {
         values: data,
@@ -106,7 +106,7 @@ export default class AttemptOverview extends Vue {
         hoverinfo: 'label+percent',
         hole: .6,
         type: 'pie',
-        sort: (isTimesaveGraph && sortBySize),
+        sort: (isTimesaveChart && sortBySize),
         automargin: true,
         textinfo: this.displayLabels ? 'percent' : 'none'
       }

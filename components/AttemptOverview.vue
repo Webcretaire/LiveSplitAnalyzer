@@ -96,7 +96,7 @@ export default class AttemptOverview extends Vue {
     return this.AttemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  makePlotData(title: string, data: Array<number | null>, labels: string[], isTimesaveChart: boolean, sortBySize: boolean) {
+  makePlotData(title: string, data: Array<number | null>, labels: string[], sortBySize: boolean) {
     return [
       {
         values: data,
@@ -106,7 +106,7 @@ export default class AttemptOverview extends Vue {
         hoverinfo: 'label+percent',
         hole: .6,
         type: 'pie',
-        sort: (isTimesaveChart && sortBySize),
+        sort: sortBySize,
         automargin: true,
         textinfo: this.displayLabels ? 'percent' : 'none'
       }
@@ -121,8 +121,7 @@ export default class AttemptOverview extends Vue {
         const time = selectTime(asArray(segment.SegmentHistory.Time).find(t => t['@_id'] == this.attempt['@_id']));
         return time ? `${segment.Name} (${formatTime(time)})` : segment.Name;
       }),
-      false,
-      this.sortBySize
+      false
     );
   }
 
@@ -137,7 +136,6 @@ export default class AttemptOverview extends Vue {
       'Attempt compared to golds',
       this.AttemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
       labels,
-      true,
       this.sortBySize
     );
   }

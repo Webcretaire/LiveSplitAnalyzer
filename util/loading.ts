@@ -7,7 +7,7 @@ export const whithLoad = (f: Function) => {
   setTimeout(() => {
     f();
     GlobalEventEmitter.$emit('stopLoading');
-  }, 500);
+  }, 50);
 };
 
 export const whithLoadAsync = (f: Function) => {
@@ -16,5 +16,5 @@ export const whithLoadAsync = (f: Function) => {
   // Even with this.$nextTick the loading modal doesn't have time to load most of the time, so wait a little bit
   setTimeout(() => {
     f(() => GlobalEventEmitter.$emit('stopLoading'));
-  }, 500);
+  }, 50);
 };

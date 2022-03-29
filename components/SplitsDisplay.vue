@@ -80,14 +80,14 @@ import {
   selectTime,
   SplitFile,
   splitFileIsModified
-}                                    from '~/util/splits';
-import {Vue, Component, Watch, Prop} from 'nuxt-property-decorator';
-import {stringTimeToSeconds}         from '~/util/durations';
-import {xmlParser}                   from '~/util/xml';
-import VueSlider                     from 'vue-slider-component';
-import {whithLoadAsync}              from '~/util/loading';
-import {asArray}                     from '~/util/util';
-import store                         from '~/util/store';
+}                              from '~/util/splits';
+import {Vue, Component, Watch} from 'nuxt-property-decorator';
+import {stringTimeToSeconds}   from '~/util/durations';
+import {xmlParser}             from '~/util/xml';
+import VueSlider               from 'vue-slider-component';
+import {whithLoadAsync}        from '~/util/loading';
+import {asArray}               from '~/util/util';
+import store                   from '~/util/store';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -183,7 +183,6 @@ export default class SplitsDisplay extends Vue {
         })
         .finally(() => endLoad());
     });
-    console.log(this.runAttempts.length);
   }
 
   @Watch('parsedSplits')

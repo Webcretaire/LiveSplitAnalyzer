@@ -25,12 +25,12 @@
                 </b-button>
               </b-form>
             </div>
+            <loading-switch v-model="filterRuns" class="mt-3 mb-2">
+              Filter out unfinished runs
+            </loading-switch>
             <vue-slider v-model="currentAttemptNumber" :data="runAttempts" data-value="@_id" data-label="@_id"
                         :marks="runSliderMarks" lazy adsorb class="attempt-selection-slider"/>
             <hr/>
-            <loading-switch v-model="filterRuns" class="mt-4 mb-2">
-              Filter out unfinished runs
-            </loading-switch>
             <loading-switch v-model="graphYAxisToZero" class="mt-2 mb-2">
               Graphs' Y axis starts at zero
             </loading-switch>
@@ -150,7 +150,7 @@ export default class SplitsDisplay extends Vue {
 
   get runSliderMarks(): number[] {
     const firstRunId = this.runAttempts[0]['@_id'];
-    const lastRunId = this.runAttempts[this.runAttempts.length - 1]['@_id'];
+    const lastRunId = this.latestAttemptNumber;
 
     return [firstRunId, lastRunId];
   }

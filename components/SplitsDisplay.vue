@@ -25,9 +25,12 @@
                 </b-button>
               </b-form>
             </div>
-            <vue-slider v-model="currentAttemptNumber" :min="1" :max="latestAttemptNumber" lazy/>
+            <vue-slider v-model="currentAttemptNumber" :data="runAttempts" lazy/>
             <hr/>
-            <loading-switch v-model="graphYAxisToZero" class="mt-4 mb-2">
+            <loading-switch v-model="filterRuns" class="mt-4 mb-2">
+              Filter out unfinished runs
+            </loading-switch>
+            <loading-switch v-model="graphYAxisToZero" class="mt-2 mb-2">
               Graphs' Y axis starts at zero
             </loading-switch>
             <loading-switch v-model="graphPBHline" class="mb-2">
@@ -77,7 +80,7 @@ import {
   SplitFile,
   splitFileIsModified
 }                              from '~/util/splits';
-import {Vue, Component, Watch} from 'nuxt-property-decorator';
+import {Vue, Component, Watch, Prop} from 'nuxt-property-decorator';
 import {stringTimeToSeconds}   from '~/util/durations';
 import {xmlParser}             from '~/util/xml';
 import VueSlider               from 'vue-slider-component';
@@ -103,6 +106,8 @@ export default class SplitsDisplay extends Vue {
 
   globalState = store.state;
 
+  filterRuns: boolean = false;
+
   widthValue: number = 0;
 
   get panelOffset() {
@@ -120,7 +125,7 @@ export default class SplitsDisplay extends Vue {
   get latestAttemptNumber(): number {
     if (!this.parsedSplits) return 0;
 
-    return Math.max(...this.allRunAttempts.map(a => a['@_id']));
+    return Math.max(...this.runAttempts.map(a => a['@_id']));
   }
 
   get splits() {
@@ -135,14 +140,17 @@ export default class SplitsDisplay extends Vue {
     return asArray(this.parsedSplits.Run.AttemptHistory.Attempt).find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
   }
 
-  get allRunAttempts(): Attempt[] {
-    return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt);
+  get runAttempts(): Attempt[] {
+    if(this.filterRuns)
+      return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt).filter(a => selectTime(a));
+    else
+      return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt);
   }
 
   get PB() {
     if (!this.parsedSplits) return null;
 
-    return this.allRunAttempts.reduce((curLowest: Attempt | null, cur: Attempt) => {
+    return this.runAttempts.reduce((curLowest: Attempt | null, cur: Attempt) => {
       const curTime = selectTime(cur);
       if (!curTime) return curLowest;
       const compare = selectTime(curLowest) || '999:59:59.99';
@@ -167,6 +175,7 @@ export default class SplitsDisplay extends Vue {
         })
         .finally(() => endLoad());
     });
+    console.log(this.runAttempts.length);
   }
 
   @Watch('parsedSplits')

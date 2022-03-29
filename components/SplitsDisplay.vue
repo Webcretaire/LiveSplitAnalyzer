@@ -25,7 +25,8 @@
                 </b-button>
               </b-form>
             </div>
-            <vue-slider v-model="currentAttemptNumber" :data="runAttempts" lazy/>
+            <vue-slider v-model="currentAttemptNumber" :data="runAttempts" data-value="@_id" data-label="@_id"
+                        :marks="runSliderMarks" lazy adsorb class="attempt-selection-slider"/>
             <hr/>
             <loading-switch v-model="filterRuns" class="mt-4 mb-2">
               Filter out unfinished runs
@@ -79,14 +80,14 @@ import {
   selectTime,
   SplitFile,
   splitFileIsModified
-}                              from '~/util/splits';
+}                                    from '~/util/splits';
 import {Vue, Component, Watch, Prop} from 'nuxt-property-decorator';
-import {stringTimeToSeconds}   from '~/util/durations';
-import {xmlParser}             from '~/util/xml';
-import VueSlider               from 'vue-slider-component';
-import {whithLoadAsync}        from '~/util/loading';
-import {asArray}               from '~/util/util';
-import store                   from '~/util/store';
+import {stringTimeToSeconds}         from '~/util/durations';
+import {xmlParser}                   from '~/util/xml';
+import VueSlider                     from 'vue-slider-component';
+import {whithLoadAsync}              from '~/util/loading';
+import {asArray}                     from '~/util/util';
+import store                         from '~/util/store';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -141,10 +142,17 @@ export default class SplitsDisplay extends Vue {
   }
 
   get runAttempts(): Attempt[] {
-    if(this.filterRuns)
+    if (this.filterRuns)
       return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt).filter(a => selectTime(a));
     else
       return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt);
+  }
+
+  get runSliderMarks(): number[] {
+    const firstRunId = this.runAttempts[0]['@_id'];
+    const lastRunId = this.runAttempts[this.runAttempts.length - 1]['@_id'];
+
+    return [firstRunId, lastRunId];
   }
 
   get PB() {
@@ -187,3 +195,9 @@ export default class SplitsDisplay extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.attempt-selection-slider {
+  margin-bottom: 2rem;
+}
+</style>

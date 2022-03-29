@@ -153,6 +153,13 @@ object-assign
  */
 
 
+/**
+  * vue-class-component v7.0.1
+  * (c) 2015-present Evan You
+  * @license MIT
+  */
+
+
 /*!
   * vue-router v3.5.3
   * (c) 2021 Evan You

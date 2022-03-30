@@ -53,6 +53,8 @@
 
           <toolbox v-model="parsedSplits" class="mb-4"/>
 
+          <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
+
           <attempt-overview :run="parsedSplits.Run"
                             :attempt="currentAttempt"
                             :is-pb="isPb"
@@ -150,7 +152,7 @@ export default class SplitsDisplay extends Vue {
 
   get runSliderMarks(): number[] {
     const firstRunId = this.runAttempts[0]['@_id'];
-    const lastRunId = this.latestAttemptNumber;
+    const lastRunId  = this.latestAttemptNumber;
 
     return [firstRunId, lastRunId];
   }

@@ -1,5 +1,5 @@
 <template>
-  <b-modal :ref="modalRef" hide-header hide-footer centered size="sm" no-close-on-backdrop no-close-on-esc>
+  <b-modal :ref="modalRef" hide-header hide-footer centered size="sm" no-close-on-backdrop no-close-on-esc @shown="runCallback">
     <div class="w-100 mt-2">
       <svg xmlns="http://www.w3.org/2000/svg"
            x="0px" y="0px" class="d-block m-auto"
@@ -33,12 +33,19 @@
 </template>
 
 <script lang="ts">
-import {Component, mixins} from 'nuxt-property-decorator';
-import BaseModal           from '~/components/BaseModal.vue';
+import {Component, mixins, Prop} from 'nuxt-property-decorator';
+import BaseModal                 from '~/components/BaseModal.vue';
 
 @Component
 export default class LoadingModal extends mixins(BaseModal) {
   modalRef: string = 'LoadingModal';
+
+  @Prop()
+  callback!: Function;
+
+  runCallback() {
+    this.$nextTick(() => this.callback());
+  }
 }
 </script>
 

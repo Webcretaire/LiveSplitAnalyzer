@@ -22,7 +22,7 @@
     <download-splits v-if="canDownload"/>
 
     <div v-if="componentInstance" :is="componentInstance"/>
-    <loading-modal v-if="loading"/>
+    <loading-modal v-if="loadingCallback" :callback="loadingCallback"/>
     <confirm-modal v-if="confirmMessage" :message="confirmMessage" :callback="confirmCallback"/>
   </div>
 </template>
@@ -35,7 +35,7 @@ import store                from '~/util/store';
 
 @Component
 export default class IndexPage extends Vue {
-  loading: boolean = false;
+  loadingCallback: Function|null = null;
 
   componentInstance: Function | null = null;
 
@@ -48,11 +48,11 @@ export default class IndexPage extends Vue {
   }
 
   created() {
-    GlobalEventEmitter.$on('startLoading', () => {
-      this.loading = true;
+    GlobalEventEmitter.$on('startLoading', (callback: Function) => {
+      this.loadingCallback = callback;
     });
     GlobalEventEmitter.$on('stopLoading', () => {
-      this.loading = false;
+      this.loadingCallback = null;
     });
     GlobalEventEmitter.$on('openModal', (modal: string) => {
       whithLoadAsync((endLoad: Function) => {

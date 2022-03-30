@@ -3,8 +3,10 @@
     <b-button v-b-toggle="id" class="toggle-collapse" variant="outline-secondary" pill>
       <font-awesome-icon icon="chevron-left" :rotation="visible ? 270 : null"/>
     </b-button>
-    <b-collapse v-model="visible" :id="id" visible>
-      <slot/>
+    <b-collapse v-model="visible" :id="id">
+      <div v-if="visible">
+        <slot/>
+      </div>
     </b-collapse>
   </b-card>
 </template>
@@ -14,7 +16,7 @@ import {Vue, Component, Prop} from 'nuxt-property-decorator';
 
 @Component
 export default class CollapsibleCard extends Vue {
-  visible: boolean = true;
+  visible: boolean = false;
 
   id: string = 'collapse-xxxx';
 

@@ -5,29 +5,44 @@
       Include reset runs in X axis
     </loading-switch>
     <p>
-      Filter runs that are between these times (in seconds):
+      Filter runs that are between these times:
     </p>
-    <b-row>
-      <b-col cols="6">
-        <b-input type="number" v-model.number="lowerBoundFilter" :min="0" debounce="500" step="0.01"/>
-      </b-col>
-      <b-col cols="6">
-        <b-input type="number" v-model.number="higherBoundFilter" :min="0" debounce="500" step="0.01"/>
-      </b-col>
-    </b-row>
-    <p class="mt-3">{{ finishedAttempts.length }} finished runs in the range [{{ timeFormat(lowerBoundFilter) }} ; {{ timeFormat(higherBoundFilter) }}]</p>
+    <div class="d-flex justify-content-center mt-1">
+      <div class="time-select-label">
+        Lower bound
+      </div>
+      <div class="time-select-input">
+        <time-selector v-model="lowerBoundFilter"/>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center mt-1">
+      <div class="time-select-label">
+        Higher bound
+      </div>
+      <div class="time-select-input">
+        <time-selector v-model="higherBoundFilter"/>
+      </div>
+    </div>
+    <p class="mt-3">
+      {{ finishedAttempts.length }} finished runs in the range
+      [ {{ timeFormat(lowerBoundFilter) }} ; {{ timeFormat(higherBoundFilter) }} ]
+    </p>
     <Plotly :data="plot_data" :layout="layout()" :display-mode-bar="true"/>
   </collapsible-card>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}            from 'nuxt-property-decorator';
-import {Attempt, selectTime}             from '~/util/splits';
-import {LINE_COLOR}                      from '~/util/plot';
+import {
+  formatTime,
+  secondsToFormattedString,
+  stringTimeToSeconds
+}                             from '~/util/durations';
+import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import {Attempt, selectTime}  from '~/util/splits';
+import {LINE_COLOR}           from '~/util/plot';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                          from 'vue-plotly';
-import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {Plotly}               from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class AttemptStats extends Vue {
@@ -71,12 +86,12 @@ export default class AttemptStats extends Vue {
   }
 
   get plot_data() {
+    const times: string[]      = this.finishedAttempts.map(attempt => selectTime(attempt) || '');
     const ids: number[]        = this.showResets
       ? this.finishedAttempts.map(attempt => attempt['@_id'])
       : Array.from({length: this.finishedAttempts.length}, (v, k) => k);
-    const number_val: number[] = this.finishedAttempts.map(attempt => stringTimeToSeconds(selectTime(attempt) || ''));
-    // Extract
-    const text_val: string[]   = this.finishedAttempts.map(attempt => formatTime(selectTime(attempt) || ''));
+    const number_val: number[] = times.map(t => stringTimeToSeconds(t));
+    const text_val: string[]   = times.map(t => formatTime(t));
 
     return [
       {
@@ -97,7 +112,7 @@ export default class AttemptStats extends Vue {
   timeFormat = secondsToFormattedString;
 
   mounted() {
-    const attemptsTimes = this.attempts.map(
+    const attemptsTimes    = this.attempts.map(
       (attempt: Attempt) => {
         const time = selectTime(attempt);
         if (!time) return 0;
@@ -110,5 +125,14 @@ export default class AttemptStats extends Vue {
 </script>
 
 <style scoped lang="scss">
+.time-select-label {
+  text-align: right;
+  line-height: 2.25rem;
+  min-width: 10rem;
+  padding-right: 0.5rem;
+}
 
+.time-select-input {
+  width: 40rem;
+}
 </style>

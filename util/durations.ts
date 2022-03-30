@@ -33,13 +33,13 @@ export const secondsToFormattedString = (time: number): string => {
   let out         = '';
   let secondsOnly = true;
 
-  if (time > 3600) {
+  if (time >= 3600) {
     secondsOnly = false;
     out += `${Math.floor(time / 3600)}h`;
     time        = time % 3600;
   }
 
-  if (time > 60) {
+  if (time >= 60) {
     secondsOnly = false;
     out += `${Math.floor(time / 60)}m`;
     time        = time % 60;

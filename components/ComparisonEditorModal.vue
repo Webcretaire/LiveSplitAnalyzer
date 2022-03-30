@@ -1,6 +1,6 @@
 <template>
   <b-modal :ref="modalRef" title="Comparison editor" class="text-center" @hidden="destroyModal" hide-footer centered
-           size="md">
+           size="lg">
     <h3 class="text-center">Create a balanced comparison</h3>
     <table role="presentation" class="w-100">
       <tbody>
@@ -32,7 +32,7 @@
         </td>
       </tr>
       <tr v-else>
-        <td class="text-right pr-2">
+        <td class="text-right pr-2" style="min-width: 8rem">
           Target time
           <span v-b-tooltip.hover title="Automatically determine time factor based on a target total time (in seconds)"
                 class="help-question">
@@ -40,7 +40,7 @@
           </span>
         </td>
         <td>
-          <b-form-input type="number" v-model.number="targetTime" :min="selectedSobTotal" debounce="500" step="0.01"/>
+          <time-selector v-model="targetTime"/>
         </td>
       </tr>
       </tbody>
@@ -54,7 +54,7 @@
     <div v-if="deletableComparisons.length">
       <hr/>
       <h3 class="text-center">Delete comparison</h3>
-      <multiselect v-model="comparisonsToDelete" :options="deletableComparisons" multiple/>
+      <multiselect style="max-width: 30rem" class="m-auto" v-model="comparisonsToDelete" :options="deletableComparisons" multiple/>
       <div class="text-center">
         <b-button @click="deleteComparisons" class="mt-2" variant="danger" :disabled="!comparisonsToDelete.length">
           Delete

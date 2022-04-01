@@ -12,7 +12,7 @@
         <div v-if="parsedSplits && showDetail">
           <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
-          <collapsible-card title="Options">
+          <collapsible-card id="OptionsCard" title="Options">
             <div class="d-flex mt-4 mb-2">
               <b-form inline class="text-center m-auto">
                 <b-input-group prepend="Currently displayed run">

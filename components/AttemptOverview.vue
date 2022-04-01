@@ -1,5 +1,5 @@
 <template>
-  <collapsible-card class="text-center" :title="title">
+  <collapsible-card id="AttemptOverviewCard" class="text-center" :title="title">
     <hr/>
     <h3 class="text-center mb-3">
       {{ isPb ? 'PB' : 'Attempt' }} Overview ({{ secondsToFormattedString(AttemptTime) }} total)

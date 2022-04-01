@@ -1,5 +1,5 @@
 <template>
-  <collapsible-card class="text-center" title="Attempts stats">
+  <collapsible-card id="AttemptsStatsCard" class="text-center" title="Attempts stats">
     <hr/>
     <loading-switch v-model="showResets" class="mb-2">
       Include reset runs in X axis
@@ -115,11 +115,12 @@ export default class AttemptStats extends Vue {
     const attemptsTimes    = this.attempts.map(
       (attempt: Attempt) => {
         const time = selectTime(attempt);
-        if (!time) return 0;
+        if (!time) return -1;
 
         return stringTimeToSeconds(time);
-      });
+      }).filter(t => t >= 0);
     this.higherBoundFilter = Math.max(...attemptsTimes);
+    this.lowerBoundFilter = Math.min(...attemptsTimes);
   }
 }
 </script>

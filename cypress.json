@@ -1,3 +1,5 @@
 {
-  "video": false
+  "video": false,
+  "viewportWidth": 1920,
+  "viewportHeight": 1000
 }

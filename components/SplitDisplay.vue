@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card class="text-left">
+    <b-card :id="`SingleSplitCard_${slug}`" class="SingleSplitCard text-left">
       <div class="limit-height">
         <b-card-img v-if="srcFormattedIcon(split)" :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
         <div class="mt-auto mb-auto">
@@ -157,8 +157,12 @@ export default class SplitDisplay extends Vue {
       });
   }
 
+  get slug() {
+    return slugify(this.split.Name, {strict: true});
+  }
+
   get collapseName() {
-    return 'collapse-' + slugify(this.split.Name);
+    return 'collapse-' + this.slug;
   }
 
   get markerColors() {

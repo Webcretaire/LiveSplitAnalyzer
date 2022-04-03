@@ -10,6 +10,16 @@
         <font-awesome-icon icon="circle-question"/>
       </span>
     </p>
+    <p>
+      <b-button variant="danger" @click="deletePreviousRuns">
+        <font-awesome-icon icon="trash"/>
+        Delete all attempts before #{{ currentAttemptNumber }}
+      </b-button>
+      <span v-b-tooltip.hover title="Delete all attempts before the currently selected one in options (included). If your PB is in this range it will not be deleted."
+            class="help-question">
+        <font-awesome-icon icon="circle-question"/>
+      </span>
+    </p>
   </collapsible-card>
 </template>
 
@@ -17,6 +27,7 @@
 import {
   Attempt,
   Segment,
+  SegmentHistoryTime,
   selectTime,
   SplitFile,
   splitFileIsModified,
@@ -26,6 +37,8 @@ import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {whithLoad}                                     from '~/util/loading';
 import {asArray}                                       from '~/util/util';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
+import {GlobalEventEmitter}                            from '~/util/globalEvents';
+import store                                           from '~/util/store';
 
 @Component
 export default class Toolbox extends Vue {
@@ -33,6 +46,12 @@ export default class Toolbox extends Vue {
   value!: SplitFile;
 
   visible: boolean = false;
+
+  @Prop()
+  currentAttemptNumber!: number;
+
+  @Prop()
+  pb!: number;
 
   get splits() {
     return this.value.Run.Segments.Segment;
@@ -140,6 +159,31 @@ export default class Toolbox extends Vue {
         appendToast: false,
         variant: 'success'
       });
+    });
+  }
+
+  doDeletePreviousRuns() {
+    const run = store.state.splitFile.Run;
+
+    // Delete attempts from attempt Array
+    run.AttemptHistory.Attempt = asArray(run.AttemptHistory.Attempt).filter(
+      (attempt: Attempt) => attempt['@_id'] == this.pb || attempt['@_id'] > this.currentAttemptNumber
+    );
+
+    // Delete individual splits attempts
+    run.Segments.Segment = run.Segments.Segment.map(segment => ({
+      ...segment,
+      SegmentHistory: {
+        Time: asArray(segment.SegmentHistory.Time).filter(
+          (time: SegmentHistoryTime) => time['@_id'] == this.pb || time['@_id'] > this.currentAttemptNumber
+        )
+      }
+    }));
+  }
+
+  deletePreviousRuns() {
+    GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
+      whithLoad(() => this.doDeletePreviousRuns());
     });
   }
 }

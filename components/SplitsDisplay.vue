@@ -51,7 +51,7 @@
             </b-row>
           </collapsible-card>
 
-          <toolbox v-model="parsedSplits" class="mb-4"/>
+          <toolbox v-model="parsedSplits" :current-attempt-number="currentAttemptNumber" :pb="PB['@_id']" class="mb-4"/>
 
           <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
 

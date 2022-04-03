@@ -1,10 +1,11 @@
 <template>
   <div class="text-center">
     <main>
-      <h1 class="mt-4">LiveSplit Analyzer</h1>
+      <img class="logo mt-5" src="~/assets/images/logo_flat.png"/>
+      <h1 class="mt-4 mb-3">LiveSplit Analyzer</h1>
       <p>This tools extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
-      <SplitsDisplay/>
+      <SplitsDisplay class="mt-4"/>
     </main>
     <footer>
       This LiveSplit Analyzer is a tool made by
@@ -104,5 +105,11 @@ footer {
   &:hover {
     text-decoration: underline !important;
   }
+}
+
+.logo {
+  height: 15rem;
+  max-height: 50vh;
+  filter: drop-shadow(0 0 3rem black);
 }
 </style>

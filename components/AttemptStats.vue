@@ -86,12 +86,17 @@ export default class AttemptStats extends Vue {
   }
 
   get plot_data() {
-    const times: string[]      = this.finishedAttempts.map(attempt => selectTime(attempt) || '');
-    const ids: number[]        = this.showResets
+    const ids: number[] = this.showResets
       ? this.finishedAttempts.map(attempt => attempt['@_id'])
       : Array.from({length: this.finishedAttempts.length}, (v, k) => k);
-    const number_val: number[] = times.map(t => stringTimeToSeconds(t));
-    const text_val: string[]   = times.map(t => formatTime(t));
+
+    const number_val: number[] = this.finishedAttempts.map(
+      attempt => stringTimeToSeconds(selectTime(attempt) || '')
+    );
+
+    const text_val: string[] = this.finishedAttempts.map(
+      attempt => `#${attempt['@_id']}: ${formatTime(selectTime(attempt) || '')}`
+    );
 
     return [
       {
@@ -120,7 +125,7 @@ export default class AttemptStats extends Vue {
         return stringTimeToSeconds(time);
       }).filter(t => t >= 0);
     this.higherBoundFilter = Math.max(...attemptsTimes);
-    this.lowerBoundFilter = Math.min(...attemptsTimes);
+    this.lowerBoundFilter  = Math.min(...attemptsTimes);
   }
 }
 </script>

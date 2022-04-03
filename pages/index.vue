@@ -3,7 +3,7 @@
     <main>
       <img class="logo mt-5" src="~/assets/images/logo_flat.png"/>
       <h1 class="mt-4 mb-3">LiveSplit Analyzer</h1>
-      <p>This tools extracts data from your split files, to display it into (hopefully) pretty graphs.
+      <p>This tool extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
       <SplitsDisplay class="mt-4"/>
     </main>
@@ -110,6 +110,6 @@ footer {
 .logo {
   height: 15rem;
   max-height: 50vh;
-  filter: drop-shadow(0 0 3rem black);
+  filter: drop-shadow(0 0 0.5rem black);
 }
 </style>

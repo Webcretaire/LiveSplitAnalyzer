@@ -9,12 +9,14 @@
       <multiselect v-model="otherComparisons" :options="multipleSelectOptions" placeholder="Pick additional comparisons"
                    multiple class="mb-2"/>
 
+      <loading-switch v-model="cumulateTime" class="mb-2">
+        Cumulate the time of previous splits
+      </loading-switch>
+
       <b-table striped hover :items="tableData">
-        <template v-for="slot in otherComparisons" v-slot:[`cell(${slot})`]="slotProps">
-          {{ slotProps.value.time }}
-          <small :class="slotProps.value.isDeltaNegative ? 'text-green' : 'text-red'">
-            ({{ slotProps.value.isDeltaNegative ? '-' : '+' }}{{ slotProps.value.delta }})
-          </small>
+        <template v-for="slot in comparisonColumns" v-slot:[`cell(${slot})`]="slotProps">
+          <comparison-table-cell :reference-comparison-name="referenceComparison"
+                                 :comparison-name="slot" :cell-data="slotProps"/>
         </template>
       </b-table>
     </div>
@@ -27,12 +29,12 @@ import {
   cumulatedSumOfBests,
   Segments,
   selectTime
-}                                                      from '~/util/splits';
-import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
-import Multiselect                                     from 'vue-multiselect';
-import {secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
-import {asArray}                                       from '~/util/util';
-import {GlobalEventEmitter}                            from '~/util/globalEvents';
+}                             from '~/util/splits';
+import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import Multiselect            from 'vue-multiselect';
+import {stringTimeToSeconds}  from '~/util/durations';
+import {asArray}              from '~/util/util';
+import {GlobalEventEmitter}   from '~/util/globalEvents';
 
 const SOB_LABEL = 'Sum of Best';
 
@@ -49,6 +51,12 @@ export default class ComparisonsDisplay extends Vue {
   referenceComparison: string = '';
 
   otherComparisons: string[] = [];
+
+  cumulateTime: boolean = true;
+
+  get comparisonColumns() {
+    return [this.referenceComparison, ...this.otherComparisons];
+  }
 
   get multipleSelectOptions() {
     return this.comparisons.filter(c => c != this.referenceComparison);
@@ -81,13 +89,28 @@ export default class ComparisonsDisplay extends Vue {
   get tableData() {
     const out: any = this.segments.Segment.map(s => ({split: s.Name}));
 
+    let timeSoFar = 0;
+    const timesSoFarOthers: Record<string, number> = {};
+    this.otherComparisons.forEach(name => timesSoFarOthers[name] = 0);
+
     this.segments.Segment.forEach((segment, index) => {
       // Add reference data
       const timeForReferenceComparison = this.splitTimeswithSoB[index].find(st => st.name === this.referenceComparison)?.time;
 
       if (!timeForReferenceComparison) return;
 
-      out[index][this.referenceComparison] = secondsToFormattedString(timeForReferenceComparison);
+      let outTimeReference = timeForReferenceComparison;
+
+      if (!this.cumulateTime) {
+        outTimeReference -= timeSoFar;
+        timeSoFar += outTimeReference;
+      }
+
+      out[index][this.referenceComparison] = {
+        time: outTimeReference,
+        isDeltaNegative: true,
+        delta: 0
+      };
 
       // Add other comparisons
       this.otherComparisons.forEach(other => {
@@ -95,7 +118,14 @@ export default class ComparisonsDisplay extends Vue {
 
         if (!timeForOtherComparison) return;
 
-        let delta             = timeForOtherComparison - timeForReferenceComparison;
+        let outTimeOther = timeForOtherComparison;
+
+        if (!this.cumulateTime) {
+          outTimeOther -= timesSoFarOthers[other];
+          timesSoFarOthers[other] += outTimeOther;
+        }
+
+        let delta             = outTimeOther - outTimeReference;
         const isDeltaNegative = delta < 0;
 
         // Make delta always positive so that secondsToFormattedString works
@@ -103,9 +133,9 @@ export default class ComparisonsDisplay extends Vue {
           delta = -delta;
 
         out[index][other] = {
-          time: secondsToFormattedString(timeForOtherComparison),
+          time: outTimeOther,
           isDeltaNegative: isDeltaNegative,
-          delta: secondsToFormattedString(delta)
+          delta: delta
         };
       });
     });

@@ -21,7 +21,7 @@
 
     <download-splits v-if="canDownload"/>
 
-    <div v-if="componentInstance" :is="componentInstance"/>
+    <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
     <loading-modal v-if="loadingCallback" :callback="loadingCallback"/>
     <confirm-modal v-if="confirmMessage" :message="confirmMessage" :callback="confirmCallback"/>
   </div>
@@ -35,9 +35,11 @@ import store                from '~/util/store';
 
 @Component
 export default class IndexPage extends Vue {
-  loadingCallback: Function|null = null;
+  loadingCallback: Function | null = null;
 
   componentInstance: Function | null = null;
+
+  modalArgs: Record<string, any> = {};
 
   confirmMessage: string = '';
 
@@ -54,8 +56,9 @@ export default class IndexPage extends Vue {
     GlobalEventEmitter.$on('stopLoading', () => {
       this.loadingCallback = null;
     });
-    GlobalEventEmitter.$on('openModal', (modal: string) => {
+    GlobalEventEmitter.$on('openModal', (modal: string, args: Record<string, any> = {}) => {
       whithLoadAsync((endLoad: Function) => {
+        this.modalArgs         = args;
         // This needs to be an attribute because if it's a getter it gets cached way too aggressively
         this.componentInstance = () => import(`~/components/${modal}`);
         this.$nextTick(() => endLoad());

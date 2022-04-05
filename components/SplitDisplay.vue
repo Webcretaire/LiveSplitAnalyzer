@@ -12,8 +12,8 @@
           </p>
           <p>
             <b-button @click="fixGoldsModal" size="sm" variant="warning">Fix fake golds</b-button>
-            <b-button v-if="isNotFirstSplit" size="sm" variant="outline-primary" class="ml-2">Merge into previous split</b-button>
-            <b-button v-if="isNotLastSplit" size="sm" variant="outline-primary" class="ml-2">Merge into next split</b-button>
+            <b-button v-if="isNotFirstSplit" @click="mergePreviousSplit" size="sm" variant="outline-primary" class="ml-2">Merge into previous split</b-button>
+            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="outline-primary" class="ml-2">Merge into next split</b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -32,8 +32,8 @@
 
 <script lang="ts">
 import {Component, Prop, Vue}                         from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime, selectTime}      from '~/util/splits';
-import {formatTime, stringTimeToSeconds}              from '~/util/durations';
+import {Segment, SegmentHistoryTime, selectTime, AttemptHistory}      from '~/util/splits';
+import {formatTime, stringTimeToSeconds, secondsToFormattedString}              from '~/util/durations';
 import {extractPng}                                   from '~/util/pngExtractor';
 import {GOLD_COLOR, LINE_COLOR, PB_COLOR}             from '~/util/plot';
 import slugify                                        from 'slugify';
@@ -58,6 +58,9 @@ export default class SplitDisplay extends Vue {
 
   @Prop()
   currentAttemptNumber?: number;
+
+  @Prop()
+  splitIndex!: number;
 
   segments: Array<Segment> = store.state.splitFile.Run.Segments.Segment;
 
@@ -241,6 +244,25 @@ export default class SplitDisplay extends Vue {
     GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal');
     singleSplitState.currentSplit = this.split;
     GlobalEventEmitter.$emit('setCurrentSplit', this.split);
+  }
+
+  mergePreviousSplit(){
+    const run = store.state.splitFile.Run;
+    const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
+    const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
+    var mergedGameTime = "0:00:00";
+    var mergedRealTime = "0:00:00";
+    for(let i = 1; i <= run.AttemptCount; i++){
+      if(store.state.hasGameTime && chosenSplitTimes[i].GameTime != undefined)
+        mergedGameTime = secondsToFormattedString(stringTimeToSeconds(chosenSplitTimes[i].GameTime) + stringTimeToSeconds(previousSplitTimes[i].GameTime));
+      if(chosenSplitTimes[i].RealTime != undefined)
+        mergedRealTime = secondsToFormattedString(stringTimeToSeconds(chosenSplitTimes[i].RealTime) + stringTimeToSeconds(previousSplitTimes[i].RealTime));
+      console.log(mergedGameTime + " " + mergedRealTime)
+    }
+  }
+
+  mergeNextSplit(){
+    // same as mergePreviousSplit() except with the next split instead
   }
 
   formatTime = formatTime;

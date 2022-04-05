@@ -9,7 +9,11 @@
           </h3>
           <p v-if="split.BestSegmentTime">
             <strong>Best time:</strong> {{ bestTimeDisplay }}
-            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="ml-2">Fix fake golds</b-button>
+          </p>
+          <p>
+            <b-button @click="fixGoldsModal" size="sm" variant="warning">Fix fake golds</b-button>
+            <b-button v-if="isNotFirstSplit" size="sm" variant="outline-primary" class="ml-2">Merge into previous split</b-button>
+            <b-button v-if="isNotLastSplit" size="sm" variant="outline-primary" class="ml-2">Merge into next split</b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -27,18 +31,19 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}                    from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime, selectTime} from '~/util/splits';
-import {formatTime, stringTimeToSeconds}         from '~/util/durations';
-import {extractPng}                              from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR, PB_COLOR}        from '~/util/plot';
-import slugify                                   from 'slugify';
+import {Component, Prop, Vue}                         from 'nuxt-property-decorator';
+import {Segment, SegmentHistoryTime, selectTime}      from '~/util/splits';
+import {formatTime, stringTimeToSeconds}              from '~/util/durations';
+import {extractPng}                                   from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, PB_COLOR}             from '~/util/plot';
+import slugify                                        from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                  from 'vue-plotly';
-import {GlobalEventEmitter}                      from '~/util/globalEvents';
-import {singleSplitState}                        from '~/util/singleSplit';
-import {asArray}                                 from '~/util/util';
+import {Plotly}                                       from 'vue-plotly';
+import {GlobalEventEmitter}                           from '~/util/globalEvents';
+import {singleSplitState}                             from '~/util/singleSplit';
+import {asArray}                                      from '~/util/util';
+import store                                          from '~/util/store';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -53,6 +58,8 @@ export default class SplitDisplay extends Vue {
 
   @Prop()
   currentAttemptNumber?: number;
+
+  segments: Array<Segment> = store.state.splitFile.Run.Segments.Segment;
 
   collapseVisible: boolean = false;
 
@@ -187,6 +194,14 @@ export default class SplitDisplay extends Vue {
     return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
   }
 
+  get isNotFirstSplit(){
+    return (this.split != this.segments[0]);
+  }
+
+  get isNotLastSplit(){
+    return (this.split != this.segments[this.segments.length - 1]);
+  }
+
   plot_data() {
     const text_val = this.timesWithPositiveIds.map((t) => {
       const time = selectTime(t);
@@ -242,7 +257,7 @@ img {
 }
 
 .limit-height {
-  max-height: 4rem;
+  max-height: 7rem;
   display: flex;
 }
 

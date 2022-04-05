@@ -118,8 +118,8 @@ export type TimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistor
 export type OptionalTimeLike = TimeLike | null | undefined;
 
 export const selectTime = (t: OptionalTimeLike): string | null => {
-  if (!store.state.useRealTime && t?.GameTime)
-    return t.GameTime;
+  if (t && !store.state.useRealTime) // && t?.GameTime)
+    return t.GameTime as string;
 
   return t?.RealTime || null;
 };

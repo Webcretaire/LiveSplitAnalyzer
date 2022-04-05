@@ -52,6 +52,13 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    standalone: true,
+    extend(config, { isDev, isClient }) {
+      config.module.rules.push({
+        test: /\.worker\.ts$/,
+        use: { loader: "worker-loader" }
+      });
+    }
   },
 
   router: {

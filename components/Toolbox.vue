@@ -15,7 +15,8 @@
         <font-awesome-icon icon="trash"/>
         Delete all attempts before #{{ currentAttemptNumber }}
       </b-button>
-      <span v-b-tooltip.hover title="Delete all attempts before the currently selected one in options (included). If your PB is in this range it will not be deleted."
+      <span v-b-tooltip.hover
+            title="Delete all attempts before the currently selected one in options (included). If your PB is in this range it will not be deleted."
             class="help-question">
         <font-awesome-icon icon="circle-question"/>
       </span>
@@ -39,6 +40,8 @@ import {asArray}                                       from '~/util/util';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
+import {offload}                                       from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 
 @Component
 export default class Toolbox extends Vue {
@@ -163,22 +166,8 @@ export default class Toolbox extends Vue {
   }
 
   doDeletePreviousRuns() {
-    const run = store.state.splitFile.Run;
-
-    // Delete attempts from attempt Array
-    run.AttemptHistory.Attempt = asArray(run.AttemptHistory.Attempt).filter(
-      (attempt: Attempt) => attempt['@_id'] == this.pb || attempt['@_id'] > this.currentAttemptNumber
-    );
-
-    // Delete individual splits attempts
-    run.Segments.Segment = run.Segments.Segment.map(segment => ({
-      ...segment,
-      SegmentHistory: {
-        Time: asArray(segment.SegmentHistory.Time).filter(
-          (time: SegmentHistoryTime) => time['@_id'] == this.pb || time['@_id'] > this.currentAttemptNumber
-        )
-      }
-    }));
+    offload(OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER, store.state.splitFile.Run, this.pb, this.currentAttemptNumber)
+      .then(r => store.state.splitFile.Run = r);
   }
 
   deletePreviousRuns() {

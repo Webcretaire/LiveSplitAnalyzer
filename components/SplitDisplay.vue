@@ -23,27 +23,29 @@
 
     <b-collapse :id="collapseName" class="mt-1" v-model="collapseVisible">
       <b-card class="text-left">
-        <Plotly v-if="renderGraph" :data="plot_data()" :layout="layout()" :display-mode-bar="true"/>
+        <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true"/>
       </b-card>
     </b-collapse>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}                                                   from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime, selectTime}                                from '~/util/splits';
-import {formatTime, stringTimeToSeconds, secondsToLivesplitFormat}              from '~/util/durations';
-import {extractPng}                                                             from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR, PB_COLOR}                                       from '~/util/plot';
-import slugify                                                                  from 'slugify';
+import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
+import {Segment, SegmentHistoryTime, selectTime}                   from '~/util/splits';
+import {formatTime, stringTimeToSeconds, secondsToLivesplitFormat} from '~/util/durations';
+import {extractPng}                                                from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR}                 from '~/util/plot';
+import slugify                                                     from 'slugify';
+import {GlobalEventEmitter}                                        from '~/util/globalEvents';
+import {singleSplitState}                                          from '~/util/singleSplit';
+import {asArray, XYCoordinates}                                    from '~/util/util';
+import {whithLoad}                                                 from '~/util/loading';
+import store                                                       from '~/util/store';
+import { offload }                                                 from '~/util/offloadWorker';
+import { OffloadWorkerOperation }                                  from '~/util/offloadworkerTypes';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                                                 from 'vue-plotly';
-import {GlobalEventEmitter}                                                     from '~/util/globalEvents';
-import {singleSplitState}                                                       from '~/util/singleSplit';
-import {asArray}                                                                from '~/util/util';
-import {whithLoad}                                                              from '~/util/loading';
-import store                                                                    from '~/util/store';
+import {Plotly}                                                    from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -54,7 +56,7 @@ export default class SplitDisplay extends Vue {
   graphYAxisToZero!: boolean;
 
   @Prop({default: false})
-  graphPBHline!: boolean;
+  graphCurrentAttemptHline!: boolean;
 
   @Prop()
   currentAttemptNumber?: number;
@@ -66,13 +68,19 @@ export default class SplitDisplay extends Vue {
 
   collapseVisible: boolean = false;
 
-  renderGraph: boolean = true;
+  timesSeconds: Array<number | null> = [];
+
+  layout: any = {};
+
+  gold: XYCoordinates = {x: 0, y: 0};
 
   /**
-   * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
-   * be an arrow function otherwise we get `_vm.layout is not a function`
+   * For some reason layout needs to be a data property or a function (a computed property will be cached and never
+   * change), and it needs to be an arrow function otherwise we get `_vm.layout is not a function`
    */
-  layout = () => {
+  @Watch('gold')
+  @Watch('timesWithPositiveIds')
+  updateLayout() {
     const l: any = {
       title: 'Time history',
       xaxis: {
@@ -100,8 +108,8 @@ export default class SplitDisplay extends Vue {
       ]
     };
 
-    const t = selectTime(this.PB);
-    if (this.graphPBHline && this.currentAttemptNumber && t) {
+    const t = selectTime(this.currentAttempt);
+    if (this.graphCurrentAttemptHline && this.currentAttemptNumber && t) {
       l.shapes = [
         {
           type: 'line',
@@ -110,7 +118,7 @@ export default class SplitDisplay extends Vue {
           x1: this.timesSeconds.length - 1,
           y1: stringTimeToSeconds(t),
           line: {
-            color: PB_COLOR,
+            color: CUR_ATTEMPT_COLOR,
             width: 1,
             dash: 'dot'
           }
@@ -118,7 +126,7 @@ export default class SplitDisplay extends Vue {
       ];
     }
 
-    return l;
+    this.layout = l;
   };
 
   get isSubsplit() {
@@ -129,20 +137,12 @@ export default class SplitDisplay extends Vue {
     return this.formatTime(selectTime(this.split.BestSegmentTime) || '');
   }
 
-  get gold() {
-    let goldX = 0;
-    let goldY = 999999;
-    for (let i = 0; i < this.timesSeconds.length; ++i) {
-      const t = this.timesSeconds[i];
-      if (t && t < goldY) {
-        goldX = i;
-        goldY = t;
-      }
-    }
-    return {x: goldX, y: goldY};
+  @Watch('timesSeconds', {immediate: true})
+  updateGold(newVal: Array<number | null>) {
+    offload(OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY, newVal).then(r => this.gold = r);
   }
 
-  get PB(): SegmentHistoryTime | undefined {
+  get currentAttempt(): SegmentHistoryTime | undefined {
     return this.timesWithPositiveIds.find(t => t['@_id'] === this.currentAttemptNumber);
   }
 
@@ -158,13 +158,9 @@ export default class SplitDisplay extends Vue {
     });
   }
 
-  get timesSeconds(): Array<number | null> {
-    return this.timesWithPositiveIds
-      .filter(t => t['@_id'] > 0)
-      .map((t) => {
-        const time = selectTime(t);
-        return time ? stringTimeToSeconds(time) : null;
-      });
+  @Watch('timesWithPositiveIds', {immediate: true})
+  updateTimesSeconds(newVal: SegmentHistoryTime[]) {
+    offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, newVal).then(r => this.timesSeconds = r);
   }
 
   get slug() {
@@ -178,7 +174,7 @@ export default class SplitDisplay extends Vue {
   get markerColors() {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
-      if (this.timesWithPositiveIds[i]['@_id'] == this.PB?.['@_id']) out.push(PB_COLOR);
+      if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(CUR_ATTEMPT_COLOR);
       else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
     }
     return out;
@@ -187,13 +183,13 @@ export default class SplitDisplay extends Vue {
   get markerSizes() {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
-      if (this.timesWithPositiveIds[i]['@_id'] == this.PB?.['@_id']) out.push(6);
+      if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;
   }
 
-  get timesWithPositiveIds() {
+  get timesWithPositiveIds(): SegmentHistoryTime[] {
     return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
   }
 
@@ -201,7 +197,7 @@ export default class SplitDisplay extends Vue {
     return (this.splitIndex != this.segments.length - 1);
   }
 
-  plot_data() {
+  get plot_data() {
     const text_val = this.timesWithPositiveIds.map((t) => {
       const time = selectTime(t);
       if (!time) return '';

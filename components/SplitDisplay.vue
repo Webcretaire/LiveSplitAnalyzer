@@ -262,7 +262,6 @@ export default class SplitDisplay extends Vue {
       if (sumRT !== 0) {
         mergedRealTime = secondsToLivesplitFormat(sumRT);
         previousSplitTimes[previousSplitIndex].RealTime = mergedRealTime;
-        this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
       }
 
       const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
@@ -271,11 +270,15 @@ export default class SplitDisplay extends Vue {
       if (sumGT !== 0) {
         mergedGameTime = secondsToLivesplitFormat(sumGT);
         previousSplitTimes[previousSplitIndex].GameTime = mergedGameTime;
-        this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
       }
     });
 
+    this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
     store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+    const newBestTime = this.timesWithPositiveIds[this.gold.x];
+    store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime = {RealTime: newBestTime.RealTime};
+    if(newBestTime.GameTime)
+      store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime.GameTime = newBestTime.GameTime;
   }
 
   mergeNextSplit(){
@@ -294,7 +297,6 @@ export default class SplitDisplay extends Vue {
       if (sumRT !== 0) {
         mergedRealTime = secondsToLivesplitFormat(sumRT);
         nextSplitTimes[nextSplitIndex].RealTime = mergedRealTime;
-        this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
       }
 
       const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
@@ -303,11 +305,15 @@ export default class SplitDisplay extends Vue {
       if (sumGT !== 0) {
         mergedGameTime = secondsToLivesplitFormat(sumGT);
         nextSplitTimes[nextSplitIndex].GameTime = mergedGameTime;
-        this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
       }
     });
 
+    this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
     store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+    const newBestTime = this.timesWithPositiveIds[this.gold.x];
+    store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime = {RealTime: newBestTime.RealTime};
+    if(newBestTime.GameTime)
+      store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime.GameTime = newBestTime.GameTime;
   }
 
   formatTime = formatTime;

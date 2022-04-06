@@ -198,11 +198,11 @@ export default class SplitDisplay extends Vue {
   }
 
   get isNotFirstSplit(){
-    return (this.split != this.segments[0]);
+    return (this.splitIndex != 0);
   }
 
   get isNotLastSplit(){
-    return (this.split != this.segments[this.segments.length - 1]);
+    return (this.splitIndex != this.segments.length - 1);
   }
 
   plot_data() {

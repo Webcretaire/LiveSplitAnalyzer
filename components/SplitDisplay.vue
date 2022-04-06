@@ -31,19 +31,19 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}                         from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime, selectTime, AttemptHistory}      from '~/util/splits';
-import {formatTime, stringTimeToSeconds, secondsToFormattedString}              from '~/util/durations';
-import {extractPng}                                   from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR, PB_COLOR}             from '~/util/plot';
-import slugify                                        from 'slugify';
+import {Component, Prop, Vue}                                                   from 'nuxt-property-decorator';
+import {Segment, SegmentHistoryTime, selectTime}                                from '~/util/splits';
+import {formatTime, stringTimeToSeconds, secondsToLivesplitFormat}              from '~/util/durations';
+import {extractPng}                                                             from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, PB_COLOR}                                       from '~/util/plot';
+import slugify                                                                  from 'slugify';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                       from 'vue-plotly';
-import {GlobalEventEmitter}                           from '~/util/globalEvents';
-import {singleSplitState}                             from '~/util/singleSplit';
-import {asArray}                                      from '~/util/util';
-import store                                          from '~/util/store';
+import {Plotly}                                                                 from 'vue-plotly';
+import {GlobalEventEmitter}                                                     from '~/util/globalEvents';
+import {singleSplitState}                                                       from '~/util/singleSplit';
+import {asArray}                                                                from '~/util/util';
+import store                                                                    from '~/util/store';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -247,45 +247,67 @@ export default class SplitDisplay extends Vue {
   }
 
   mergePreviousSplit(){
-    const run = store.state.splitFile.Run;
-    const hasGameTime = store.state.hasGameTime;
-
     const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
     const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
 
-    let replaceRealTime = true;
-    let replaceGameTime = true;
-    let mergedGameTime = secondsToFormattedString(0);
-    let mergedRealTime = secondsToFormattedString(0);
+    let mergedGameTime = secondsToLivesplitFormat(0);
+    let mergedRealTime = secondsToLivesplitFormat(0);
 
-    previousSplitTimes.forEach(previousSplitTime => {
+    previousSplitTimes.forEach((previousSplitTime, previousSplitIndex) => {
       let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === previousSplitTime?.["@_id"]);
 
       const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
       const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
-      if (realTime1 + realTime2 === 0)
-        replaceRealTime = false;
-
-      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
-      const gameTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
-      if (gameTime1 + gameTime2 === 0)
-        replaceGameTime = false;
-
-      if(replaceRealTime){
-        mergedRealTime = secondsToFormattedString(realTime1 + realTime2);
-        previousSplitTimes[previousSplitTimes.indexOf(previousSplitTime)].RealTime = mergedRealTime;
+      const sumRT = realTime1 + realTime2;
+      if (sumRT !== 0) {
+        mergedRealTime = secondsToLivesplitFormat(sumRT);
+        previousSplitTimes[previousSplitIndex].RealTime = mergedRealTime;
         this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
       }
-      if(replaceGameTime){
-        mergedGameTime = secondsToFormattedString(gameTime1 + gameTime2);
-        previousSplitTimes[previousSplitTimes.indexOf(previousSplitTime)].GameTime = mergedGameTime;
+
+      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
+      const gameTime2 = previousSplitTime?.GameTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
+      const sumGT = gameTime1 + gameTime2;
+      if (sumGT !== 0) {
+        mergedGameTime = secondsToLivesplitFormat(sumGT);
+        previousSplitTimes[previousSplitIndex].GameTime = mergedGameTime;
         this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
       }
     });
+
+    store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
   }
 
   mergeNextSplit(){
-    // same as mergePreviousSplit() except with the next split instead
+    const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
+    const nextSplitTimes = asArray(this.segments[this.splitIndex + 1].SegmentHistory.Time);
+
+    let mergedGameTime = secondsToLivesplitFormat(0);
+    let mergedRealTime = secondsToLivesplitFormat(0);
+
+    nextSplitTimes.forEach((nextSplitTime, nextSplitIndex) => {
+      let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === nextSplitTime?.["@_id"]);
+
+      const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
+      const realTime2 = nextSplitTime?.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
+      const sumRT = realTime1 + realTime2;
+      if (sumRT !== 0) {
+        mergedRealTime = secondsToLivesplitFormat(sumRT);
+        nextSplitTimes[nextSplitIndex].RealTime = mergedRealTime;
+        this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
+      }
+
+      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
+      const gameTime2 = nextSplitTime?.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
+      const sumGT = gameTime1 + gameTime2;
+      if (sumGT !== 0) {
+        mergedGameTime = secondsToLivesplitFormat(sumGT);
+        nextSplitTimes[nextSplitIndex].GameTime = mergedGameTime;
+        this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
+      }
+    });
+
+    store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
   }
 
   formatTime = formatTime;

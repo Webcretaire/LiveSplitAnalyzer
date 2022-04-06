@@ -248,17 +248,40 @@ export default class SplitDisplay extends Vue {
 
   mergePreviousSplit(){
     const run = store.state.splitFile.Run;
+    const hasGameTime = store.state.hasGameTime;
+
     const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
     const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
-    var mergedGameTime = "0:00:00";
-    var mergedRealTime = "0:00:00";
-    for(let i = 1; i <= run.AttemptCount; i++){
-      if(store.state.hasGameTime && chosenSplitTimes[i].GameTime != undefined)
-        mergedGameTime = secondsToFormattedString(stringTimeToSeconds(chosenSplitTimes[i].GameTime) + stringTimeToSeconds(previousSplitTimes[i].GameTime));
-      if(chosenSplitTimes[i].RealTime != undefined)
-        mergedRealTime = secondsToFormattedString(stringTimeToSeconds(chosenSplitTimes[i].RealTime) + stringTimeToSeconds(previousSplitTimes[i].RealTime));
-      console.log(mergedGameTime + " " + mergedRealTime)
-    }
+
+    let replaceRealTime = true;
+    let replaceGameTime = true;
+    let mergedGameTime = secondsToFormattedString(0);
+    let mergedRealTime = secondsToFormattedString(0);
+
+    previousSplitTimes.forEach(previousSplitTime => {
+      let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === previousSplitTime?.["@_id"]);
+
+      const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
+      const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
+      if (realTime1 + realTime2 === 0)
+        replaceRealTime = false;
+
+      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
+      const gameTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
+      if (gameTime1 + gameTime2 === 0)
+        replaceGameTime = false;
+
+      if(replaceRealTime){
+        mergedRealTime = secondsToFormattedString(realTime1 + realTime2);
+        previousSplitTimes[previousSplitTimes.indexOf(previousSplitTime)].RealTime = mergedRealTime;
+        this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
+      }
+      if(replaceGameTime){
+        mergedGameTime = secondsToFormattedString(gameTime1 + gameTime2);
+        previousSplitTimes[previousSplitTimes.indexOf(previousSplitTime)].GameTime = mergedGameTime;
+        this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
+      }
+    });
   }
 
   mergeNextSplit(){

@@ -66,6 +66,7 @@
           <split-display :split="split"
                          v-for="(split, key) in splits"
                          :key="`split-${key}`"
+                         :splitIndex="key"
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphPBHline="graphPBHline"
                          :currentAttemptNumber="currentAttemptNumber"

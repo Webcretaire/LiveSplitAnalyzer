@@ -253,15 +253,15 @@ export default class SplitDisplay extends Vue {
     let mergedGameTime = secondsToLivesplitFormat(0);
     let mergedRealTime = secondsToLivesplitFormat(0);
 
-    previousSplitTimes.forEach((previousSplitTime, previousSplitIndex) => {
-      let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === previousSplitTime?.["@_id"]);
+    previousSplitTimes.forEach((chosenSplitTime, chosenSplitIndex) => {
+      let previousSplitTime = previousSplitTimes.find(split => split?.['@_id'] === chosenSplitTime?.["@_id"]);
 
       const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
       const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
       const sumRT = realTime1 + realTime2;
       if (sumRT !== 0) {
         mergedRealTime = secondsToLivesplitFormat(sumRT);
-        previousSplitTimes[previousSplitIndex].RealTime = mergedRealTime;
+        previousSplitTimes[chosenSplitIndex].RealTime = mergedRealTime;
       }
 
       const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
@@ -269,16 +269,12 @@ export default class SplitDisplay extends Vue {
       const sumGT = gameTime1 + gameTime2;
       if (sumGT !== 0) {
         mergedGameTime = secondsToLivesplitFormat(sumGT);
-        previousSplitTimes[previousSplitIndex].GameTime = mergedGameTime;
+        previousSplitTimes[chosenSplitIndex].GameTime = mergedGameTime;
       }
     });
 
     this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
     store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
-    const newBestTime = this.timesWithPositiveIds[this.gold.x];
-    store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime = {RealTime: newBestTime.RealTime};
-    if(newBestTime.GameTime)
-      store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime.GameTime = newBestTime.GameTime;
   }
 
   mergeNextSplit(){
@@ -310,10 +306,6 @@ export default class SplitDisplay extends Vue {
 
     this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
     store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
-    const newBestTime = this.timesWithPositiveIds[this.gold.x];
-    store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime = {RealTime: newBestTime.RealTime};
-    if(newBestTime.GameTime)
-      store.state.splitFile.Run.Segments.Segment[this.splitIndex].BestSegmentTime.GameTime = newBestTime.GameTime;
   }
 
   formatTime = formatTime;

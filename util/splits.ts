@@ -118,10 +118,7 @@ export type TimeLike = RealAndGameTime | OptionalRealAndGameTime | SegmentHistor
 export type OptionalTimeLike = TimeLike | null | undefined;
 
 export const selectTime = (t: OptionalTimeLike): string | null => {
-  if (t && !store.state.useRealTime) // && t?.GameTime)
-    return t.GameTime as string;
-
-  return t?.RealTime || null;
+  return t?.GameTime || t?.RealTime || null;
 };
 
 export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | null = null): Array<number> => {

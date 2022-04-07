@@ -11,9 +11,8 @@
             <strong>Best time:</strong> {{ bestTimeDisplay }}
           </p>
           <p>
-            <b-button @click="fixGoldsModal" size="sm" variant="warning">Fix fake golds</b-button>
-            <b-button v-if="isNotFirstSplit" @click="mergePreviousSplit" size="sm" variant="outline-primary" class="ml-2">Merge into previous split</b-button>
-            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="outline-primary" class="ml-2">Merge into next split</b-button>
+            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-1">Fix fake golds</b-button>
+            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="outline-primary" class="ml-1">Merge into next split</b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -198,10 +197,6 @@ export default class SplitDisplay extends Vue {
     return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
   }
 
-  get isNotFirstSplit(){
-    return (this.splitIndex != 0);
-  }
-
   get isNotLastSplit(){
     return (this.splitIndex != this.segments.length - 1);
   }
@@ -247,46 +242,6 @@ export default class SplitDisplay extends Vue {
     GlobalEventEmitter.$emit('setCurrentSplit', this.split);
   }
 
-  mergePreviousSplit(){
-    whithLoad(() => {
-      const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
-      const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
-
-      let mergedGameTime = secondsToLivesplitFormat(0);
-      let mergedRealTime = secondsToLivesplitFormat(0);
-
-      previousSplitTimes.forEach((chosenSplitTime, chosenSplitIndex) => {
-        let previousSplitTime = previousSplitTimes.find(split => split?.['@_id'] === chosenSplitTime?.["@_id"]);
-
-        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
-        const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
-        const sumRT = realTime1 + realTime2;
-        if (sumRT !== 0) {
-          mergedRealTime = secondsToLivesplitFormat(sumRT);
-          previousSplitTimes[chosenSplitIndex].RealTime = mergedRealTime;
-        }
-
-        const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
-        const gameTime2 = previousSplitTime?.GameTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
-        const sumGT = gameTime1 + gameTime2;
-        if (sumGT !== 0) {
-          mergedGameTime = secondsToLivesplitFormat(sumGT);
-          previousSplitTimes[chosenSplitIndex].GameTime = mergedGameTime;
-        }
-      });
-
-      this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
-      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
-
-      this.$bvToast.toast(`Merged ${this.split.Name} with ${this.segments[this.splitIndex - 1].Name}`, {
-        title: 'Splits merged',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'success'
-      });
-    });
-  }
-
   mergeNextSplit(){
     whithLoad(() => {
       const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
@@ -315,15 +270,15 @@ export default class SplitDisplay extends Vue {
         }
       });
 
-      this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
-      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
-
       this.$bvToast.toast(`Merged ${this.split.Name} with ${this.segments[this.splitIndex + 1].Name}`, {
         title: 'Splits merged',
         autoHideDelay: 5000,
         appendToast: false,
         variant: 'success'
       });
+      
+      this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
+      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
     });
   }
 

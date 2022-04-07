@@ -26,16 +26,15 @@
 
 <script lang="ts">
 import {
-  Attempt,
+  Attempt, Run,
   Segment,
-  SegmentHistoryTime,
   selectTime,
   SplitFile,
   splitFileIsModified,
   SplitTime
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
-import {whithLoad}                                     from '~/util/loading';
+import {whithLoad, whithLoadAsync}                     from '~/util/loading';
 import {asArray}                                       from '~/util/util';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
@@ -165,14 +164,20 @@ export default class Toolbox extends Vue {
     });
   }
 
-  doDeletePreviousRuns() {
-    offload(OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER, store.state.splitFile.Run, this.pb, this.currentAttemptNumber)
-      .then(r => store.state.splitFile.Run = r);
-  }
-
   deletePreviousRuns() {
     GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
-      whithLoad(() => this.doDeletePreviousRuns());
+      whithLoadAsync(
+        (endLoad: Function) => offload(
+          OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,
+          store.state.splitFile.Run,
+          this.pb,
+          this.currentAttemptNumber
+        ).then((r: Run) => {
+          store.state.splitFile.Run              = r;
+          store.state.splitFile.Run.AttemptCount = asArray(r.AttemptHistory.Attempt).length;
+          endLoad();
+        })
+      );
     });
   }
 }

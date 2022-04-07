@@ -42,8 +42,8 @@ import {Plotly}                                                                 
 import {GlobalEventEmitter}                                                     from '~/util/globalEvents';
 import {singleSplitState}                                                       from '~/util/singleSplit';
 import {asArray}                                                                from '~/util/util';
+import {whithLoad}                                                            from '~/util/loading';
 import store                                                                    from '~/util/store';
-import { whithLoad }                                                            from '~/util/loading';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -276,7 +276,7 @@ export default class SplitDisplay extends Vue {
         appendToast: false,
         variant: 'success'
       });
-      
+
       this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
       store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
     });

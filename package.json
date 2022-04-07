@@ -22,7 +22,6 @@
     "nuxt": "^2.15.8",
     "nuxt-property-decorator": "^2.9.1",
     "sass": "^1.49.8",
-    "slugify": "^1.6.5",
     "vue": "^2.6.14",
     "vue-multiselect": "^2.1.6",
     "vue-plotly": "^1.1.0",

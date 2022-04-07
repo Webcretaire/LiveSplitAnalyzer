@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card :id="`SingleSplitCard_${slug}`" class="SingleSplitCard text-left">
+    <b-card :id="`SingleSplitCard_${splitIndex}`" class="SingleSplitCard text-left">
       <div class="limit-height">
         <b-card-img v-if="srcFormattedIcon(split)" :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
         <div class="mt-auto mb-auto">
@@ -12,7 +12,7 @@
           </p>
           <p>
             <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-1">Fix fake golds</b-button>
-            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="info" class="ml-1" 
+            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="info" class="ml-1"
                       v-b-tooltip.hover :title="mergeSplitTooltip">
               Merge into next split
             </b-button>
@@ -38,14 +38,13 @@ import {Segment, SegmentHistoryTime, selectTime}                   from '~/util/
 import {formatTime, stringTimeToSeconds, secondsToLivesplitFormat} from '~/util/durations';
 import {extractPng}                                                from '~/util/pngExtractor';
 import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR}                 from '~/util/plot';
-import slugify                                                     from 'slugify';
 import {GlobalEventEmitter}                                        from '~/util/globalEvents';
 import {singleSplitState}                                          from '~/util/singleSplit';
 import {asArray, XYCoordinates}                                    from '~/util/util';
 import {whithLoadAsync}                                            from '~/util/loading';
 import store                                                       from '~/util/store';
-import { offload }                                                 from '~/util/offloadWorker';
-import { OffloadWorkerOperation }                                  from '~/util/offloadworkerTypes';
+import {offload}                                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                                                    from 'vue-plotly';
@@ -166,12 +165,8 @@ export default class SplitDisplay extends Vue {
     offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, newVal).then(r => this.timesSeconds = r);
   }
 
-  get slug() {
-    return slugify(this.split.Name, {strict: true});
-  }
-
   get collapseName() {
-    return 'collapse-' + this.slug;
+    return 'collapse-split-' + this.splitIndex;
   }
 
   get markerColors() {
@@ -196,7 +191,7 @@ export default class SplitDisplay extends Vue {
     return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
   }
 
-  get isNotLastSplit(){
+  get isNotLastSplit() {
     return (this.splitIndex != this.segments.length - 1);
   }
 
@@ -228,7 +223,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get mergeSplitTooltip() {
-    return `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"`
+    return `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"`;
   }
 
   srcFormattedIcon(split: Segment): string | null {
@@ -251,22 +246,22 @@ export default class SplitDisplay extends Vue {
 
   doMergeNextSplit(endLoad: Function) {
     const chosenSplitTimes: SegmentHistoryTime[] = asArray(this.split.SegmentHistory.Time);
-    const nextSplitTimes: SegmentHistoryTime[] = asArray(this.nextSplit.SegmentHistory.Time);
+    const nextSplitTimes: SegmentHistoryTime[]   = asArray(this.nextSplit.SegmentHistory.Time);
 
     const newTimes = nextSplitTimes.map(nextSplitTime => {
       const out: SegmentHistoryTime = {'@_id': nextSplitTime['@_id']};
-      const chosenSplitTime = chosenSplitTimes.find(split => split['@_id'] === nextSplitTime["@_id"]);
+      const chosenSplitTime         = chosenSplitTimes.find(split => split['@_id'] === nextSplitTime['@_id']);
 
       const realTime2 = nextSplitTime.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
       if (realTime2) {
-        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
-        out.RealTime = secondsToLivesplitFormat(realTime1 + realTime2);
+        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0;
+        out.RealTime    = secondsToLivesplitFormat(realTime1 + realTime2);
       }
 
       const gameTime2 = nextSplitTime.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
       if (gameTime2) {
         const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0;
-        out.GameTime = secondsToLivesplitFormat(gameTime1 + gameTime2);
+        out.GameTime    = secondsToLivesplitFormat(gameTime1 + gameTime2);
       }
 
       return out;
@@ -275,7 +270,7 @@ export default class SplitDisplay extends Vue {
     const runsWithTimes = newTimes.filter(t => selectTime(t));
 
     offload(
-      OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY, 
+      OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY,
       runsWithTimes.map(t => stringTimeToSeconds(selectTime(t) as string))
     ).then(goldCoord => {
       const goldSplit = runsWithTimes[goldCoord.x];
@@ -288,7 +283,7 @@ export default class SplitDisplay extends Vue {
       this.nextSplit.SegmentHistory.Time = newTimes;
 
       // Copy this before splice otherwise the next split name won't refer to the correct split
-      const curSplitName = this.split.Name;
+      const curSplitName  = this.split.Name;
       const nextSplitName = this.nextSplit.Name;
 
       store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
@@ -303,7 +298,7 @@ export default class SplitDisplay extends Vue {
     });
   }
 
-  mergeNextSplit(){
+  mergeNextSplit() {
     GlobalEventEmitter.$emit('openConfirm', `Merge "${this.split.Name}" into "${this.nextSplit.Name}"?`, () => {
       whithLoadAsync((endLoad: Function) => this.doMergeNextSplit(endLoad));
     });

@@ -44,6 +44,7 @@ import {GlobalEventEmitter}                                                     
 import {singleSplitState}                                                       from '~/util/singleSplit';
 import {asArray}                                                                from '~/util/util';
 import store                                                                    from '~/util/store';
+import { whithLoad }                                                            from '~/util/loading';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -247,65 +248,83 @@ export default class SplitDisplay extends Vue {
   }
 
   mergePreviousSplit(){
-    const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
-    const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
+    whithLoad(() => {
+      const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
+      const previousSplitTimes = asArray(this.segments[this.splitIndex - 1].SegmentHistory.Time);
 
-    let mergedGameTime = secondsToLivesplitFormat(0);
-    let mergedRealTime = secondsToLivesplitFormat(0);
+      let mergedGameTime = secondsToLivesplitFormat(0);
+      let mergedRealTime = secondsToLivesplitFormat(0);
 
-    previousSplitTimes.forEach((chosenSplitTime, chosenSplitIndex) => {
-      let previousSplitTime = previousSplitTimes.find(split => split?.['@_id'] === chosenSplitTime?.["@_id"]);
+      previousSplitTimes.forEach((chosenSplitTime, chosenSplitIndex) => {
+        let previousSplitTime = previousSplitTimes.find(split => split?.['@_id'] === chosenSplitTime?.["@_id"]);
 
-      const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
-      const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
-      const sumRT = realTime1 + realTime2;
-      if (sumRT !== 0) {
-        mergedRealTime = secondsToLivesplitFormat(sumRT);
-        previousSplitTimes[chosenSplitIndex].RealTime = mergedRealTime;
-      }
+        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
+        const realTime2 = previousSplitTime?.RealTime ? stringTimeToSeconds(previousSplitTime.RealTime) : 0;
+        const sumRT = realTime1 + realTime2;
+        if (sumRT !== 0) {
+          mergedRealTime = secondsToLivesplitFormat(sumRT);
+          previousSplitTimes[chosenSplitIndex].RealTime = mergedRealTime;
+        }
 
-      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
-      const gameTime2 = previousSplitTime?.GameTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
-      const sumGT = gameTime1 + gameTime2;
-      if (sumGT !== 0) {
-        mergedGameTime = secondsToLivesplitFormat(sumGT);
-        previousSplitTimes[chosenSplitIndex].GameTime = mergedGameTime;
-      }
+        const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
+        const gameTime2 = previousSplitTime?.GameTime ? stringTimeToSeconds(previousSplitTime.GameTime) : 0;
+        const sumGT = gameTime1 + gameTime2;
+        if (sumGT !== 0) {
+          mergedGameTime = secondsToLivesplitFormat(sumGT);
+          previousSplitTimes[chosenSplitIndex].GameTime = mergedGameTime;
+        }
+      });
+
+      this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
+      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+
+      this.$bvToast.toast(`Merged ${this.split.Name} with ${this.segments[this.splitIndex - 1].Name}`, {
+        title: 'Splits merged',
+        autoHideDelay: 5000,
+        appendToast: false,
+        variant: 'success'
+      });
     });
-
-    this.segments[this.splitIndex - 1].SegmentHistory.Time = previousSplitTimes;
-    store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
   }
 
   mergeNextSplit(){
-    const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
-    const nextSplitTimes = asArray(this.segments[this.splitIndex + 1].SegmentHistory.Time);
+    whithLoad(() => {
+      const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
+      const nextSplitTimes = asArray(this.segments[this.splitIndex + 1].SegmentHistory.Time);
 
-    let mergedGameTime = secondsToLivesplitFormat(0);
-    let mergedRealTime = secondsToLivesplitFormat(0);
+      let mergedGameTime = secondsToLivesplitFormat(0);
+      let mergedRealTime = secondsToLivesplitFormat(0);
 
-    nextSplitTimes.forEach((nextSplitTime, nextSplitIndex) => {
-      let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === nextSplitTime?.["@_id"]);
+      nextSplitTimes.forEach((nextSplitTime, nextSplitIndex) => {
+        let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === nextSplitTime?.["@_id"]);
 
-      const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
-      const realTime2 = nextSplitTime?.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
-      const sumRT = realTime1 + realTime2;
-      if (sumRT !== 0) {
-        mergedRealTime = secondsToLivesplitFormat(sumRT);
-        nextSplitTimes[nextSplitIndex].RealTime = mergedRealTime;
-      }
+        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
+        const realTime2 = nextSplitTime?.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
+        const sumRT = realTime1 + realTime2;
+        if (sumRT !== 0) {
+          mergedRealTime = secondsToLivesplitFormat(sumRT);
+          nextSplitTimes[nextSplitIndex].RealTime = mergedRealTime;
+        }
 
-      const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
-      const gameTime2 = nextSplitTime?.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
-      const sumGT = gameTime1 + gameTime2;
-      if (sumGT !== 0) {
-        mergedGameTime = secondsToLivesplitFormat(sumGT);
-        nextSplitTimes[nextSplitIndex].GameTime = mergedGameTime;
-      }
+        const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
+        const gameTime2 = nextSplitTime?.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
+        const sumGT = gameTime1 + gameTime2;
+        if (sumGT !== 0) {
+          mergedGameTime = secondsToLivesplitFormat(sumGT);
+          nextSplitTimes[nextSplitIndex].GameTime = mergedGameTime;
+        }
+      });
+
+      this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
+      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+
+      this.$bvToast.toast(`Merged ${this.split.Name} with ${this.segments[this.splitIndex + 1].Name}`, {
+        title: 'Splits merged',
+        autoHideDelay: 5000,
+        appendToast: false,
+        variant: 'success'
+      });
     });
-
-    this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
-    store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
   }
 
   formatTime = formatTime;

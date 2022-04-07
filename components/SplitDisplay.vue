@@ -39,7 +39,7 @@ import slugify                                                     from 'slugify
 import {GlobalEventEmitter}                                        from '~/util/globalEvents';
 import {singleSplitState}                                          from '~/util/singleSplit';
 import {asArray, XYCoordinates}                                    from '~/util/util';
-import {whithLoad}                                                 from '~/util/loading';
+import {whithLoadAsync}                                            from '~/util/loading';
 import store                                                       from '~/util/store';
 import { offload }                                                 from '~/util/offloadWorker';
 import { OffloadWorkerOperation }                                  from '~/util/offloadworkerTypes';
@@ -238,10 +238,14 @@ export default class SplitDisplay extends Vue {
     GlobalEventEmitter.$emit('setCurrentSplit', this.split);
   }
 
+  get nextSplit() {
+    return store.state.splitFile.Run.Segments.Segment[this.splitIndex + 1];
+  }
+
   mergeNextSplit(){
-    whithLoad(() => {
-      const chosenSplitTimes = asArray(this.split.SegmentHistory.Time);
-      const nextSplitTimes = asArray(this.segments[this.splitIndex + 1].SegmentHistory.Time);
+    whithLoadAsync((endLoad: Function) => {
+      const chosenSplitTimes: SegmentHistoryTime[] = asArray(this.split.SegmentHistory.Time);
+      const nextSplitTimes: SegmentHistoryTime[] = asArray(this.nextSplit.SegmentHistory.Time);
 
       nextSplitTimes.forEach((nextSplitTime, nextSplitIndex) => {
         let chosenSplitTime = chosenSplitTimes.find(split => split?.['@_id'] === nextSplitTime?.["@_id"]);
@@ -249,27 +253,37 @@ export default class SplitDisplay extends Vue {
         const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0; 
         const realTime2 = nextSplitTime?.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
         const sumRT = realTime1 + realTime2;
-        if (sumRT !== 0) {
+        if (sumRT !== 0) 
           nextSplitTimes[nextSplitIndex].RealTime = secondsToLivesplitFormat(sumRT);
-        }
 
         const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0; 
         const gameTime2 = nextSplitTime?.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
         const sumGT = gameTime1 + gameTime2;
-        if (sumGT !== 0) {
+        if (sumGT !== 0) 
           nextSplitTimes[nextSplitIndex].GameTime = secondsToLivesplitFormat(sumGT);
-        }
       });
 
-      this.$bvToast.toast(`Merged ${this.split.Name} with ${this.segments[this.splitIndex + 1].Name}`, {
-        title: 'Splits merged',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'success'
-      });
+      offload(
+        OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY, 
+        nextSplitTimes.filter(t => t.RealTime).map(t => stringTimeToSeconds(selectTime(t) || ''))
+      ).then(goldCoord => {
+        const goldSplit = nextSplitTimes[goldCoord.x];
 
-      this.segments[this.splitIndex + 1].SegmentHistory.Time = nextSplitTimes;
-      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+        this.nextSplit.BestSegmentTime = {RealTime: goldSplit.RealTime!}; // We know RealTime exists from "filter" above
+        if (goldSplit.GameTime)
+          this.nextSplit.BestSegmentTime.GameTime = goldSplit.GameTime;
+
+        this.nextSplit.SegmentHistory.Time = nextSplitTimes;
+        store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+
+        this.$bvToast.toast(`Merged ${this.split.Name} with ${this.nextSplit.Name}`, {
+          title: 'Splits merged',
+          autoHideDelay: 5000,
+          appendToast: false,
+          variant: 'success'
+        });
+        endLoad();
+      });
     });
   }
 

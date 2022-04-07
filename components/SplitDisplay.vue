@@ -33,21 +33,26 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
-import {Segment, SegmentHistoryTime, selectTime}                   from '~/util/splits';
-import {formatTime, stringTimeToSeconds, secondsToLivesplitFormat} from '~/util/durations';
-import {extractPng}                                                from '~/util/pngExtractor';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR}                 from '~/util/plot';
-import {GlobalEventEmitter}                                        from '~/util/globalEvents';
-import {singleSplitState}                                          from '~/util/singleSplit';
-import {asArray, XYCoordinates}                                    from '~/util/util';
-import {whithLoadAsync}                                            from '~/util/loading';
-import store                                                       from '~/util/store';
-import {offload}                                                   from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
+import {
+  Segment,
+  SegmentHistoryTime,
+  selectTime,
+  splitFileIsModified
+}                                                  from '~/util/splits';
+import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
+import {formatTime, stringTimeToSeconds}           from '~/util/durations';
+import {extractPng}                                from '~/util/pngExtractor';
+import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
+import {GlobalEventEmitter}                        from '~/util/globalEvents';
+import {singleSplitState}                          from '~/util/singleSplit';
+import {asArray, XYCoordinates}                    from '~/util/util';
+import {whithLoadAsync}                            from '~/util/loading';
+import store                                       from '~/util/store';
+import {offload}                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                                    from 'vue-plotly';
+import {Plotly}                                    from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
@@ -253,6 +258,8 @@ export default class SplitDisplay extends Vue {
       store.state.splitFile.Run.Segments.Segment,
       this.splitIndex
     ).then(segments => {
+      splitFileIsModified(true);
+
       const autosplitterSettings = store.state.splitFile.Run.AutoSplitterSettings;
       if (autosplitterSettings?.Splits?.Split)
         autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);

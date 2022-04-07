@@ -173,6 +173,8 @@ export default class Toolbox extends Vue {
           this.pb,
           this.currentAttemptNumber
         ).then((r: Run) => {
+          splitFileIsModified(true);
+
           store.state.splitFile.Run              = r;
           store.state.splitFile.Run.AttemptCount = asArray(r.AttemptHistory.Attempt).length;
           endLoad();

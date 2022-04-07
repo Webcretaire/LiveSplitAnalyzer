@@ -228,10 +228,9 @@ export default class SplitDisplay extends Vue {
 
   srcFormattedIcon(split: Segment): string | null {
     const png = extractPng(split.Icon);
-    return png ? 'data:image/jpeg;base64,' + btoa(
-      new Uint8Array(png)
-        .reduce((data, byte) => data + String.fromCharCode(byte), '')
-    ) : null;
+    return png
+      ? `data:image/jpeg;base64,${btoa(new Uint8Array(png).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
+      : null;
   }
 
   fixGoldsModal() {
@@ -245,48 +244,19 @@ export default class SplitDisplay extends Vue {
   }
 
   doMergeNextSplit(endLoad: Function) {
-    const chosenSplitTimes: SegmentHistoryTime[] = asArray(this.split.SegmentHistory.Time);
-    const nextSplitTimes: SegmentHistoryTime[]   = asArray(this.nextSplit.SegmentHistory.Time);
-
-    const newTimes = nextSplitTimes.map(nextSplitTime => {
-      const out: SegmentHistoryTime = {'@_id': nextSplitTime['@_id']};
-      const chosenSplitTime         = chosenSplitTimes.find(split => split['@_id'] === nextSplitTime['@_id']);
-
-      const realTime2 = nextSplitTime.RealTime ? stringTimeToSeconds(nextSplitTime.RealTime) : 0;
-      if (realTime2) {
-        const realTime1 = chosenSplitTime?.RealTime ? stringTimeToSeconds(chosenSplitTime.RealTime) : 0;
-        out.RealTime    = secondsToLivesplitFormat(realTime1 + realTime2);
-      }
-
-      const gameTime2 = nextSplitTime.GameTime ? stringTimeToSeconds(nextSplitTime.GameTime) : 0;
-      if (gameTime2) {
-        const gameTime1 = chosenSplitTime?.GameTime ? stringTimeToSeconds(chosenSplitTime.GameTime) : 0;
-        out.GameTime    = secondsToLivesplitFormat(gameTime1 + gameTime2);
-      }
-
-      return out;
-    });
-
-    const runsWithTimes = newTimes.filter(t => selectTime(t));
+    // Copy this before splice otherwise the next split name won't refer to the correct split
+    const curSplitName  = this.split.Name;
+    const nextSplitName = this.nextSplit.Name;
 
     offload(
-      OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY,
-      runsWithTimes.map(t => stringTimeToSeconds(selectTime(t) as string))
-    ).then(goldCoord => {
-      const goldSplit = runsWithTimes[goldCoord.x];
-
-      // We know RealTime exists from "filter" above
-      this.nextSplit.BestSegmentTime = {RealTime: goldSplit.RealTime as string};
-      if (goldSplit.GameTime)
-        this.nextSplit.BestSegmentTime.GameTime = goldSplit.GameTime;
-
-      this.nextSplit.SegmentHistory.Time = newTimes;
-
-      // Copy this before splice otherwise the next split name won't refer to the correct split
-      const curSplitName  = this.split.Name;
-      const nextSplitName = this.nextSplit.Name;
-
-      store.state.splitFile.Run.Segments.Segment.splice(this.splitIndex, 1);
+      OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE,
+      store.state.splitFile.Run.Segments.Segment,
+      this.splitIndex
+    ).then(segments => {
+      const autosplitterSettings = store.state.splitFile.Run.AutoSplitterSettings;
+      if (autosplitterSettings?.Splits?.Split)
+        autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
+      store.state.splitFile.Run.Segments.Segment = segments;
 
       this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
         title: 'Splits merged',

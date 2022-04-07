@@ -1,8 +1,8 @@
 import {
   deleteAttemptBeforeNumber,
-  goldCoordinatesFromSecondsArray,
+  goldCoordinatesFromSecondsArray, mergeSplitIntoNextOne,
   segTimeArrayToSeconds
-}                                                     from '~/util/splitProcessing';
+} from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import {xmlParser}                                    from '~/util/xml';
 
@@ -33,6 +33,8 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
     case OffloadWorkerOperation.XML_PARSE_TEXT:
       out = xmlParser.parse(a[0]);
       break;
+    case OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE:
+      out = mergeSplitIntoNextOne(a[0], a[1]);
   }
 
   answer(e, out);

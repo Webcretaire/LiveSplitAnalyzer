@@ -3,7 +3,8 @@ export enum OffloadWorkerOperation {
   DELETE_ATTEMPT_BEFORE_NUMBER,
   SEG_TIME_ARRAY_TO_SECONDS,
   GOLD_COORDINATES_FROM_SECONDS_ARRAY,
-  XML_PARSE_TEXT
+  XML_PARSE_TEXT,
+  MERGE_SPLIT_INTO_NEXT_ONE
 }
 
 export interface OffloadWorkerMessage {

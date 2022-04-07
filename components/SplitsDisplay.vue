@@ -65,7 +65,7 @@
 
           <split-display :split="split"
                          v-for="(split, key) in splits"
-                         :key="`split-${key}`"
+                         :key="`split-${key}-${split.Name}`"
                          :splitIndex="key"
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphPBHline="graphPBHline"

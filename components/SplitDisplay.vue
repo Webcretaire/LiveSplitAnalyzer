@@ -299,7 +299,7 @@ img {
 }
 
 .split-icon-container {
-  min-width: 7rem;
+  min-width: 6.5rem;
   text-align: center;
   display: flex;
   justify-content: center;
@@ -307,7 +307,7 @@ img {
   .split-icon {
     object-fit: contain;
     max-width: 100%;
-    max-height: 7rem;
+    max-height: 5rem;
     width: auto;
     height: auto;
   }

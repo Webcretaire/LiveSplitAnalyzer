@@ -196,6 +196,10 @@ export default class SplitsDisplay extends Vue {
     this.showDetail           = false;
     this.$nextTick(() => this.showDetail = true);
   }
+
+  mounted() {
+    this.widthValue = window.innerWidth > 1400 ? 0 : 1;
+  }
 }
 </script>
 

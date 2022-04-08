@@ -2,17 +2,17 @@
   <div>
     <b-card :id="`SingleSplitCard_${splitIndex}`" class="SingleSplitCard text-left">
       <div class="limit-height">
-        <b-card-img v-if="srcFormattedIcon(split)" :src="srcFormattedIcon(split)" class="split-icon mr-4" block/>
+        <div class="split-icon-container mr-4 ml-2" v-if="srcFormattedIcon">
+          <b-card-img :src="srcFormattedIcon" class="split-icon" block/>
+        </div>
         <div class="mt-auto mb-auto">
           <h3>
             {{ isSubsplit ? split.Name.substring(1) : split.Name }} <small v-if="isSubsplit">(subsplit)</small>
           </h3>
-          <p v-if="split.BestSegmentTime">
-            <strong>Best time:</strong> {{ bestTimeDisplay }}
-          </p>
-          <p>
-            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-1">Fix fake golds</b-button>
-            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="info" class="ml-1"
+          <p v-if="split.BestSegmentTime" class="m-0">
+            <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
+            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-2">Fix fake golds</b-button>
+            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="info"
                       v-b-tooltip.hover :title="mergeSplitTooltip">
               Merge into next split
             </b-button>
@@ -231,8 +231,8 @@ export default class SplitDisplay extends Vue {
     return `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"`;
   }
 
-  srcFormattedIcon(split: Segment): string | null {
-    const png = extractPng(split.Icon);
+  get srcFormattedIcon(): string | null {
+    const png = extractPng(this.split.Icon);
     return png
       ? `data:image/jpeg;base64,${btoa(new Uint8Array(png).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
       : null;
@@ -295,16 +295,22 @@ img {
 }
 
 .limit-height {
-  max-height: 7rem;
   display: flex;
 }
 
-.split-icon {
-  object-fit: contain;
-  max-width: 100%;
-  max-height: 256px;
-  width: auto;
-  height: auto;
+.split-icon-container {
+  min-width: 7rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .split-icon {
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 7rem;
+    width: auto;
+    height: auto;
+  }
 }
 
 .toggle-collapse {

@@ -3,11 +3,12 @@
     <font-awesome-icon icon="pen-to-square" class="text-info" v-if="comparisonName !== 'Sum of Best'"
                        @click="editValue"/>
     <span v-if="comparisonName === referenceComparisonName">
-      {{ format(cellData.value.time) }}
+      {{ formatWithDefault(cellData.value.time) }}
     </span>
     <span v-else>
-      {{ format(cellData.value.time) }}
-      <small :class="cellData.value.isDeltaNegative ? 'text-green' : 'text-red'">
+      {{ formatWithDefault(cellData.value.time) }}
+      <small :class="cellData.value.isDeltaNegative ? 'text-green' : 'text-red'"
+             v-if="cellData.value.time && cellData.value.delta">
         ({{ cellData.value.isDeltaNegative ? '-' : '+' }}{{ format(cellData.value.delta) }})
       </small>
     </span>
@@ -38,6 +39,10 @@ export default class ComparisonTableCell extends Vue {
   cellData!: any;
 
   format = secondsToFormattedString;
+
+  formatWithDefault(time: number | undefined) {
+    return time ? secondsToFormattedString(time) : 'No data';
+  }
 
   doEditValue(newVal: number) {
     const delta = newVal - this.cellData.value.time;
@@ -75,7 +80,7 @@ export default class ComparisonTableCell extends Vue {
 
     GlobalEventEmitter.$emit('openModal', 'TimeSelectionModal', {
       message: splitName.startsWith('-') ? `${splitName.slice(1)} (subsplit)` : splitName,
-      value: this.cellData.value.time,
+      value: this.cellData.value.time || 0,
       callback: (value: number) => this.doEditValue(value)
     });
   }

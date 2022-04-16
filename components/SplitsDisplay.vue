@@ -10,8 +10,6 @@
           class="mb-3"
         ></b-form-file>
         <div v-if="parsedSplits && showDetail">
-          <run-overview :run="parsedSplits.Run" class="mb-4"/>
-
           <collapsible-card id="OptionsCard" title="Options">
             <div class="d-flex mt-4 mb-2">
               <b-form inline class="text-center m-auto">
@@ -50,27 +48,42 @@
               </b-col>
             </b-row>
           </collapsible-card>
+          <b-card class="main-card" no-body>
+            <b-tabs class="main-tabs" card pills align="center">
+              <b-tab title="Summary" active>
+                <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
-          <toolbox v-model="parsedSplits" :current-attempt-number="currentAttemptNumber" :pb="PB['@_id']" class="mb-4"/>
+                <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
+              </b-tab>
 
-          <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
+              <b-tab title="Attempt analysis">
+                <toolbox v-model="parsedSplits" :current-attempt-number="currentAttemptNumber" :pb="PB['@_id']"
+                         class="mb-4"/>
 
-          <attempt-overview :run="parsedSplits.Run"
-                            :attempt="currentAttempt"
-                            :is-pb="isPb"
-                            :display-labels="displayLabels"
-                            class="mb-4"/>
+                <attempt-overview :run="parsedSplits.Run"
+                                  :attempt="currentAttempt"
+                                  :is-pb="isPb"
+                                  :display-labels="displayLabels"/>
+              </b-tab>
+              <b-tab title="Comparisons">
+                <comparisons-display :segments="parsedSplits.Run.Segments"/>
 
-          <comparisons-display :segments="parsedSplits.Run.Segments"/>
+                <comparison-creator/>
 
-          <split-display :split="split"
-                         v-for="(split, key) in splits"
-                         :key="`split-${key}-${split.Name}`"
-                         :splitIndex="key"
-                         :graphYAxisToZero="graphYAxisToZero"
-                         :graphPBHline="graphPBHline"
-                         :currentAttemptNumber="currentAttemptNumber"
-                         class="mb-3"/>
+                <comparison-remover/>
+              </b-tab>
+              <b-tab title="Splits analysis">
+                <split-display :split="split"
+                               v-for="(split, index) in splits"
+                               :key="`split-${index}-${split.Name}`"
+                               :splitIndex="index"
+                               :graphYAxisToZero="graphYAxisToZero"
+                               :graphPBHline="graphPBHline"
+                               :currentAttemptNumber="currentAttemptNumber"
+                               class="mb-3"/>
+              </b-tab>
+            </b-tabs>
+          </b-card>
         </div>
       </div>
     </b-col>
@@ -78,15 +91,20 @@
 </template>
 
 <script lang="ts">
-import {Attempt, selectTime, SplitFile, splitFileIsModified} from '~/util/splits';
-import {Component, Vue, Watch}                               from 'nuxt-property-decorator';
-import {stringTimeToSeconds}                                 from '~/util/durations';
-import VueSlider                                             from 'vue-slider-component';
-import {whithLoadAsync}                                      from '~/util/loading';
-import {asArray}                                             from '~/util/util';
-import store                                                 from '~/util/store';
-import {offload}                                             from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                              from '~/util/offloadworkerTypes';
+import {
+  Attempt,
+  selectTime,
+  SplitFile,
+  splitFileIsModified
+}                               from '~/util/splits';
+import {Component, Vue, Watch}  from 'nuxt-property-decorator';
+import {stringTimeToSeconds}    from '~/util/durations';
+import VueSlider                from 'vue-slider-component';
+import {whithLoadAsync}         from '~/util/loading';
+import {asArray}                from '~/util/util';
+import store, {Store}           from '~/util/store';
+import {offload}                from '~/util/offloadWorker';
+import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -171,7 +189,7 @@ export default class SplitsDisplay extends Vue {
       newVal.text()
         .then(text => {
           // Not very elegant, but efficient and decently fast
-          store.state.hasGameTime = text.includes('<GameTime>');
+          this.globalState.hasGameTime = text.includes('<GameTime>');
 
           return offload(OffloadWorkerOperation.XML_PARSE_TEXT, text);
         })
@@ -181,12 +199,18 @@ export default class SplitsDisplay extends Vue {
           if (!this.parsedSplits) // Should never happen, but it's important for type safety
             return;
 
-          store.state.useRealTime = !store.state.hasGameTime;
-          store.state.splitFile   = this.parsedSplits;
+          this.globalState.useRealTime = !this.globalState.hasGameTime;
+          this.globalState.splitFile   = this.parsedSplits;
           splitFileIsModified(false);
         })
         .finally(() => endLoad());
     });
+  }
+
+  @Watch('globalState', {deep: true})
+  onStateUpdate(newVal: Store) {
+    // Worker state must be updated separately because
+    offload(OffloadWorkerOperation.UPDATE_STORE_DATA, newVal);
   }
 
   @Watch('parsedSplits')
@@ -206,5 +230,9 @@ export default class SplitsDisplay extends Vue {
 <style lang="scss" scoped>
 .attempt-selection-slider {
   margin-bottom: 2rem;
+}
+
+.main-card {
+  background-color: transparent;
 }
 </style>

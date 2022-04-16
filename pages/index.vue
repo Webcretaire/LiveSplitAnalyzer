@@ -1,8 +1,8 @@
 <template>
   <div class="text-center">
     <main>
-      <img class="logo mt-5" src="~/assets/images/logo_flat.png"/>
-      <h1 class="mt-4 mb-3">LiveSplit Analyzer</h1>
+      <img :class="logoClasses" src="~/assets/images/logo_flat.png"/>
+      <h1 class="mb-3">LiveSplit Analyzer</h1>
       <p>This tool extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
       <SplitsDisplay class="mt-4"/>
@@ -20,7 +20,7 @@
       </a>
     </footer>
 
-    <download-splits v-if="canDownload"/>
+    <download-splits v-if="loadedSplitfile"/>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
     <loading-modal v-if="loadingCallback" :callback="loadingCallback"/>
@@ -46,8 +46,12 @@ export default class IndexPage extends Vue {
 
   confirmCallback: Function | null = null;
 
-  get canDownload() {
+  get loadedSplitfile() {
     return store.state.splitFile?.Run != undefined;
+  }
+
+  get logoClasses() {
+    return this.loadedSplitfile ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
   }
 
   created() {
@@ -111,5 +115,11 @@ footer {
   height: 15rem;
   max-height: 50vh;
   filter: drop-shadow(0 0 0.5rem black);
+  transition: all 0.5s;
+}
+
+.logo-small {
+  height: 8rem;
+  max-height: 30vh;
 }
 </style>

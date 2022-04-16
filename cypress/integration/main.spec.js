@@ -41,13 +41,15 @@ describe('Main page', () => {
   });
 
   it('Attempt overview works properly', () => {
-    cy.get('#AttemptOverviewCard').within(() => {
-      // PB should be selected by default
-      cy.get('h4.card-title').first().should('have.text', 'Personal Best');
-      openCard();
-      // Check that PB time and timesave are computed properly
-      cy.get('h3').first().should('contain.text', 'PB Overview (18m38.83s total)');
-      cy.get('h3').eq(1).should('contain.text', 'Possible timesave (45.81s total)');
+    // Open second tab
+    cy.get('a.nav-link[aria-posinset="2"').click();
+
+    // PB should be selected by default
+    cy.get('#AttemptOverviewTimeCard').within(() => {
+      cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (18m38.83s total)');
+    });
+    cy.get('#AttemptOverviewTimesaveCard').within(() => {
+      cy.get('h4.card-title').first().should('have.text', 'Possible timesave (45.81s total)');
     });
 
     // Select another attempt that's not PB
@@ -56,16 +58,18 @@ describe('Main page', () => {
       cy.get('input[type="number"]').clear().type('100');
     });
 
-    cy.get('#AttemptOverviewCard').within(() => {
-      // Title should have changed
-      cy.get('h4.card-title').first().should('have.text', 'Attempt n°100');
-      // Check that time and timesave updated properly
-      cy.get('h3').first().should('contain.text', 'Attempt Overview (18m49.24s total)');
-      cy.get('h3').eq(1).should('contain.text', 'Possible timesave (56.23s total)');
+    cy.get('#AttemptOverviewTimeCard').within(() => {
+      cy.get('h4.card-title').first().should('have.text', 'Attempt n°100 overview (18m49.24s total)');
+    });
+
+    cy.get('#AttemptOverviewTimesaveCard').within(() => {
+      cy.get('h4.card-title').first().should('contain.text', 'Possible timesave (56.23s total)');
     });
   });
 
   it('Split names are extracted properly', () => {
+    // Open last tab (actually not mandatory because tabs are not loaded lazily)
+    cy.get('a.nav-link[aria-posinset="4"').click();
     const splits = [];
     cy.get('.SingleSplitCard h3')
       .each(el => splits.push(cleanText(el.text())))

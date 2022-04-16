@@ -1,17 +1,16 @@
 <template>
-  <collapsible-card id="AttemptOverviewCard" class="text-center" :title="title">
-    <hr/>
-    <h3 class="text-center mb-3">
-      {{ isPb ? 'PB' : 'Attempt' }} Overview ({{ secondsToFormattedString(AttemptTime) }} total)
-    </h3>
-    <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
-    <hr/>
-    <h3 class="text-center mb-3">Possible timesave ({{ secondsToFormattedString(AttemptTimesave) }} total)</h3>
-    <loading-switch v-model="sortByTimesave" class = "mt-2 mb-4">
-      Sort by possible timesave
-    </loading-switch>
-    <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
-  </collapsible-card>
+  <div>
+    <collapsible-card id="AttemptOverviewTimeCard" class="text-center" :title="titleAttempt">
+      <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
+    </collapsible-card>
+
+    <collapsible-card id="AttemptOverviewTimesaveCard" class="text-center" :title="titleTimesave">
+      <loading-switch v-model="sortByTimesave" class="mt-2 mb-4">
+        Sort by possible timesave
+      </loading-switch>
+      <Plotly v-if="renderGraph" :data="plotDataTimesave()" :layout="layout" :display-mode-bar="true"/>
+    </collapsible-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,8 +51,12 @@ export default class AttemptOverview extends Vue {
 
   layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
-  get title() {
-    return this.isPb ? 'Personal Best' : `Attempt n°${this.attempt['@_id']}`;
+  get titleAttempt() {
+    return `${this.isPb ? 'Personal Best' : `Attempt n°${this.attempt['@_id']}`} overview (${ secondsToFormattedString(this.attemptTime) } total)`;
+  }
+
+  get titleTimesave() {
+    return `Possible timesave (${ secondsToFormattedString(this.attemptTimesave) } total)`;
   }
 
   get AttemptSegments() {
@@ -71,11 +74,11 @@ export default class AttemptOverview extends Vue {
     });
   }
 
-  get AttemptTime() {
+  get attemptTime() {
     return this.AttemptSplitTimes.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  get AttemptSplitTimesaves() {
+  get attemptSplitTimesaves() {
     let timeSaveSoFar = 0;
 
     return this.run.Segments.Segment.map((segment, index) => {
@@ -92,8 +95,8 @@ export default class AttemptOverview extends Vue {
     });
   }
 
-  get AttemptTimesave() {
-    return this.AttemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
+  get attemptTimesave() {
+    return this.attemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
   makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {
@@ -128,13 +131,13 @@ export default class AttemptOverview extends Vue {
   plotDataTimesave() {
     const labels = this.run.Segments.Segment.map((segment, i) => {
       // We need to introduce this variable otherwise TS is too dumb to realise that what we're doing is safe
-      const ast = this.AttemptSplitTimesaves[i];
+      const ast = this.attemptSplitTimesaves[i];
       return `${segment.Name} (${ast ? secondsToFormattedString(ast) : ''})`;
     });
 
     return this.makePlotData(
       'Attempt compared to golds',
-      this.AttemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
+      this.attemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
       labels,
       this.sortByTimesave
     );

@@ -1,8 +1,5 @@
 <template>
   <collapsible-card title="Comparisons">
-    <b-button variant="outline-info" @click="openComparisonEditor" class="mb-2">
-      Edit comparisons
-    </b-button>
     <multiselect v-model="referenceComparison" :options="comparisons" placeholder="Pick a reference comparison"
                  class="mb-2"/>
     <div v-if="referenceComparison">
@@ -34,7 +31,6 @@ import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import Multiselect            from 'vue-multiselect';
 import {stringTimeToSeconds}  from '~/util/durations';
 import {asArray}              from '~/util/util';
-import {GlobalEventEmitter}   from '~/util/globalEvents';
 
 const SOB_LABEL = 'Sum of Best';
 
@@ -141,10 +137,6 @@ export default class ComparisonsDisplay extends Vue {
     });
 
     return out;
-  }
-
-  openComparisonEditor() {
-    GlobalEventEmitter.$emit('openModal', 'ComparisonEditorModal');
   }
 }
 </script>

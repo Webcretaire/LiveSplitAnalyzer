@@ -81,12 +81,17 @@ export default class SplitDisplay extends Vue {
 
   gold: XYCoordinates = {x: 0, y: 0};
 
+  get useRealTime() {
+    return store.state.useRealTime;
+  }
+
   /**
    * For some reason layout needs to be a data property or a function (a computed property will be cached and never
    * change), and it needs to be an arrow function otherwise we get `_vm.layout is not a function`
    */
   @Watch('gold')
   @Watch('timesWithPositiveIds')
+  @Watch('graphYAxisToZero')
   updateLayout() {
     const l: any = {
       title: 'Time history',
@@ -168,6 +173,14 @@ export default class SplitDisplay extends Vue {
   @Watch('timesWithPositiveIds', {immediate: true})
   updateTimesSeconds(newVal: SegmentHistoryTime[]) {
     offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, newVal).then(r => this.timesSeconds = r);
+  }
+
+  @Watch('useRealTime')
+  updateTimesAfterUseRealTimeChange() {
+    this.$nextTick(() => {
+      offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, this.timesWithPositiveIds)
+        .then(r => this.timesSeconds = r);
+    });
   }
 
   get collapseName() {
@@ -304,6 +317,7 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .split-icon {
     object-fit: contain;
     max-width: 100%;

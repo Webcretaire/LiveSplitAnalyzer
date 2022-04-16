@@ -1,8 +1,6 @@
 <template>
-  <b-modal :ref="modalRef" title="Comparison editor" class="text-center" @hidden="destroyModal" hide-footer centered
-           size="lg">
-    <h3 class="text-center">Create a balanced comparison</h3>
-    <table role="presentation" class="w-100">
+  <collapsible-card id="ComparisonCreatorCard" title="Create a balanced comparison">
+    <table role="presentation" class="w-100 mt-4">
       <tbody>
       <tr>
         <td class="text-right pr-2">
@@ -24,8 +22,8 @@
           Factor
           <span v-b-tooltip.hover title="How much time to add to each of your golds (as a percentage)"
                 class="help-question">
-            <font-awesome-icon icon="circle-question"/>
-          </span>
+              <font-awesome-icon icon="circle-question"/>
+            </span>
         </td>
         <td>
           <b-form-input type="number" v-model.number="balancedFactor" min="0" debounce="500" step="0.01"/>
@@ -36,8 +34,8 @@
           Target time
           <span v-b-tooltip.hover title="Automatically determine time factor based on a target total time (in seconds)"
                 class="help-question">
-            <font-awesome-icon icon="circle-question"/>
-          </span>
+              <font-awesome-icon icon="circle-question"/>
+            </span>
         </td>
         <td>
           <time-selector v-model="targetTime"/>
@@ -50,23 +48,11 @@
         Create
       </b-button>
     </div>
-
-    <div v-if="deletableComparisons.length">
-      <hr/>
-      <h3 class="text-center">Delete comparison</h3>
-      <multiselect style="max-width: 30rem" class="m-auto" v-model="comparisonsToDelete" :options="deletableComparisons" multiple/>
-      <div class="text-center">
-        <b-button @click="deleteComparisons" class="mt-2" variant="danger" :disabled="!comparisonsToDelete.length">
-          Delete
-        </b-button>
-      </div>
-    </div>
-  </b-modal>
+  </collapsible-card>
 </template>
 
 <script lang="ts">
 import {
-  availableComparisons,
   cumulatedSumOfBests,
   splitFileIsModified,
   Segments,
@@ -79,27 +65,16 @@ import {asArray}                  from '~/util/util';
 import {secondsToLivesplitFormat} from '~/util/durations';
 import {whithLoad}                from '~/util/loading';
 import Multiselect                from 'vue-multiselect';
-import {GlobalEventEmitter}       from '~/util/globalEvents';
 
 @Component({components: {Multiselect}})
-export default class ComparisonEditorModal extends mixins(BaseModal) {
-  modalRef: string = 'ComparisonEditorModal';
-
+export default class ComparisonCreator extends mixins(BaseModal) {
   comparisonName: string = '';
-
-  comparisonsToDelete: string[] = [];
 
   targetTime: number = this.selectedSobTotal;
 
   balancedFactor: number = 0;
 
   useTargetTime: boolean = false;
-
-  get deletableComparisons() {
-    if (!store.state.splitFile.Run?.Segments) return [];
-
-    return availableComparisons(store.state.splitFile.Run?.Segments).filter(s => s != 'Personal Best');
-  }
 
   get segments(): Segments {
     if (!store.state.splitFile.Run?.Segments) {
@@ -179,39 +154,10 @@ export default class ComparisonEditorModal extends mixins(BaseModal) {
       variant: 'success'
     });
   }
-
-  deleteComparisons() {
-    GlobalEventEmitter.$emit('openConfirm', `Delete ${this.comparisonsToDelete.join(', ')}?`, () => {
-      splitFileIsModified(true);
-
-      this.segments.Segment.forEach((segment, index, segArray) => {
-        const splitTimes = asArray(segArray[index].SplitTimes.SplitTime);
-
-        segArray[index].SplitTimes.SplitTime = splitTimes.filter(
-          (splitTime: SplitTime) => !this.comparisonsToDelete.includes(splitTime['@_name'])
-        );
-      });
-
-      this.$bvToast.toast(`Comparison${this.comparisonsToDelete.length == 1 ? '' : 's'} successfully deleted`, {
-        title: this.comparisonsToDelete.join(', '),
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'success'
-      });
-
-      this.comparisonsToDelete = [];
-
-      GlobalEventEmitter.$emit('closeConfirm');
-    });
-  }
 }
 </script>
 
 <style scoped lang="scss">
-h3 {
-  font-size: 1.25rem;
-}
-
 .help-question {
   font-size: 1rem;
 }

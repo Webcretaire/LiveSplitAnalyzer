@@ -8,7 +8,7 @@
 @import "vue-multiselect/dist/vue-multiselect.min.css";
 
 body {
-  background-color: #262626;
+  background-color: rgb(20, 23, 33);
   box-shadow: inset 0 0 8rem 1rem black;
 }
 
@@ -50,4 +50,31 @@ h2, h3 {
 
 .text-green {
   color: green;
+}
+
+.main-tabs {
+  background-color: rgba(43, 72, 168, 0.2);
+
+  .card-header {
+    a {
+      color: white;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .card-header, .tab-content {
+    border: 1px solid white;
+  }
+
+  .tab-content {
+    border-top: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+
+    .tab-pane.card-body {
+      padding-bottom: 0
+    }
+  }
 }

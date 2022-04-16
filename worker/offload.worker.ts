@@ -1,10 +1,12 @@
 import {
   deleteAttemptBeforeNumber,
-  goldCoordinatesFromSecondsArray, mergeSplitIntoNextOne,
+  goldCoordinatesFromSecondsArray,
+  mergeSplitIntoNextOne,
   segTimeArrayToSeconds
-} from '~/util/splitProcessing';
+}                                                     from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import {xmlParser}                                    from '~/util/xml';
+import store, {Store}                                 from '~/util/store';
 
 const ctx: Worker = self as any; // See https://stackoverflow.com/a/50420456
 
@@ -35,6 +37,10 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE:
       out = mergeSplitIntoNextOne(a[0], a[1]);
+      break;
+    case OffloadWorkerOperation.UPDATE_STORE_DATA:
+      Object.assign(store.state, a[0]);
+      break;
   }
 
   answer(e, out);

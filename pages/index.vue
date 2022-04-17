@@ -86,10 +86,11 @@ export default class IndexPage extends Vue {
 
 <style scoped lang="scss">
 main {
-  min-height: calc(100vh - 4rem);
+  min-height: calc(100vh - 3.5rem);
 }
 
 footer {
+  line-height: 3.5rem;
   font-weight: 300;
 }
 

@@ -4,7 +4,7 @@
       <font-awesome-icon icon="chevron-left" :rotation="visible ? 270 : null"/>
     </b-button>
     <b-collapse v-model="visible" :id="id">
-      <div v-if="visible">
+      <div v-if="visible || !lazy">
         <slot/>
       </div>
     </b-collapse>
@@ -25,6 +25,9 @@ export default class CollapsibleCard extends Vue {
 
   @Prop({default: false})
   startsOpen!: boolean;
+
+  @Prop({default: true})
+  lazy!: boolean;
 
   created() {
     this.visible = this.startsOpen;

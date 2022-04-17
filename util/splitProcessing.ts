@@ -1,5 +1,6 @@
 import {
   Attempt,
+  AttemptHistory,
   Run,
   Segment,
   SegmentHistoryTime,
@@ -89,3 +90,11 @@ export const mergeSplitIntoNextOne = (segments: Segment[], chosenSplitIndex: num
 
   return segments;
 };
+
+export const computePbFromAttemptHistory = (history: AttemptHistory) => asArray(history.Attempt)
+  .reduce((curLowest: Attempt | null, cur: Attempt) => {
+    const curTime = selectTime(cur);
+    if (!curTime) return curLowest;
+    const compare = selectTime(curLowest) || '999:59:59.99';
+    return !curLowest || stringTimeToSeconds(curTime) < stringTimeToSeconds(compare) ? cur : curLowest;
+  }, null);

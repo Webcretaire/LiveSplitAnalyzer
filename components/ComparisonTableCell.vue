@@ -47,11 +47,11 @@ export default class ComparisonTableCell extends Vue {
   doEditValue(newVal: number) {
     const delta = newVal - this.cellData.value.time;
 
-    const segments = store.state.splitFile.Run.Segments.Segment;
+    const segments = store.state.splitFile!.Run.Segments.Segment;
 
     for (let i = this.cellData.index; i < segments.length; ++i) {
       const comparisons = asArray(
-        store.state.splitFile.Run.Segments.Segment[i].SplitTimes.SplitTime
+        store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime
       );
 
       const relevantComparison: SplitTime | undefined = comparisons.find(

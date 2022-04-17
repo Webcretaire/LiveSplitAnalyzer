@@ -1,6 +1,5 @@
 <template>
   <collapsible-card id="AttemptsStatsCard" class="text-center" title="Attempts stats">
-    <hr/>
     <loading-switch v-model="showResets" class="mb-2">
       Include reset runs in X axis
     </loading-switch>

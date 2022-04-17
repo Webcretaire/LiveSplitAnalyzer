@@ -30,13 +30,13 @@ export default class ComparisonRemover extends mixins(BaseModal) {
   comparisonsToDelete: string[] = [];
 
   get deletableComparisons() {
-    if (!store.state.splitFile.Run?.Segments) return [];
+    if (!store.state.splitFile!.Run?.Segments) return [];
 
-    return availableComparisons(store.state.splitFile.Run?.Segments).filter(s => s != 'Personal Best');
+    return availableComparisons(store.state.splitFile!.Run?.Segments).filter(s => s != 'Personal Best');
   }
 
   get segments(): Segments {
-    if (!store.state.splitFile.Run?.Segments) {
+    if (!store.state.splitFile!.Run?.Segments) {
       this.$bvToast.toast(`No splitfile selected`, {
         title: 'Error',
         autoHideDelay: 5000,
@@ -46,7 +46,7 @@ export default class ComparisonRemover extends mixins(BaseModal) {
       return {Segment: []};
     }
 
-    return store.state.splitFile.Run.Segments;
+    return store.state.splitFile!.Run.Segments;
   }
 
   deleteComparisons() {

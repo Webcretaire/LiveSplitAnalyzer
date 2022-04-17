@@ -53,7 +53,7 @@ describe('Main page', () => {
     });
 
     // Select another attempt that's not PB
-    cy.get('#OptionsCard').within(() => {
+    cy.get('.tab-pane.active .card').first().within(() => {
       openCard();
       cy.get('input[type="number"]').clear().type('100');
     });
@@ -63,7 +63,7 @@ describe('Main page', () => {
     });
 
     cy.get('#AttemptOverviewTimesaveCard').within(() => {
-      cy.get('h4.card-title').first().should('contain.text', 'Possible timesave (56.23s total)');
+      cy.get('h4.card-title').first().should('have.text', 'Possible timesave (56.23s total)');
     });
   });
 

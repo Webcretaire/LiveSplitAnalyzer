@@ -1,4 +1,5 @@
 import {
+  computePbFromAttemptHistory,
   deleteAttemptBeforeNumber,
   goldCoordinatesFromSecondsArray,
   mergeSplitIntoNextOne,
@@ -6,7 +7,7 @@ import {
 }                                                     from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import {xmlParser}                                    from '~/util/xml';
-import store, {Store}                                 from '~/util/store';
+import store                                          from '~/util/store';
 
 const ctx: Worker = self as any; // See https://stackoverflow.com/a/50420456
 
@@ -40,6 +41,9 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.UPDATE_STORE_DATA:
       Object.assign(store.state, a[0]);
+      break;
+    case OffloadWorkerOperation.GET_PB:
+      out = computePbFromAttemptHistory(a[0]);
       break;
   }
 

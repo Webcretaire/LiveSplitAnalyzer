@@ -29,7 +29,6 @@ import {
   Attempt, Run,
   Segment,
   selectTime,
-  SplitFile,
   splitFileIsModified,
   SplitTime
 }                                                      from '~/util/splits';
@@ -44,19 +43,16 @@ import {OffloadWorkerOperation}                        from '~/util/offloadworke
 
 @Component
 export default class Toolbox extends Vue {
-  @Prop()
-  value!: SplitFile;
-
   visible: boolean = false;
 
   @Prop()
   currentAttemptNumber!: number;
 
   @Prop()
-  pb!: number;
+  pb!: Attempt | null;
 
   get splits() {
-    return this.value.Run.Segments.Segment;
+    return store.state.splitFile!.Run.Segments.Segment;
   }
 
   reconstructAttemptTime(id: number) {
@@ -68,7 +64,7 @@ export default class Toolbox extends Vue {
   }
 
   get allRunAttempts(): Attempt[] {
-    return asArray(this.value.Run.AttemptHistory.Attempt);
+    return asArray(store.state.splitFile!.Run.AttemptHistory.Attempt);
   }
 
   get pbFromSplitHistory(): Attempt | undefined {
@@ -121,7 +117,7 @@ export default class Toolbox extends Vue {
         return;
       }
       let timeSoFar = {RealTime: 0, GameTime: 0};
-      for (let i = 0; i < this.value.Run.Segments.Segment.length; ++i) {
+      for (let i = 0; i < store.state.splitFile!.Run.Segments.Segment.length; ++i) {
         const st                 = this.splits[i].SplitTimes.SplitTime || [];
         const times: SplitTime[] = asArray(st);
         const realPBTime         = asArray(this.splits[i].SegmentHistory.Time).find(t => t['@_id'] == realPB?.['@_id']);
@@ -145,15 +141,11 @@ export default class Toolbox extends Vue {
         }
 
         // It appears sometimes PB is so messed up there is no SplitTimes property
-        if (!this.value.Run.Segments.Segment[i].SplitTimes)
-          this.value.Run.Segments.Segment[i].SplitTimes = {SplitTime: []};
+        if (!store.state.splitFile!.Run.Segments.Segment[i].SplitTimes)
+          store.state.splitFile!.Run.Segments.Segment[i].SplitTimes = {SplitTime: []};
 
-        console.log(this.value.Run.Segments.Segment[i].SplitTimes.SplitTime);
-
-        this.value.Run.Segments.Segment[i].SplitTimes.SplitTime = out;
+        store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime = out;
       }
-
-      this.$emit('input', this.value);
 
       this.$bvToast.toast(`PB time for each split was updated with run ${realPB?.['@_id']}`, {
         title: 'Splits updated',
@@ -169,14 +161,14 @@ export default class Toolbox extends Vue {
       whithLoadAsync(
         (endLoad: Function) => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,
-          store.state.splitFile.Run,
-          this.pb,
+          store.state.splitFile!.Run,
+          store.state.PB?.['@_id'],
           this.currentAttemptNumber
         ).then((r: Run) => {
           splitFileIsModified(true);
 
-          store.state.splitFile.Run              = r;
-          store.state.splitFile.Run.AttemptCount = asArray(r.AttemptHistory.Attempt).length;
+          store.state.splitFile!.Run              = r;
+          store.state.splitFile!.Run.AttemptCount = asArray(r.AttemptHistory.Attempt).length;
           endLoad();
         })
       );

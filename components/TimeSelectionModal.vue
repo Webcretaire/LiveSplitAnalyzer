@@ -3,7 +3,7 @@
            @hidden="destroyModal">
     <div class="text-center m-2">
       <h3 class="mb-3">{{ message }}</h3>
-      <time-selector v-model="value" class="mb-3"/>
+      <time-selector v-model="internalValue" class="mb-3"/>
       <b-button variant="success" @click="applyCallback">OK</b-button>
       <b-button variant="danger" @click="hideModal">Cancel</b-button>
     </div>
@@ -11,9 +11,8 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, mixins}    from 'nuxt-property-decorator';
-import BaseModal            from '~/components/BaseModal.vue';
-import {GlobalEventEmitter} from '~/util/globalEvents';
+import {Component, Prop, mixins, Watch} from 'nuxt-property-decorator';
+import BaseModal                        from '~/components/BaseModal.vue';
 
 @Component
 export default class TimeSelectionModal extends mixins(BaseModal) {
@@ -26,11 +25,18 @@ export default class TimeSelectionModal extends mixins(BaseModal) {
   callback!: Function;
 
   @Prop()
-  value!:number;
+  value!: number;
+
+  internalValue: number = 0;
+
+  @Watch('value', {immediate: true})
+  onValueUpdate(newVal: number) {
+    this.internalValue = newVal;
+  }
 
   applyCallback() {
-    this.$emit('input', this.value);
-    this.callback(this.value);
+    this.$emit('input', this.internalValue);
+    this.callback(this.internalValue);
     this.hideModal();
   }
 }

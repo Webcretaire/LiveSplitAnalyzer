@@ -71,7 +71,7 @@ export default class SplitDisplay extends Vue {
   @Prop()
   splitIndex!: number;
 
-  segments: Segment[] = store.state.splitFile.Run.Segments.Segment;
+  segments: Segment[] = store.state.splitFile!.Run.Segments.Segment;
 
   collapseVisible: boolean = false;
 
@@ -92,6 +92,7 @@ export default class SplitDisplay extends Vue {
   @Watch('gold')
   @Watch('timesWithPositiveIds')
   @Watch('graphYAxisToZero')
+  @Watch('graphCurrentAttemptHline')
   updateLayout() {
     const l: any = {
       title: 'Time history',
@@ -119,6 +120,8 @@ export default class SplitDisplay extends Vue {
         }
       ]
     };
+
+    l.shapes = [];
 
     const t = selectTime(this.currentAttempt);
     if (this.graphCurrentAttemptHline && this.currentAttemptNumber && t) {
@@ -258,7 +261,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get nextSplit() {
-    return store.state.splitFile.Run.Segments.Segment[this.splitIndex + 1];
+    return store.state.splitFile!.Run.Segments.Segment[this.splitIndex + 1];
   }
 
   doMergeNextSplit(endLoad: Function) {
@@ -268,15 +271,15 @@ export default class SplitDisplay extends Vue {
 
     offload(
       OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE,
-      store.state.splitFile.Run.Segments.Segment,
+      store.state.splitFile!.Run.Segments.Segment,
       this.splitIndex
     ).then(segments => {
       splitFileIsModified(true);
 
-      const autosplitterSettings = store.state.splitFile.Run.AutoSplitterSettings;
+      const autosplitterSettings = store.state.splitFile!.Run.AutoSplitterSettings;
       if (autosplitterSettings?.Splits?.Split)
         autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
-      store.state.splitFile.Run.Segments.Segment = segments;
+      store.state.splitFile!.Run.Segments.Segment = segments;
 
       this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
         title: 'Splits merged',

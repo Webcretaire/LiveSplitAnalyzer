@@ -5,11 +5,11 @@
  */
 
 
-/*!
- * vuex v3.6.2
- * (c) 2021 Evan You
- * @license MIT
- */
+/**
+  * vue-class-component v7.0.1
+  * (c) 2015-present Evan You
+  * @license MIT
+  */
 
 
 /*
@@ -66,13 +66,6 @@ object-assign
  * Copyright (c) 2014-2015, Jon Schlinkert.
  * Licensed under the MIT License.
  */
-
-
-/**
-  * vue-class-component v7.0.1
-  * (c) 2015-present Evan You
-  * @license MIT
-  */
 
 
 /*!
@@ -160,13 +153,6 @@ PERFORMANCE OF THIS SOFTWARE.
   */
 
 
-/**
-  * vue-class-component v7.0.1
-  * (c) 2015-present Evan You
-  * @license MIT
-  */
-
-
 /*!
   * vue-router v3.5.3
   * (c) 2021 Evan You
@@ -178,3 +164,10 @@ PERFORMANCE OF THIS SOFTWARE.
  * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
+
+
+/**
+  * vue-class-component v7.0.1
+  * (c) 2015-present Evan You
+  * @license MIT
+  */

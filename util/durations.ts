@@ -54,15 +54,18 @@ export const secondsToFormattedString = (time: number): string => {
 export const secondsToLivesplitFormat = (time: number): string => {
   let out = '';
 
-  out += `${Math.floor(time / 3600)}:`;
-  time = time % 3600;
+  const hours = Math.trunc(time / 3600).toFixed();
+  out += `${hours.padStart(2, '0')}:`;
+  time        = time % 3600;
 
-  const minutes = Math.floor(time / 60);
-  out += `${minutes < 10 ? '0' : ''}${minutes}:`;
+  const minutes = Math.trunc(time / 60).toFixed();
+  out += `${minutes.padStart(2, '0')}:`;
   time          = time % 60;
 
-  // Math.abs is mostly here to avoid -0 seconds, just 0 is prettier
-  out += `${(time < 10) ? '0' : ''}${Math.abs(+time.toFixed(6))}`;
+  const wholeSeconds = Math.trunc(time);
+  // Remove any digit smaller than 0.1 microseconds
+  const microseconds = (time - wholeSeconds).toFixed(7).substring(2);
+  out += `${wholeSeconds.toFixed().padStart(2, '0')}.${microseconds.padEnd(7, '0')}`;
 
   return out;
 };

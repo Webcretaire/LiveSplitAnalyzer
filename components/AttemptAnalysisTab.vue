@@ -2,7 +2,9 @@
   <div>
     <collapsible-card title="Options" :lazy="false">
       <attempt-selector v-model="currentAttemptNumber"/>
-      <b-col cols="10" offset="1"><hr/></b-col>
+      <b-col cols="10" offset="1">
+        <hr/>
+      </b-col>
       <loading-switch v-model="displayLabels" class="mb-2">
         Display labels for doughnut charts
       </loading-switch>
@@ -17,9 +19,10 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'nuxt-property-decorator';
+import {Component, Vue, Watch} from 'nuxt-property-decorator';
 import store                   from '~/util/store';
 import {asArray}               from '~/util/util';
+import {Attempt}               from '~/util/splits';
 
 @Component
 export default class AttemptAnalysisTab extends Vue {
@@ -31,6 +34,12 @@ export default class AttemptAnalysisTab extends Vue {
 
   get PB() {
     return this.globalState.PB;
+  }
+
+  @Watch('PB', {immediate: true})
+  onPbUpdate(newVal: Attempt | null) {
+    if (newVal)
+      this.currentAttemptNumber = newVal?.['@_id'];
   }
 
   get isPb(): boolean {

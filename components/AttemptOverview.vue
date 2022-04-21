@@ -142,7 +142,5 @@ export default class AttemptOverview extends Vue {
       this.sortByTimesave
     );
   }
-
-  secondsToFormattedString = secondsToFormattedString;
 }
 </script>

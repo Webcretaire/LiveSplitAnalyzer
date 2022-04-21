@@ -2,7 +2,9 @@
   <div>
     <collapsible-card title="Options" :lazy="false">
       <attempt-selector v-model="currentAttemptNumber"/>
-      <b-col cols="10" offset="1"><hr/></b-col>
+      <b-col cols="10" offset="1">
+        <hr/>
+      </b-col>
       <loading-switch v-model="graphYAxisToZero" class="mt-2 mb-2">
         Graphs' Y axis starts at zero
       </loading-switch>
@@ -23,8 +25,9 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import {Segment}              from '~/util/splits';
+import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
+import store                         from '~/util/store';
+import {Attempt, Segment}            from '~/util/splits';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
@@ -36,5 +39,15 @@ export default class SplitsDisplayTab extends Vue {
 
   @Prop()
   splits!: Segment[];
+
+  get PB() {
+    return store.state.PB;
+  }
+
+  @Watch('PB', {immediate: true})
+  onPbUpdate(newVal: Attempt | null) {
+    if (newVal)
+      this.currentAttemptNumber = newVal?.['@_id'];
+  }
 };
 </script>

@@ -140,10 +140,6 @@ export default class SplitsDisplay extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.attempt-selection-slider {
-  margin-bottom: 2rem;
-}
-
 .main-card {
   background-color: transparent;
 }

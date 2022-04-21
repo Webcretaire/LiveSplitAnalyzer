@@ -25,7 +25,6 @@ import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import {Attempt, selectTime}         from '~/util/splits';
 import {asArray}                     from '~/util/util';
 import store                         from '~/util/store';
-import {stringTimeToSeconds}         from '~/util/durations';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -67,14 +66,15 @@ export default class SplitsDisplay extends Vue {
     this.internalValue = newVal;
   }
 
-  @Watch('PB', {immediate: true})
-  onPbUpdate(newVal: Attempt | null) {
-    this.internalValue = newVal?.['@_id'] || 1;
-  }
-
   @Watch('internalValue')
   onInternalValueChange(newVal: number) {
     this.$emit('input', newVal);
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.attempt-selection-slider {
+  margin-bottom: 2rem;
+}
+</style>

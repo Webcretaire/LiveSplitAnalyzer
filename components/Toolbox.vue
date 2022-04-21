@@ -34,7 +34,6 @@ import {
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {whithLoad, whithLoadAsync}                     from '~/util/loading';
-import {asArray}                                       from '~/util/util';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
@@ -57,18 +56,18 @@ export default class Toolbox extends Vue {
 
   reconstructAttemptTime(id: number) {
     return this.splits.reduce((curTime: number, s: Segment) => {
-      const time = selectTime(asArray(s.SegmentHistory.Time).find(t => t['@_id'] == id));
+      const time = selectTime((s.SegmentHistory?.Time || []).find(t => t['@_id'] == id));
       if (!time) return curTime;
       return stringTimeToSeconds(time) + curTime;
     }, 0);
   }
 
   get allRunAttempts(): Attempt[] {
-    return asArray(store.state.splitFile!.Run.AttemptHistory.Attempt);
+    return store.state.splitFile!.Run.AttemptHistory.Attempt;
   }
 
   get pbFromSplitHistory(): Attempt | undefined {
-    const completedRunsTimes = asArray(this.splits[this.splits.length - 1].SegmentHistory.Time).map(
+    const completedRunsTimes = (this.splits[this.splits.length - 1].SegmentHistory?.Time || []).map(
       t => ({
         id: t['@_id'],
         time: this.reconstructAttemptTime(t['@_id'])
@@ -119,8 +118,8 @@ export default class Toolbox extends Vue {
       let timeSoFar = {RealTime: 0, GameTime: 0};
       for (let i = 0; i < store.state.splitFile!.Run.Segments.Segment.length; ++i) {
         const st                 = this.splits[i].SplitTimes.SplitTime || [];
-        const times: SplitTime[] = asArray(st);
-        const realPBTime         = asArray(this.splits[i].SegmentHistory.Time).find(t => t['@_id'] == realPB?.['@_id']);
+        const times: SplitTime[] = st;
+        const realPBTime         = this.splits[i].SegmentHistory!.Time.find(t => t['@_id'] == realPB?.['@_id']);
         const out                = times.filter(t => t['@_name'] != 'Personal Best'); // Remove pre-existing PB time
 
         if (realPBTime) {
@@ -168,7 +167,7 @@ export default class Toolbox extends Vue {
           splitFileIsModified(true);
 
           store.state.splitFile!.Run              = r;
-          store.state.splitFile!.Run.AttemptCount = asArray(r.AttemptHistory.Attempt).length;
+          store.state.splitFile!.Run.AttemptCount = r.AttemptHistory.Attempt.length;
           endLoad();
         })
       );

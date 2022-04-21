@@ -18,7 +18,6 @@
 </template>
 
 <script lang="ts">
-
 import {
   Segment,
   SegmentHistoryTime,
@@ -31,7 +30,6 @@ import {GlobalEventEmitter}              from '~/util/globalEvents';
 import {singleSplitState}                from '~/util/singleSplit';
 import {formatTime, stringTimeToSeconds} from '~/util/durations';
 import {whithLoadAsync}                  from '~/util/loading';
-import {asArray}                         from '~/util/util';
 
 @Component
 export default class ManualGoldUpdateModal extends mixins(BaseModal) {
@@ -46,7 +44,8 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   ];
 
   get history() {
-    return [...asArray(this.split?.SegmentHistory.Time)] // Make a copy otherwise sort acts in place and messes up the whole page
+    // Make a copy otherwise sort acts in place and messes up the whole page
+    return [...(this.split?.SegmentHistory?.Time || [])]
       .filter(t => selectTime(t))
       .sort((t1, t2) => {
         const t1s = selectTime(t1);
@@ -64,8 +63,8 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
     splitFileIsModified(true);
 
     // Delete split in attempts
-    if (this.split?.SegmentHistory.Time)
-      this.split.SegmentHistory.Time = asArray(this.split.SegmentHistory.Time).filter(a => a['@_id'] != attempt['@_id']);
+    if (this.split?.SegmentHistory?.Time)
+      this.split.SegmentHistory.Time = this.split.SegmentHistory.Time.filter(a => a['@_id'] != attempt['@_id']);
 
     if (!this.split?.BestSegmentTime) return;
 

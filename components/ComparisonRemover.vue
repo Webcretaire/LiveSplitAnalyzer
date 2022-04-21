@@ -21,7 +21,6 @@ import {
 import {Component, mixins}        from 'nuxt-property-decorator';
 import BaseModal                  from '~/components/BaseModal.vue';
 import store                      from '~/util/store';
-import {asArray}                  from '~/util/util';
 import Multiselect                from 'vue-multiselect';
 import {GlobalEventEmitter}       from '~/util/globalEvents';
 
@@ -54,7 +53,7 @@ export default class ComparisonRemover extends mixins(BaseModal) {
       splitFileIsModified(true);
 
       this.segments.Segment.forEach((segment, index, segArray) => {
-        const splitTimes = asArray(segArray[index].SplitTimes.SplitTime);
+        const splitTimes = segArray[index].SplitTimes.SplitTime;
 
         segArray[index].SplitTimes.SplitTime = splitTimes.filter(
           (splitTime: SplitTime) => !this.comparisonsToDelete.includes(splitTime['@_name'])

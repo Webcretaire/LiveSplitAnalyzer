@@ -45,7 +45,7 @@ import {extractPng}                                from '~/util/pngExtractor';
 import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
 import {GlobalEventEmitter}                        from '~/util/globalEvents';
 import {singleSplitState}                          from '~/util/singleSplit';
-import {asArray, XYCoordinates}                    from '~/util/util';
+import {XYCoordinates}                             from '~/util/util';
 import {whithLoadAsync}                            from '~/util/loading';
 import store                                       from '~/util/store';
 import {offload}                                   from '~/util/offloadWorker';
@@ -209,7 +209,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get timesWithPositiveIds(): SegmentHistoryTime[] {
-    return asArray(this.split.SegmentHistory.Time).filter(t => t['@_id'] > 0);
+    return (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
   }
 
   get isNotLastSplit() {

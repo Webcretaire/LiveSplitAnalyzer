@@ -61,7 +61,6 @@ import {
 import {Component, Vue, Watch}  from 'nuxt-property-decorator';
 import VueSlider                from 'vue-slider-component';
 import {whithLoadAsync}         from '~/util/loading';
-import {asArray}                from '~/util/util';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
@@ -97,10 +96,9 @@ export default class SplitsDisplay extends Vue {
   }
 
   get runAttempts(): Attempt[] {
-    if (this.filterRuns)
-      return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt).filter(a => selectTime(a));
-    else
-      return asArray(this.parsedSplits?.Run.AttemptHistory.Attempt);
+    const attempts = this.parsedSplits?.Run.AttemptHistory.Attempt || [];
+
+    return this.filterRuns ? attempts.filter(a => selectTime(a)) : attempts;
   }
 
   @Watch('splitFile')

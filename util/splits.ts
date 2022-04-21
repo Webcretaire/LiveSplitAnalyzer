@@ -22,7 +22,7 @@ export interface Attempt extends OptionalRealAndGameTime {
 }
 
 export interface AttemptHistory {
-  'Attempt': Attempt | Attempt[];
+  'Attempt': Attempt[];
 }
 
 export interface RunMetadataVariable {
@@ -31,7 +31,7 @@ export interface RunMetadataVariable {
 }
 
 export interface RunMetadataVariables {
-  'Variable': RunMetadataVariable[] | RunMetadataVariable;
+  'Variable': RunMetadataVariable[];
 }
 
 export interface RunMetadataPlatform {
@@ -55,7 +55,7 @@ export interface SegmentHistoryTime extends OptionalRealAndGameTime {
 }
 
 export interface SegmentHistory {
-  'Time': SegmentHistoryTime | SegmentHistoryTime[];
+  'Time': SegmentHistoryTime[];
 }
 
 export interface SplitTime extends RealAndGameTime {
@@ -63,7 +63,7 @@ export interface SplitTime extends RealAndGameTime {
 }
 
 export interface SplitTimes {
-  'SplitTime': SplitTime | SplitTime[];
+  'SplitTime': SplitTime[];
 }
 
 export interface Segment {
@@ -71,7 +71,7 @@ export interface Segment {
   'Icon': string;
   'SplitTimes': SplitTimes;
   'BestSegmentTime': RealAndGameTime;
-  'SegmentHistory': SegmentHistory;
+  'SegmentHistory'?: SegmentHistory;
 }
 
 export interface Segments {
@@ -142,7 +142,7 @@ export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | n
 
 export const availableComparisons = (segments: Segments) => {
   return segments.Segment.reduce((acc: string[], segment: Segment) => {
-    const splitTime = asArray(segment.SplitTimes.SplitTime);
+    const splitTime = segment.SplitTimes.SplitTime;
 
     splitTime.forEach((s: SplitTime) => {
       if (!acc.includes(s['@_name']))

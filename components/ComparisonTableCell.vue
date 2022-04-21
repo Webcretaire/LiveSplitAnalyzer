@@ -24,7 +24,6 @@ import {
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import {GlobalEventEmitter}   from '~/util/globalEvents';
 import store                  from '~/util/store';
-import {asArray}              from '~/util/util';
 import {SplitTime}            from '~/util/splits';
 
 @Component
@@ -50,9 +49,7 @@ export default class ComparisonTableCell extends Vue {
     const segments = store.state.splitFile!.Run.Segments.Segment;
 
     for (let i = this.cellData.index; i < segments.length; ++i) {
-      const comparisons = asArray(
-        store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime
-      );
+      const comparisons = store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime;
 
       const relevantComparison: SplitTime | undefined = comparisons.find(
         comparison => comparison['@_name'] === this.comparisonName

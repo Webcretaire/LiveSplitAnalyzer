@@ -30,7 +30,6 @@ import {
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import Multiselect            from 'vue-multiselect';
 import {stringTimeToSeconds}  from '~/util/durations';
-import {asArray}              from '~/util/util';
 
 const SOB_LABEL = 'Sum of Best';
 
@@ -69,7 +68,7 @@ export default class ComparisonsDisplay extends Vue {
   get splitTimeswithSoB(): NameTime[][] {
     return this.segments.Segment.map(
       (segment, index) => [
-        ...asArray(segment.SplitTimes.SplitTime).map(t => {
+        ...segment.SplitTimes.SplitTime.map(t => {
           let outTime    = null;
           const selected = selectTime(t);
 

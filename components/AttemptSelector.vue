@@ -23,7 +23,6 @@
 import VueSlider                     from 'vue-slider-component';
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import {Attempt, selectTime}         from '~/util/splits';
-import {asArray}                     from '~/util/util';
 import store                         from '~/util/store';
 
 @Component({components: {VueSlider}})
@@ -45,9 +44,9 @@ export default class SplitsDisplay extends Vue {
 
   get runAttempts(): Attempt[] {
     if (this.filterRuns)
-      return asArray(store.state.splitFile!.Run.AttemptHistory.Attempt).filter(a => selectTime(a));
+      return store.state.splitFile!.Run.AttemptHistory.Attempt.filter(a => selectTime(a));
     else
-      return asArray(store.state.splitFile!.Run.AttemptHistory.Attempt);
+      return store.state.splitFile!.Run.AttemptHistory.Attempt;
   }
 
   get latestAttemptNumber(): number {

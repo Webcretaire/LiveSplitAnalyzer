@@ -16,7 +16,6 @@
 import {Vue, Component, Prop} from 'nuxt-property-decorator';
 import {Run, selectTime}      from '~/util/splits';
 import {stringTimeToSeconds}  from '~/util/durations';
-import {asArray}              from '~/util/util';
 
 @Component
 export default class RunOverview extends Vue {
@@ -24,13 +23,13 @@ export default class RunOverview extends Vue {
   run!: Run;
 
   get finishedRuns() {
-    return asArray(this.run.AttemptHistory.Attempt).filter(a => selectTime(a)).length;
+    return this.run.AttemptHistory.Attempt.filter(a => selectTime(a)).length;
   }
 
   get PBs() {
     let curPB = 999999;
 
-    return asArray(this.run.AttemptHistory.Attempt).filter(a => {
+    return this.run.AttemptHistory.Attempt.filter(a => {
       const t = selectTime(a);
       if (!t) return false;
       const time = stringTimeToSeconds(t);
@@ -43,7 +42,7 @@ export default class RunOverview extends Vue {
   }
 
   get runMetadata() {
-    return asArray(this.run.Metadata.Variables?.Variable);
+    return this.run.Metadata.Variables?.Variable;
   }
 
   visible: boolean = true;

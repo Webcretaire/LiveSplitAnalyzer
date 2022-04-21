@@ -21,7 +21,6 @@
 <script lang="ts">
 import {Component, Vue, Watch} from 'nuxt-property-decorator';
 import store                   from '~/util/store';
-import {asArray}               from '~/util/util';
 import {Attempt}               from '~/util/splits';
 
 @Component
@@ -47,7 +46,7 @@ export default class AttemptAnalysisTab extends Vue {
   }
 
   get currentAttempt() {
-    return asArray(this.globalState.splitFile!.Run.AttemptHistory.Attempt).find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
+    return this.globalState.splitFile!.Run.AttemptHistory.Attempt.find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
   }
 
   mounted() {

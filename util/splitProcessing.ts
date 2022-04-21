@@ -4,10 +4,12 @@ import {
   Run,
   Segment,
   SegmentHistoryTime,
-  selectTime
+  selectTime,
+  SplitFile
 }                                                      from '~/util/splits';
 import {asArray, XYCoordinates}                        from '~/util/util';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
+import {xmlParser}                                     from '~/util/xml';
 
 export const segTimeArrayToSeconds = (times: SegmentHistoryTime[]) => times.map((t) => {
   const time = selectTime(t);
@@ -29,7 +31,7 @@ export const goldCoordinatesFromSecondsArray = (times: Array<number | null>): XY
 
 export const deleteAttemptBeforeNumber = (run: Run, pb: number, attemptNumber: number) => {
   // Delete attempts from attempt Array
-  run.AttemptHistory.Attempt = asArray(run.AttemptHistory.Attempt).filter(
+  run.AttemptHistory.Attempt = run.AttemptHistory.Attempt.filter(
     (attempt: Attempt) => attempt['@_id'] == pb || attempt['@_id'] > attemptNumber
   );
 
@@ -37,7 +39,7 @@ export const deleteAttemptBeforeNumber = (run: Run, pb: number, attemptNumber: n
   run.Segments.Segment = run.Segments.Segment.map(segment => ({
     ...segment,
     SegmentHistory: {
-      Time: asArray(segment.SegmentHistory.Time).filter(
+      Time: (segment.SegmentHistory?.Time || []).filter(
         (time: SegmentHistoryTime) => time['@_id'] == pb || time['@_id'] > attemptNumber
       )
     }
@@ -49,8 +51,8 @@ export const deleteAttemptBeforeNumber = (run: Run, pb: number, attemptNumber: n
 export const mergeSplitIntoNextOne = (segments: Segment[], chosenSplitIndex: number) => {
   const chosenSplit                            = segments[chosenSplitIndex];
   const nextSplit                              = segments[chosenSplitIndex + 1];
-  const chosenSplitTimes: SegmentHistoryTime[] = asArray(chosenSplit.SegmentHistory.Time);
-  const nextSplitTimes: SegmentHistoryTime[]   = asArray(nextSplit.SegmentHistory.Time);
+  const chosenSplitTimes: SegmentHistoryTime[] = (chosenSplit.SegmentHistory?.Time || []);
+  const nextSplitTimes: SegmentHistoryTime[]   = (nextSplit.SegmentHistory?.Time || []);
 
   const newTimes = nextSplitTimes.map(nextSplitTime => {
     const out: SegmentHistoryTime = {'@_id': nextSplitTime['@_id']};
@@ -84,6 +86,7 @@ export const mergeSplitIntoNextOne = (segments: Segment[], chosenSplitIndex: num
   if (goldSplit.GameTime)
     nextSplit.BestSegmentTime.GameTime = goldSplit.GameTime;
 
+  if (!nextSplit.SegmentHistory) nextSplit.SegmentHistory = {Time: []};
   nextSplit.SegmentHistory.Time = newTimes;
 
   segments.splice(chosenSplitIndex, 1);
@@ -91,10 +94,29 @@ export const mergeSplitIntoNextOne = (segments: Segment[], chosenSplitIndex: num
   return segments;
 };
 
-export const computePbFromAttemptHistory = (history: AttemptHistory) => asArray(history.Attempt)
+export const computePbFromAttemptHistory = (history: AttemptHistory) => history.Attempt
   .reduce((curLowest: Attempt | null, cur: Attempt) => {
     const curTime = selectTime(cur);
     if (!curTime) return curLowest;
     const compare = selectTime(curLowest) || '999:59:59.99';
     return !curLowest || stringTimeToSeconds(curTime) < stringTimeToSeconds(compare) ? cur : curLowest;
   }, null);
+
+export const parseSplitFile = (fileContent: string): SplitFile => {
+  const out = xmlParser.parse(fileContent) as SplitFile;
+
+  // Make sure all properties that can be an array or an object are an array
+  if (out.Run.Metadata.Variables)
+    out.Run.Metadata.Variables.Variable = asArray(out.Run.Metadata.Variables.Variable);
+  out.Run.AttemptHistory.Attempt = asArray(out.Run.AttemptHistory.Attempt);
+  out.Run.Segments.Segment       = asArray(out.Run.Segments.Segment);
+  out.Run.Segments.Segment.forEach((val, i, arr) => {
+    if (val.SegmentHistory)
+      arr[i].SegmentHistory!.Time = asArray(val.SegmentHistory.Time);
+    arr[i].SplitTimes.SplitTime = asArray(val.SplitTimes.SplitTime);
+    // Name could be a number, force it to be a string
+    arr[i].Name                 = String(val.Name);
+  });
+
+  return out;
+};

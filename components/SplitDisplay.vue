@@ -145,7 +145,7 @@ export default class SplitDisplay extends Vue {
   };
 
   get isSubsplit() {
-    return this.split.Name.startsWith('-');
+    return String(this.split.Name).startsWith('-');
   }
 
   get bestTimeDisplay() {

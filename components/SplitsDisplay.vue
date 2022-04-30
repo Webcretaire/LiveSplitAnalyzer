@@ -64,7 +64,6 @@ import {whithLoadAsync}         from '~/util/loading';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
-import { BCollapse } from 'bootstrap-vue';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {

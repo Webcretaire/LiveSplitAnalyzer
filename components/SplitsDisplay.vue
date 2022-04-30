@@ -131,13 +131,13 @@ export default class SplitsDisplay extends Vue {
     offload(OffloadWorkerOperation.GET_PB, newVal.Run.AttemptHistory).then(PB => this.globalState.PB = PB);
   }
 
-  @Watch("widthValue")
+  @Watch('widthValue')
   panelWidthStore() {
-    localStorage.setItem("widthValue", JSON.stringify(this.widthValue));
+    localStorage.setItem('widthValue', JSON.stringify(this.widthValue));
   }
 
   mounted() {
-    const savedWidthValue = localStorage.getItem("widthValue");
+    const savedWidthValue = localStorage.getItem('widthValue');
     if (savedWidthValue) {
       this.widthValue = JSON.parse(savedWidthValue);
     } else {

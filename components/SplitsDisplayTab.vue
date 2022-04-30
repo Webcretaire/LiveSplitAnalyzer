@@ -52,22 +52,22 @@ export default class SplitsDisplayTab extends Vue {
 
   @Watch('graphYAxisToZero')
   yAxisStore() {
-    localStorage.setItem("graphYAxisToZero", JSON.stringify(this.graphYAxisToZero));
+    localStorage.setItem('graphYAxisToZero', JSON.stringify(this.graphYAxisToZero));
   }
 
   @Watch('graphCurrentAttemptHline')
   attemptLineStore() {
-    localStorage.setItem("graphCurrentAttemptHline", JSON.stringify(this.graphCurrentAttemptHline));
+    localStorage.setItem('graphCurrentAttemptHline', JSON.stringify(this.graphCurrentAttemptHline));
   }
 
   mounted() {
-    const yAxisSetting = localStorage.getItem("graphYAxisToZero");
-    const attemptLineSetting = localStorage.getItem("graphCurrentAttemptHline");
+    const yAxisSetting       = localStorage.getItem('graphYAxisToZero');
+    const attemptLineSetting = localStorage.getItem('graphCurrentAttemptHline');
 
     if (yAxisSetting)
       this.graphYAxisToZero = JSON.parse(yAxisSetting);
-    
-    if(attemptLineSetting)
+
+    if (attemptLineSetting)
       this.graphCurrentAttemptHline = JSON.parse(attemptLineSetting);
   }
 };

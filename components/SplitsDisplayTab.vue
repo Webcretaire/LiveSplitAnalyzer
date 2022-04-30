@@ -9,7 +9,7 @@
         Graphs' Y axis starts at zero
       </loading-switch>
       <loading-switch v-model="graphCurrentAttemptHline" class="mb-2">
-        Display current attempt times as a horizontal line
+        Display current attempt's times as a horizontal line
       </loading-switch>
     </collapsible-card>
 
@@ -48,6 +48,27 @@ export default class SplitsDisplayTab extends Vue {
   onPbUpdate(newVal: Attempt | null) {
     if (newVal)
       this.currentAttemptNumber = newVal?.['@_id'];
+  }
+
+  @Watch('graphYAxisToZero')
+  yAxisStore() {
+    localStorage.setItem("graphYAxisToZero", JSON.stringify(this.graphYAxisToZero));
+  }
+
+  @Watch('graphCurrentAttemptHline')
+  attemptLineStore() {
+    localStorage.setItem("graphCurrentAttemptHline", JSON.stringify(this.graphCurrentAttemptHline));
+  }
+
+  mounted() {
+    const yAxisSetting = localStorage.getItem("graphYAxisToZero");
+    const attemptLineSetting = localStorage.getItem("graphCurrentAttemptHline");
+
+    if (yAxisSetting)
+      this.graphYAxisToZero = JSON.parse(yAxisSetting);
+    
+    if(attemptLineSetting)
+      this.graphCurrentAttemptHline = JSON.parse(attemptLineSetting);
   }
 };
 </script>

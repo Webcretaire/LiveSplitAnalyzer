@@ -9,7 +9,7 @@
         Graphs' Y axis starts at zero
       </loading-switch>
       <loading-switch v-model="graphCurrentAttemptHline" class="mb-2">
-        Display current attempt times' as an horizontal line
+        Display current attempt times as a horizontal line
       </loading-switch>
     </collapsible-card>
 

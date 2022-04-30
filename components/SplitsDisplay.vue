@@ -16,7 +16,7 @@
                 <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
                 <collapsible-card id="OptionsCard" title="General settings">
-                  <loading-switch v-if="globalState.hasGameTime" v-model="globalState.useRealTime" class="mb-2">
+                  <loading-switch v-if="globalState.hasGameTime" v-model="useRealTime" class="mb-2">
                     Use real time instead of game time
                   </loading-switch>
                   <h6 class="mt-4">Size of info panels</h6>
@@ -64,6 +64,7 @@ import {whithLoadAsync}         from '~/util/loading';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
+import { BCollapse } from 'bootstrap-vue';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -72,6 +73,8 @@ export default class SplitsDisplay extends Vue {
   graphYAxisToZero: boolean = false;
 
   globalState = store.state;
+
+  useRealTime = this.globalState.useRealTime;
 
   filterRuns: boolean = false;
 
@@ -136,10 +139,17 @@ export default class SplitsDisplay extends Vue {
     localStorage.setItem("widthValue", String(this.widthValue));
   }
 
+  @Watch("useRealTime")
+  realTimeStore() {
+    localStorage.setItem("useRealTime", String(this.useRealTime));
+  }
+
   mounted() {
-    if (localStorage.getItem("useRealTime"))
-      this.globalState.useRealTime = Boolean(localStorage.getItem("useRealTime"));
-    
+    if (localStorage.getItem("useRealTime")){
+      const realTimeStoreValue = localStorage.getItem("useRealTime") === "true";
+      this.useRealTime = realTimeStoreValue;
+    }
+
     if (localStorage.getItem("widthValue")) {
       this.widthValue = Number(localStorage.getItem("widthValue"));
     } else {

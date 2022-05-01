@@ -142,7 +142,7 @@ export default class SplitDisplay extends Vue {
     }
 
     this.layout = l;
-  };
+  }
 
   get isSubsplit() {
     return String(this.split.Name).startsWith('-');

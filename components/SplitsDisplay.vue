@@ -79,7 +79,7 @@ export default class SplitsDisplay extends Vue {
 
   get parsedSplits() {
     return store.state.splitFile;
-  };
+  }
 
   get panelOffset() {
     return (0 - (this.widthValue - 3));

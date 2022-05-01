@@ -52,6 +52,6 @@ export default class AttemptAnalysisTab extends Vue {
   mounted() {
     this.displayLabels = (this.globalState.splitFile!.Run.Segments.Segment.length || 0) <= 30;
   }
-};
+}
 </script>
 

@@ -1,6 +1,6 @@
-import store                              from '~/util/store';
-import {stringTimeToSeconds}              from '~/util/durations';
-import {asArray, confirmQuit, quitIsSafe} from '~/util/util';
+import store                     from '~/util/store';
+import {stringTimeToSeconds}     from '~/util/durations';
+import {confirmQuit, quitIsSafe} from '~/util/util';
 
 export interface RealAndGameTime {
   'RealTime': string;

@@ -70,5 +70,5 @@ export default class SplitsDisplayTab extends Vue {
     if (attemptLineSetting)
       this.graphCurrentAttemptHline = JSON.parse(attemptLineSetting);
   }
-};
+}
 </script>

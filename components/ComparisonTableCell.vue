@@ -81,7 +81,7 @@ export default class ComparisonTableCell extends Vue {
       callback: (value: number) => this.doEditValue(value)
     });
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>

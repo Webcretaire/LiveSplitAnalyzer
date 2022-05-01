@@ -57,7 +57,7 @@ export default class TimeSelector extends Vue {
 
     this.seconds = +time.toFixed(2);
   }
-};
+}
 </script>
 
 <style scoped lang="scss">

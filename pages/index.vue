@@ -1,7 +1,7 @@
 <template>
   <div class="text-center">
     <main>
-      <img :class="logoClasses" src="~/assets/images/logo_flat.png"/>
+      <img :class="logoClasses" src="~/assets/images/logo_flat.png" alt="LiveSplitAnalyzer logo"/>
       <h1 class="mb-3">LiveSplit Analyzer</h1>
       <p>This tool extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>

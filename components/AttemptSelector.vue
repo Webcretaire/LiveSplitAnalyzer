@@ -26,7 +26,7 @@ import {Attempt, selectTime}         from '~/util/splits';
 import store                         from '~/util/store';
 
 @Component({components: {VueSlider}})
-export default class SplitsDisplay extends Vue {
+export default class AttemptSelector extends Vue {
   @Prop()
   value!: number;
 

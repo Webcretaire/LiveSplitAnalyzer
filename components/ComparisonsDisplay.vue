@@ -49,6 +49,10 @@ export default class ComparisonsDisplay extends Vue {
 
   cumulateTime: boolean = true;
 
+  subsplitLabel(name: String) {
+    return(name.startsWith('-') ? (name.substring(1) + " (subsplit)") : name);
+  }
+
   get comparisonColumns() {
     return [this.referenceComparison, ...this.otherComparisons];
   }
@@ -82,7 +86,7 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get tableData() {
-    const out: any = this.segments.Segment.map(s => ({split: s.Name}));
+    const out: any = this.segments.Segment.map(s => ({split: this.subsplitLabel(s.Name)}));
 
     let timeSoFar = 0;
     const timesSoFarOthers: Record<string, number> = {};

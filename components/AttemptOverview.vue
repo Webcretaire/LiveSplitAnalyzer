@@ -121,7 +121,8 @@ export default class AttemptOverview extends Vue {
       this.AttemptSplitTimes,
       this.run.Segments.Segment.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        return time ? `${segment.Name} (${formatTime(time)})` : segment.Name;
+        const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
+        return time ? `${segmentName} (${formatTime(time)})` : segment.Name;
       }),
       false
     );
@@ -131,7 +132,8 @@ export default class AttemptOverview extends Vue {
     const labels = this.run.Segments.Segment.map((segment, i) => {
       // We need to introduce this variable otherwise TS is too dumb to realise that what we're doing is safe
       const ast = this.attemptSplitTimesaves[i];
-      return `${segment.Name} (${ast ? secondsToFormattedString(ast) : ''})`;
+      const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
+      return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
     });
 
     return this.makePlotData(

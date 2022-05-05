@@ -1,7 +1,7 @@
 <template>
   <b-modal :ref="modalRef" title="Fix golds" class="text-center" @hidden="destroyModal" hide-footer centered size="lg">
     <div v-if="split" class="text-center" style="max-height: 80vh; overflow: auto">
-      <h3 class="mb-3">Best attempts for split <em>{{ split.Name }}</em></h3>
+      <h3 class="mb-3">Best attempts for split <em>{{ splitLabel }}</em></h3>
       <b-table small :fields="fields" :items="history" responsive="sm">
         <template #cell(time)="data">
           {{ formatTime(data.item) }}
@@ -42,6 +42,18 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
     {key: 'time', label: 'Time'},
     {key: 'actions', label: 'Actions'}
   ];
+
+  get splitLabel() {
+    const splitName = this.split!.Name;
+    if (splitName.startsWith('-')) {
+      return splitName.substring(1);
+    } else if (splitName.startsWith('{')) {
+      const cutIndex = splitName.indexOf('}') + 2;
+      return splitName.substring(cutIndex);
+    } else {
+      return splitName;
+    }
+  }
 
   get history() {
     // Make a copy otherwise sort acts in place and messes up the whole page

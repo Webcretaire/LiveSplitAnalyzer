@@ -7,7 +7,7 @@
         </div>
         <div class="mt-auto mb-auto">
           <h3>
-            {{ subsplitLabel[0] }} <small v-if="subsplitLabel[1]">(subsplit)</small>
+            {{ splitLabel }} <small v-if="isSubsplit">(subsplit)</small>
           </h3>
           <p v-if="split.BestSegmentTime" class="m-0">
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
@@ -144,15 +144,31 @@ export default class SplitDisplay extends Vue {
     this.layout = l;
   }
 
-  get subsplitLabel() {
+  get isSubsplit() {
+    return this.split.Name.startsWith('-') || this.split.Name.startsWith('{');
+  }
+
+  get splitLabel() {
     const splitName = this.split.Name;
     if (splitName.startsWith('-')) {
-      return [splitName.substring(1), true];
+      return splitName.substring(1);
     } else if (splitName.startsWith('{')) {
       const cutIndex = splitName.indexOf('}') + 2;
-      return [splitName.substring(cutIndex), true];
+      return splitName.substring(cutIndex);
     } else {
-      return [splitName, false];
+      return splitName;
+    }
+  }
+
+  get nextSplitLabel() {
+    const splitName = this.nextSplit.Name;
+    if (splitName.startsWith('-')) {
+      return splitName.substring(1);
+    } else if (splitName.startsWith('{')) {
+      const cutIndex = splitName.indexOf('}') + 2;
+      return splitName.substring(cutIndex);
+    } else {
+      return splitName;
     }
   }
 
@@ -252,7 +268,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get mergeSplitTooltip() {
-    return `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"`;
+    return `"${this.splitLabel}" will be deleted, and its times merged with "${this.nextSplitLabel}"`;
   }
 
   get srcFormattedIcon(): string | null {
@@ -289,7 +305,7 @@ export default class SplitDisplay extends Vue {
         autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
       store.state.splitFile!.Run.Segments.Segment = segments;
 
-      this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
+      this.$bvToast.toast(`Merged ${this.splitLabel} with ${this.nextSplitLabel}`, {
         title: 'Splits merged',
         autoHideDelay: 5000,
         appendToast: false,
@@ -300,7 +316,7 @@ export default class SplitDisplay extends Vue {
   }
 
   mergeNextSplit() {
-    GlobalEventEmitter.$emit('openConfirm', `Merge "${this.split.Name}" into "${this.nextSplit.Name}"?`, () => {
+    GlobalEventEmitter.$emit('openConfirm', `Merge "${this.splitLabel}" into "${this.nextSplitLabel}"?`, () => {
       whithLoadAsync((endLoad: Function) => this.doMergeNextSplit(endLoad));
     });
   }

@@ -98,6 +98,17 @@ export default class AttemptOverview extends Vue {
     return this.attemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
+  subsplitLabel(name: string) {
+    if (name.startsWith('-')) {
+      return name.substring(1);
+    } else if (name.startsWith('{')) {
+      const cutIndex = name.indexOf('}') + 2;
+      return name.substring(cutIndex);
+    } else {
+      return name;
+    }
+  }
+
   makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {
     return [
       {
@@ -121,8 +132,7 @@ export default class AttemptOverview extends Vue {
       this.AttemptSplitTimes,
       this.run.Segments.Segment.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
-        return time ? `${segmentName} (${formatTime(time)})` : segment.Name;
+        return time ? `${this.subsplitLabel(segment.Name)} (${formatTime(time)})` : segment.Name;
       }),
       false
     );
@@ -132,8 +142,7 @@ export default class AttemptOverview extends Vue {
     const labels = this.run.Segments.Segment.map((segment, i) => {
       // We need to introduce this variable otherwise TS is too dumb to realise that what we're doing is safe
       const ast = this.attemptSplitTimesaves[i];
-      const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
-      return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
+      return `${this.subsplitLabel(segment.Name)} (${ast ? secondsToFormattedString(ast) : ''})`;
     });
 
     return this.makePlotData(

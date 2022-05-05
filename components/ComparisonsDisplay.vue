@@ -50,7 +50,14 @@ export default class ComparisonsDisplay extends Vue {
   cumulateTime: boolean = true;
 
   subsplitLabel(name: string) {
-    return name.startsWith('-') ? `${name.substring(1)} (subsplit)` : name;
+    if (name.startsWith('-')) {
+      return `${name.substring(1)} (subsplit)`;
+    } else if (name.startsWith('{')) {
+      const cutIndex = name.indexOf('}') + 2;
+      return `${name.substring(cutIndex)} (subsplit)`;
+    } else {
+      return name;
+    }
   }
 
   get comparisonColumns() {

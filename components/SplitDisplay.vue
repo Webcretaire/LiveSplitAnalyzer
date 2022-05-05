@@ -7,7 +7,7 @@
         </div>
         <div class="mt-auto mb-auto">
           <h3>
-            {{ isSubsplit ? split.Name.substring(1) : split.Name }} <small v-if="isSubsplit">(subsplit)</small>
+            {{ subsplitLabel[0] }} <small v-if="subsplitLabel[1]">(subsplit)</small>
           </h3>
           <p v-if="split.BestSegmentTime" class="m-0">
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
@@ -144,8 +144,16 @@ export default class SplitDisplay extends Vue {
     this.layout = l;
   }
 
-  get isSubsplit() {
-    return String(this.split.Name).startsWith('-');
+  get subsplitLabel() {
+    const splitName = this.split.Name;
+    if (splitName.startsWith('-')) {
+      return [splitName.substring(1), true];
+    } else if (splitName.startsWith('{')) {
+      const cutIndex = splitName.indexOf('}') + 2;
+      return [splitName.substring(cutIndex), true];
+    } else {
+      return [splitName, false];
+    }
   }
 
   get bestTimeDisplay() {

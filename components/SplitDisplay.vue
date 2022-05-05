@@ -290,8 +290,8 @@ export default class SplitDisplay extends Vue {
 
   doMergeNextSplit(endLoad: Function) {
     // Copy this before splice otherwise the next split name won't refer to the correct split
-    const curSplitName  = this.split.Name;
-    const nextSplitName = this.nextSplit.Name;
+    const curSplitName  = this.splitLabel;
+    const nextSplitName = this.nextSplitLabel;
 
     offload(
       OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE,
@@ -305,7 +305,7 @@ export default class SplitDisplay extends Vue {
         autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
       store.state.splitFile!.Run.Segments.Segment = segments;
 
-      this.$bvToast.toast(`Merged ${this.splitLabel} with ${this.nextSplitLabel}`, {
+      this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
         title: 'Splits merged',
         autoHideDelay: 5000,
         appendToast: false,

@@ -25,7 +25,8 @@ import {
   availableComparisons,
   cumulatedSumOfBests,
   Segments,
-  selectTime
+  selectTime,
+  subsplitLabel
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import Multiselect            from 'vue-multiselect';
@@ -48,17 +49,6 @@ export default class ComparisonsDisplay extends Vue {
   otherComparisons: string[] = [];
 
   cumulateTime: boolean = true;
-
-  subsplitLabel(name: string) {
-    if (name.startsWith('-')) {
-      return `${name.substring(1)} (subsplit)`;
-    } else if (name.startsWith('{')) {
-      const cutIndex = name.indexOf('}') + 2;
-      return `${name.substring(cutIndex)} (subsplit)`;
-    } else {
-      return name;
-    }
-  }
 
   get comparisonColumns() {
     return [this.referenceComparison, ...this.otherComparisons];
@@ -93,7 +83,7 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get tableData() {
-    const out: any = this.segments.Segment.map(s => ({split: this.subsplitLabel(s.Name)}));
+    const out: any = this.segments.Segment.map(s => ({split: subsplitLabel(s.Name, true)}));
 
     let timeSoFar = 0;
     const timesSoFarOthers: Record<string, number> = {};

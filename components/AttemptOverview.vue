@@ -18,12 +18,12 @@ import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds
-}                                 from '~/util/durations';
-import {Component, Prop, Vue}     from 'nuxt-property-decorator';
-import {Attempt, Run, selectTime} from '~/util/splits';
+}                                                from '~/util/durations';
+import {Component, Prop, Vue}                    from 'nuxt-property-decorator';
+import {Attempt, Run, selectTime, subsplitLabel} from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                   from 'vue-plotly';
+import {Plotly}                                  from 'vue-plotly';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {
@@ -98,17 +98,6 @@ export default class AttemptOverview extends Vue {
     return this.attemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
-  subsplitLabel(name: string) {
-    if (name.startsWith('-')) {
-      return name.substring(1);
-    } else if (name.startsWith('{')) {
-      const cutIndex = name.indexOf('}') + 2;
-      return name.substring(cutIndex);
-    } else {
-      return name;
-    }
-  }
-
   makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {
     return [
       {
@@ -132,7 +121,8 @@ export default class AttemptOverview extends Vue {
       this.AttemptSplitTimes,
       this.run.Segments.Segment.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        return time ? `${this.subsplitLabel(segment.Name)} (${formatTime(time)})` : segment.Name;
+        const segmentName = subsplitLabel(segment.Name, false);
+        return time ? `${segmentName} (${formatTime(time)})` : segmentName;
       }),
       false
     );
@@ -142,7 +132,7 @@ export default class AttemptOverview extends Vue {
     const labels = this.run.Segments.Segment.map((segment, i) => {
       // We need to introduce this variable otherwise TS is too dumb to realise that what we're doing is safe
       const ast = this.attemptSplitTimesaves[i];
-      return `${this.subsplitLabel(segment.Name)} (${ast ? secondsToFormattedString(ast) : ''})`;
+      return `${subsplitLabel(segment.Name, false)} (${ast ? secondsToFormattedString(ast) : ''})`;
     });
 
     return this.makePlotData(

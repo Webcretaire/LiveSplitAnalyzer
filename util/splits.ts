@@ -124,6 +124,21 @@ export const selectTime = (t: OptionalTimeLike): string | null => {
   return t?.RealTime || null;
 };
 
+export const subsplitLabel = (name: string, includeLabel: boolean): string => {
+  if (name.startsWith('-')) {
+    const labeledName = name.substring(1);
+    return includeLabel ? `${labeledName} (subsplit)` : labeledName;
+  }
+
+  if (name.startsWith('{')) {
+    const cutIndex = name.indexOf('}') + 2;
+    const labeledName = name.substring(cutIndex);
+    return includeLabel ? `${labeledName} (subsplit)` : labeledName;
+  }
+
+  return name;
+}
+
 export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | null = null): Array<number> => {
   let timeSoFar = 0;
 

@@ -37,7 +37,8 @@ import {
   Segment,
   SegmentHistoryTime,
   selectTime,
-  splitFileIsModified
+  splitFileIsModified,
+  subsplitLabel
 }                                                  from '~/util/splits';
 import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
 import {formatTime, stringTimeToSeconds}           from '~/util/durations';
@@ -70,6 +71,8 @@ export default class SplitDisplay extends Vue {
 
   @Prop()
   splitIndex!: number;
+
+  splitLabel: string = subsplitLabel(this.split.Name, false);
 
   segments: Segment[] = store.state.splitFile!.Run.Segments.Segment;
 
@@ -148,28 +151,8 @@ export default class SplitDisplay extends Vue {
     return this.split.Name.startsWith('-') || this.split.Name.startsWith('{');
   }
 
-  get splitLabel() {
-    const splitName = this.split.Name;
-    if (splitName.startsWith('-')) {
-      return splitName.substring(1);
-    } else if (splitName.startsWith('{')) {
-      const cutIndex = splitName.indexOf('}') + 2;
-      return splitName.substring(cutIndex);
-    } else {
-      return splitName;
-    }
-  }
-
   get nextSplitLabel() {
-    const splitName = this.nextSplit.Name;
-    if (splitName.startsWith('-')) {
-      return splitName.substring(1);
-    } else if (splitName.startsWith('{')) {
-      const cutIndex = splitName.indexOf('}') + 2;
-      return splitName.substring(cutIndex);
-    } else {
-      return splitName;
-    }
+    return subsplitLabel(this.nextSplit.Name, false);
   }
 
   get bestTimeDisplay() {

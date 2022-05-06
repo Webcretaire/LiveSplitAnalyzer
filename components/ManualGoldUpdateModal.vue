@@ -22,7 +22,8 @@ import {
   Segment,
   SegmentHistoryTime,
   selectTime,
-  splitFileIsModified
+  splitFileIsModified,
+  subsplitLabel
 }                                        from '~/util/splits';
 import {Component, mixins}               from 'nuxt-property-decorator';
 import BaseModal                         from '~/components/BaseModal.vue';
@@ -44,15 +45,7 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   ];
 
   get splitLabel() {
-    const splitName = this.split!.Name;
-    if (splitName.startsWith('-')) {
-      return splitName.substring(1);
-    } else if (splitName.startsWith('{')) {
-      const cutIndex = splitName.indexOf('}') + 2;
-      return splitName.substring(cutIndex);
-    } else {
-      return splitName;
-    }
+    return subsplitLabel(this.split!.Name, false);
   }
 
   get history() {

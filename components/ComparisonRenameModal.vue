@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import {Segments, SplitTime}			from '~/util/splits';
+import {Segments}			from '~/util/splits';
 import {Component, Prop, mixins}  from 'nuxt-property-decorator';
 import BaseModal            			from '~/components/BaseModal.vue';
 import {GlobalEventEmitter} 			from '~/util/globalEvents';

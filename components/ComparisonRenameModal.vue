@@ -3,7 +3,7 @@
     <div class="text-center" style="max-height: 80vh; overflow: auto">
 			<h4>Rename "{{ oldComparisonName }}" to:</h4>
 			<b-form-input v-model="newComparisonName" required debounce="500" class="mt-2 mb-2"/>
-			<b-button variant="success" :disabled="newNameInput">
+			<b-button @click="renameComparison" variant="success" :disabled="newNameInput" class="mb-1">
 				Confirm
 			</b-button>
     </div>
@@ -11,25 +11,38 @@
 </template>
 
 <script lang="ts">
-import {Component, mixins}  from 'nuxt-property-decorator';
-import BaseModal            from '~/components/BaseModal.vue';
-import {GlobalEventEmitter} from '~/util/globalEvents';
+import {Segments, SplitTime}			from '~/util/splits';
+import {Component, Prop, mixins}  from 'nuxt-property-decorator';
+import BaseModal            			from '~/components/BaseModal.vue';
+import {GlobalEventEmitter} 			from '~/util/globalEvents';
+import {whithLoad} 								from '~/util/loading';
+import store 											from '~/util/store';
 
 @Component
 export default class ComparisonRenameModal extends mixins(BaseModal) {
   modalRef: string = 'ComparisonRenameModal';
 
 	newComparisonName: string = '';
-	
-	oldComparisonName: string = '';
+
+	segments: Segments = store.state.splitFile!.Run?.Segments;
+
+	@Prop()
+	oldComparisonName!: string;
 
 	get newNameInput() {
 		return this.newComparisonName === '';
 	}
 
-	created() {
-		let name = '';
-		GlobalEventEmitter.$on('referenceComparison', (referenceComparison: string) => this.oldComparisonName = referenceComparison);
+	renameComparison() {
+		whithLoad(() => {
+			this.segments.Segment.forEach((segment) => {
+				const selectedComparison = segment.SplitTimes.SplitTime.find(s => s['@_name'] === this.oldComparisonName);
+				if (selectedComparison)
+					selectedComparison['@_name'] = this.newComparisonName;
+			});
+			GlobalEventEmitter.$emit('newComparisonName', this.newComparisonName);
+		});
+		this.destroyModal();
 	}
 }
 </script>

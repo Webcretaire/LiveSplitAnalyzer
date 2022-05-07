@@ -6,9 +6,11 @@
                  class="mb-2"/>
       </b-col>
       <b-col>
-        <b-button @click="comparisonRenameModal" variant="success" :disabled="!referenceComparison" class="mt-1 mr-2">
-          Rename comparison
-        </b-button>
+        <div v-b-tooltip.hover :title="renameComparisonTooltip">
+          <b-button @click="comparisonRenameModal" variant="success" :disabled="!allowRename" class="mt-1 mr-2">
+            Rename comparison
+          </b-button>
+        </div>
       </b-col>
     </b-row>
     <div v-if="referenceComparison">
@@ -36,7 +38,7 @@ import {
   Segments,
   selectTime
 }                             from '~/util/splits';
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import Multiselect            from 'vue-multiselect';
 import {stringTimeToSeconds}  from '~/util/durations';
 import {GlobalEventEmitter}   from '~/util/globalEvents';
@@ -61,6 +63,23 @@ export default class ComparisonsDisplay extends Vue {
 
   subsplitLabel(name: string) {
     return name.startsWith('-') ? `${name.substring(1)} (subsplit)` : name;
+  }
+
+  get allowRename() {
+    const notPB = this.referenceComparison != 'Personal Best';
+    const notSoB = this.referenceComparison != 'Sum of Best';
+    const notEmpty = Boolean(this.referenceComparison);
+    return notPB && notSoB && notEmpty;
+  }
+
+  get renameComparisonTooltip() {
+    if (this.referenceComparison == 'Personal Best' || this.referenceComparison == 'Sum of Best')
+      return "You can't rename this.";
+
+    if (!this.referenceComparison)
+      return "You need to select a comparison to rename.";
+
+    return "";
   }
 
   get comparisonColumns() {
@@ -153,8 +172,12 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   comparisonRenameModal() {
-    GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal');
-    GlobalEventEmitter.$emit('referenceComparison', this.referenceComparison);
+    GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal', {oldComparisonName: this.referenceComparison});
+  }
+
+  @Watch("comparisons")
+  refreshReference() {
+    GlobalEventEmitter.$on('newComparisonName', (newComparisonName: string) => this.referenceComparison = newComparisonName);
   }
 }
 </script>

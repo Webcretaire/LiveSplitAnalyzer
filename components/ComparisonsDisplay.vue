@@ -38,7 +38,7 @@ import {
   Segments,
   selectTime
 }                             from '~/util/splits';
-import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
+import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import Multiselect            from 'vue-multiselect';
 import {stringTimeToSeconds}  from '~/util/durations';
 import {GlobalEventEmitter}   from '~/util/globalEvents';
@@ -175,8 +175,7 @@ export default class ComparisonsDisplay extends Vue {
     GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal', {oldComparisonName: this.referenceComparison});
   }
 
-  @Watch("comparisons")
-  refreshReference() {
+  mounted() {
     GlobalEventEmitter.$on('newComparisonName', (newComparisonName: string) => this.referenceComparison = newComparisonName);
   }
 }

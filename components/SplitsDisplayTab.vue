@@ -13,21 +13,22 @@
       </loading-switch>
     </collapsible-card>
 
-    <split-display :split="split"
-                   v-for="(split, index) in splits"
-                   :key="`split-${index}-${split.Name}`"
-                   :splitIndex="index"
-                   :graphYAxisToZero="graphYAxisToZero"
-                   :graphCurrentAttemptHline="graphCurrentAttemptHline"
-                   :currentAttemptNumber="currentAttemptNumber"
-                   class="mb-3"/>
+    <subsplits-display :split="split"
+                       v-for="split in splits"
+                       :key="`split-${split.Index}-${split.Name}`"
+                       :splitIndex="split.Index"
+                       :graphYAxisToZero="graphYAxisToZero"
+                       :graphCurrentAttemptHline="graphCurrentAttemptHline"
+                       :currentAttemptNumber="currentAttemptNumber"
+                       class="mb-3"/>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt, Segment}            from '~/util/splits';
+import {Attempt}                     from '~/util/splits';
+import {DetailedSegment}             from '~/util/splitProcessing';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
@@ -38,7 +39,7 @@ export default class SplitsDisplayTab extends Vue {
   currentAttemptNumber: number = 1;
 
   @Prop()
-  splits!: Segment[];
+  splits!: DetailedSegment[];
 
   get PB() {
     return store.state.PB;

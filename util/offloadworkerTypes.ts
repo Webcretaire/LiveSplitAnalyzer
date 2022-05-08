@@ -6,12 +6,13 @@ export enum OffloadWorkerOperation {
   XML_PARSE_TEXT,
   MERGE_SPLIT_INTO_NEXT_ONE,
   UPDATE_STORE_DATA,
-  GET_PB
+  GET_PB,
+  GENERATE_SPLIT_DETAIL
 }
 
 export interface OffloadWorkerMessage {
   magic: string,
-  message: OffloadWorkerRequest,
+  message: OffloadWorkerRequest
 }
 
 export interface OffloadWorkerRequest {

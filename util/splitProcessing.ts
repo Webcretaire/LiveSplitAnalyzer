@@ -1,6 +1,7 @@
 import {
   Attempt,
   AttemptHistory,
+  RealAndGameTime,
   Run,
   Segment,
   SegmentHistoryTime,
@@ -10,6 +11,12 @@ import {
 import {asArray, XYCoordinates}                        from '~/util/util';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {xmlParser}                                     from '~/util/xml';
+import {extractPng}                                    from './pngExtractor';
+
+export interface DetailedSegment extends Segment {
+  Subsplits: DetailedSegment[],
+  Index: number // Index in the original raw SplitFile
+}
 
 export const segTimeArrayToSeconds = (times: SegmentHistoryTime[]) => times.map((t) => {
   const time = selectTime(t);
@@ -117,6 +124,115 @@ export const parseSplitFile = (fileContent: string): SplitFile => {
     // Name could be a number, force it to be a string
     arr[i].Name                 = String(val.Name);
   });
+
+  return out;
+};
+
+export const generateSplitDetail = (rawSplits: Segment[]) => {
+  const out: DetailedSegment[] = [];
+  let virtualSplitIndex = 0;
+  let accumulateSubsplits: DetailedSegment[] = [];
+  rawSplits.forEach((rawSplit: Segment, index: number) => {
+    const rawIcon = extractPng(rawSplit.Icon); 
+    const icon = rawIcon
+      ? `data:image/jpeg;base64,${btoa(new Uint8Array(rawIcon).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
+      : ''
+
+    // If current split is a subsplit, add it to the pile and go to next one
+    if (rawSplit.Name.startsWith('-')) {
+      accumulateSubsplits.push({
+        ...rawSplit, 
+        Subsplits: [], 
+        Name: rawSplit.Name.substring(1).trim(), 
+        Index: index,
+        Icon: icon
+      });
+      return;
+    }
+
+    const nameMatches = rawSplit.Name.match(/\{(.*)\}(.*)/);
+    const splitToAdd: DetailedSegment = {
+      ...rawSplit, 
+      Subsplits: [], 
+      Index: index,
+      Icon: icon
+    };
+
+    if (accumulateSubsplits.length || nameMatches) { // We're ending a subsplit group
+      // nameMatches[0] has the whole string, [1] has the split name, [2] has the subsplit name
+      accumulateSubsplits.push({
+        ...rawSplit,
+        Subsplits: [],
+        Name: nameMatches?.[2].trim() || rawSplit.Name,
+        Index: index,
+        Icon: icon
+      });
+      splitToAdd.Name = nameMatches?.[1] || rawSplit.Name;
+    }
+
+    splitToAdd.Subsplits = [...accumulateSubsplits];
+
+    // If we have stored subsplits, agregate their times in the "big split"
+    if (accumulateSubsplits.length) {
+      // This split is "virtual", it doesn't really exist in the splitfile, so give it a negative Index
+      splitToAdd.Index = --virtualSplitIndex; 
+
+      const lastSubsplit = accumulateSubsplits[accumulateSubsplits.length - 1];
+
+      // Accumulate time history
+      const timeHistoryToSum = lastSubsplit.SegmentHistory?.Time;
+      if (!timeHistoryToSum) {
+        delete splitToAdd.SegmentHistory;
+      } else {
+        // Iterate other attempts of current split
+        splitToAdd.SegmentHistory = {Time: timeHistoryToSum.map(time => {
+          // Iterate over the subsplits of current group, and find corresponding attempt
+          const times = accumulateSubsplits.reduce((acc: RealAndGameTime, accSplit: DetailedSegment) => {
+            const curAttemptTime = accSplit.SegmentHistory?.Time.find(t => t['@_id'] === time['@_id']);
+
+            const outAcc = {...acc};
+
+            if (curAttemptTime?.GameTime) {
+              if (!outAcc.GameTime) outAcc.GameTime = '0:0:0.0';
+              outAcc.GameTime = secondsToLivesplitFormat(
+                stringTimeToSeconds(outAcc.GameTime) +
+                stringTimeToSeconds(curAttemptTime.GameTime)
+              );
+            }
+
+            if (curAttemptTime?.RealTime) {
+              outAcc.RealTime = secondsToLivesplitFormat(
+                stringTimeToSeconds(outAcc.RealTime) +
+                stringTimeToSeconds(curAttemptTime.RealTime)
+              );
+            }
+
+            return outAcc;
+          }, {RealTime: '0:0:0.0'});
+
+          return {...times, "@_id": time['@_id']};
+        })};
+      }
+
+      // Re-compute gold
+      if (splitToAdd.SegmentHistory) { // If think this should always be true, but who knows
+        const goldCoord = goldCoordinatesFromSecondsArray(
+          splitToAdd.SegmentHistory.Time.map(t => stringTimeToSeconds(selectTime(t) as string))
+        );
+
+        const goldSplit = splitToAdd.SegmentHistory.Time[goldCoord.x];
+        // We know RealTime exists from "filter" above
+        splitToAdd.BestSegmentTime = {RealTime: goldSplit.RealTime as string};
+        if (goldSplit.GameTime)
+          splitToAdd.BestSegmentTime.GameTime = goldSplit.GameTime;
+      }
+
+      // Reset the subsplit pile
+      accumulateSubsplits = [];
+    }
+
+    out.push(splitToAdd);
+  })
 
   return out;
 };

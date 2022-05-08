@@ -1,6 +1,7 @@
 import {
   computePbFromAttemptHistory,
   deleteAttemptBeforeNumber,
+  generateSplitDetail,
   goldCoordinatesFromSecondsArray,
   mergeSplitIntoNextOne,
   parseSplitFile,
@@ -44,6 +45,9 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.GET_PB:
       out = computePbFromAttemptHistory(a[0]);
+      break;
+    case OffloadWorkerOperation.GENERATE_SPLIT_DETAIL:
+      out = generateSplitDetail(a[0]);
       break;
   }
 

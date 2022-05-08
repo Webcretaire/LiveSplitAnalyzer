@@ -2,8 +2,8 @@
   <div>
     <b-card :id="`SingleSplitCard_${splitIndex}`" class="SingleSplitCard text-left">
       <div class="limit-height">
-        <div class="split-icon-container mr-4 ml-2" v-if="srcFormattedIcon">
-          <b-card-img :src="srcFormattedIcon" class="split-icon" block/>
+        <div class="split-icon-container mr-4 ml-2" v-if="split.Icon">
+          <b-card-img :src="split.Icon" class="split-icon" block/>
         </div>
         <div class="mt-auto mb-auto">
           <h3>
@@ -12,7 +12,7 @@
           <p v-if="split.BestSegmentTime" class="m-0">
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
             <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-2">Fix fake golds</b-button>
-            <b-button v-if="isNotLastSplit" @click="mergeNextSplit" size="sm" variant="info"
+            <b-button v-if="nextSplit" @click="mergeNextSplit" size="sm" variant="info"
                       v-b-tooltip.hover :title="mergeSplitTooltip">
               Merge into next split
             </b-button>
@@ -41,7 +41,6 @@ import {
 }                                                  from '~/util/splits';
 import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
 import {formatTime, stringTimeToSeconds}           from '~/util/durations';
-import {extractPng}                                from '~/util/pngExtractor';
 import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
 import {GlobalEventEmitter}                        from '~/util/globalEvents';
 import {singleSplitState}                          from '~/util/singleSplit';
@@ -187,7 +186,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get collapseName() {
-    return 'collapse-split-' + this.splitIndex;
+    return `collapse-split-${this.splitIndex}`;
   }
 
   get markerColors() {
@@ -210,10 +209,6 @@ export default class SplitDisplay extends Vue {
 
   get timesWithPositiveIds(): SegmentHistoryTime[] {
     return (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
-  }
-
-  get isNotLastSplit() {
-    return (this.splitIndex != this.segments.length - 1);
   }
 
   get plot_data() {
@@ -244,14 +239,7 @@ export default class SplitDisplay extends Vue {
   }
 
   get mergeSplitTooltip() {
-    return `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"`;
-  }
-
-  get srcFormattedIcon(): string | null {
-    const png = extractPng(this.split.Icon);
-    return png
-      ? `data:image/jpeg;base64,${btoa(new Uint8Array(png).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
-      : null;
+    return this.nextSplit ? `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"` : '';
   }
 
   fixGoldsModal() {
@@ -260,11 +248,23 @@ export default class SplitDisplay extends Vue {
     GlobalEventEmitter.$emit('setCurrentSplit', this.split);
   }
 
-  get nextSplit() {
+  get nextSplit(): Segment | undefined {
     return store.state.splitFile!.Run.Segments.Segment[this.splitIndex + 1];
   }
 
   doMergeNextSplit(endLoad: Function) {
+    if (!this.nextSplit) {
+      this.$bvToast.toast("Next split doesn't exist", {
+        title: 'Splits merged',
+        autoHideDelay: 5000,
+        appendToast: false,
+        variant: 'danger'
+      });
+      endLoad();
+
+      return;
+    }
+
     // Copy this before splice otherwise the next split name won't refer to the correct split
     const curSplitName  = this.split.Name;
     const nextSplitName = this.nextSplit.Name;
@@ -292,6 +292,8 @@ export default class SplitDisplay extends Vue {
   }
 
   mergeNextSplit() {
+    if (!this.nextSplit) return;
+
     GlobalEventEmitter.$emit('openConfirm', `Merge "${this.split.Name}" into "${this.nextSplit.Name}"?`, () => {
       whithLoadAsync((endLoad: Function) => this.doMergeNextSplit(endLoad));
     });

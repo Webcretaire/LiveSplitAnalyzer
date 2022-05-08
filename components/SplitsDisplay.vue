@@ -41,7 +41,7 @@
                 <comparison-remover/>
               </b-tab>
               <b-tab title="Splits analysis">
-                <splits-display-tab :splits="splits"/>
+                <splits-display-tab :splits="detailedSegments"/>
               </b-tab>
             </b-tabs>
           </b-card>
@@ -54,6 +54,7 @@
 <script lang="ts">
 import {
   Attempt,
+  Segment,
   selectTime,
   SplitFile,
   splitFileIsModified
@@ -64,6 +65,7 @@ import {whithLoadAsync}         from '~/util/loading';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
+import {DetailedSegment}        from '~/util/splitProcessing';
 
 @Component({components: {VueSlider}})
 export default class SplitsDisplay extends Vue {
@@ -77,6 +79,8 @@ export default class SplitsDisplay extends Vue {
 
   widthValue: number = 0;
 
+  detailedSegments: DetailedSegment[] = [];
+
   get parsedSplits() {
     return store.state.splitFile;
   }
@@ -87,12 +91,6 @@ export default class SplitsDisplay extends Vue {
 
   get panelSize() {
     return (12 - (2 * this.panelOffset));
-  }
-
-  get splits() {
-    if (!this.parsedSplits) return [];
-
-    return this.parsedSplits.Run.Segments.Segment;
   }
 
   get runAttempts(): Attempt[] {
@@ -120,9 +118,13 @@ export default class SplitsDisplay extends Vue {
     });
   }
 
+  @Watch('globalState.splitFile.Run.Segments.Segment', {deep: true})
+  segmentsChange(newVal: Segment[]) {
+    offload(OffloadWorkerOperation.GENERATE_SPLIT_DETAIL, newVal).then(s => this.detailedSegments = s);
+  }
+
   @Watch('globalState', {deep: true})
   onStateUpdate(newVal: Store) {
-    // Worker state must be updated separately because
     offload(OffloadWorkerOperation.UPDATE_STORE_DATA, newVal);
   }
 

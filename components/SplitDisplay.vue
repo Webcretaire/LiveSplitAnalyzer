@@ -7,7 +7,7 @@
         </div>
         <div class="mt-auto mb-auto">
           <h3>
-            {{ isSubsplit ? split.Name.substring(1) : split.Name }} <small v-if="isSubsplit">(subsplit)</small>
+            {{ split.Name }} <small v-if="split.IsSubsplit">(subsplit)</small>
           </h3>
           <p v-if="split.BestSegmentTime" class="m-0">
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
@@ -49,6 +49,7 @@ import {whithLoadAsync}                            from '~/util/loading';
 import store                                       from '~/util/store';
 import {offload}                                   from '~/util/offloadWorker';
 import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
+import {DetailedSegment}                           from '~/util/splitProcessing';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                                    from 'vue-plotly';
@@ -56,7 +57,7 @@ import {Plotly}                                    from 'vue-plotly';
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends Vue {
   @Prop()
-  split!: Segment;
+  split!: DetailedSegment;
 
   @Prop({default: false})
   graphYAxisToZero!: boolean;
@@ -141,10 +142,6 @@ export default class SplitDisplay extends Vue {
     }
 
     this.layout = l;
-  }
-
-  get isSubsplit() {
-    return String(this.split.Name).startsWith('-');
   }
 
   get bestTimeDisplay() {

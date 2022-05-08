@@ -75,17 +75,21 @@ describe('Main page', () => {
       .each(el => splits.push(cleanText(el.text())))
       .wrap(splits)
       .should('deep.equal', [
-        'King\'s Pass (subsplit)',
         'Vengeful Spirit',
+        'King\'s Pass (subsplit)',
+        'Vengeful Spirit (subsplit)',
         'Greenpath',
         'Mothwing Cloak',
         'Mantis Claw',
-        'Gruz Mother (subsplit)',
         'Blue Lake',
-        'Gorgeous Husk (subsplit)',
+        'Gruz Mother (subsplit)',
+        'Blue Lake (subsplit)',
         'Lemm Shop',
-        'BUY LANTERN YOU IDIOT (subsplit)',
+        'Gorgeous Husk (subsplit)',
+        'Lemm Shop (subsplit)',
         'Crystal Heart',
+        'BUY LANTERN YOU IDIOT (subsplit)',
+        'Crystal Heart (subsplit)',
         'Myla'
       ]);
   });

@@ -15,7 +15,8 @@ import {extractPng}                                    from './pngExtractor';
 
 export interface DetailedSegment extends Segment {
   Subsplits: DetailedSegment[],
-  Index: number // Index in the original raw SplitFile
+  Index: number, // Index in the original raw SplitFile
+  IsSubsplit: boolean
 }
 
 export const segTimeArrayToSeconds = (times: SegmentHistoryTime[]) => times.map((t) => {
@@ -145,7 +146,8 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
         Subsplits: [], 
         Name: rawSplit.Name.substring(1).trim(), 
         Index: index,
-        Icon: icon
+        Icon: icon,
+        IsSubsplit: true
       });
       return;
     }
@@ -155,7 +157,8 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
       ...rawSplit, 
       Subsplits: [], 
       Index: index,
-      Icon: icon
+      Icon: icon,
+      IsSubsplit: false
     };
 
     if (accumulateSubsplits.length || nameMatches) { // We're ending a subsplit group
@@ -165,7 +168,8 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
         Subsplits: [],
         Name: nameMatches?.[2].trim() || rawSplit.Name,
         Index: index,
-        Icon: icon
+        Icon: icon,
+        IsSubsplit: true
       });
       splitToAdd.Name = nameMatches?.[1] || rawSplit.Name;
     }

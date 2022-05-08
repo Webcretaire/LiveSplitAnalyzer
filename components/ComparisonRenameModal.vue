@@ -29,6 +29,9 @@ export default class ComparisonRenameModal extends mixins(BaseModal) {
 	@Prop()
 	oldComparisonName!: string;
 
+	@Prop()
+	callback!: Function;
+
 	get newNameInput() {
 		return this.newComparisonName === '';
 	}
@@ -40,9 +43,14 @@ export default class ComparisonRenameModal extends mixins(BaseModal) {
 				if (selectedComparison)
 					selectedComparison['@_name'] = this.newComparisonName;
 			});
-			GlobalEventEmitter.$emit('newComparisonName', this.newComparisonName);
+			this.applyCallback();
 		});
-		this.destroyModal();
 	}
+
+	applyCallback() {
+    this.$emit('input', this.newComparisonName);
+    this.callback(this.newComparisonName);
+    this.hideModal();
+  }
 }
 </script>

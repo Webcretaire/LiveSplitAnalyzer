@@ -172,11 +172,14 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   comparisonRenameModal() {
-    GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal', {oldComparisonName: this.referenceComparison});
+    GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal', {
+      oldComparisonName: this.referenceComparison,
+      callback: (newComparisonName:string) => this.refreshReference(newComparisonName)
+    });
   }
 
-  mounted() {
-    GlobalEventEmitter.$on('newComparisonName', (newComparisonName: string) => this.referenceComparison = newComparisonName);
+  refreshReference(newComparisonName: string) {
+    this.referenceComparison = newComparisonName;
   }
 }
 </script>

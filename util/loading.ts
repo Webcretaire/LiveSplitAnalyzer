@@ -7,7 +7,7 @@ export const whithLoad = (f: Function) => {
   });
 };
 
-export const whithLoadAsync = (f: Function) => {
+export const withLoadAsync = (f: Function) => {
   GlobalEventEmitter.$emit('startLoading', () => {
     f(() => GlobalEventEmitter.$emit('stopLoading'));
   });

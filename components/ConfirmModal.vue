@@ -10,9 +10,9 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, mixins}    from 'nuxt-property-decorator';
-import BaseModal            from '~/components/BaseModal.vue';
-import {GlobalEventEmitter} from '~/util/globalEvents';
+import {Component, Prop, mixins} from 'nuxt-property-decorator';
+import BaseModal                 from '~/components/BaseModal.vue';
+import {GlobalEventEmitter}      from '~/util/globalEvents';
 
 @Component
 export default class ConfirmModal extends mixins(BaseModal) {

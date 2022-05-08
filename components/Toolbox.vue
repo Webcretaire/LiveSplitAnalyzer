@@ -33,7 +33,7 @@ import {
   SplitTime
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
-import {whithLoad, whithLoadAsync}                     from '~/util/loading';
+import {whithLoad, withLoadAsync}                      from '~/util/loading';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
@@ -157,7 +157,7 @@ export default class Toolbox extends Vue {
 
   deletePreviousRuns() {
     GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
-      whithLoadAsync(
+      withLoadAsync(
         (endLoad: Function) => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,
           store.state.splitFile!.Run,

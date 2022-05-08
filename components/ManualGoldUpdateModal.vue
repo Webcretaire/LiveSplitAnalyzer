@@ -29,7 +29,7 @@ import BaseModal                         from '~/components/BaseModal.vue';
 import {GlobalEventEmitter}              from '~/util/globalEvents';
 import {singleSplitState}                from '~/util/singleSplit';
 import {formatTime, stringTimeToSeconds} from '~/util/durations';
-import {whithLoadAsync}                  from '~/util/loading';
+import {withLoadAsync}                   from '~/util/loading';
 
 @Component
 export default class ManualGoldUpdateModal extends mixins(BaseModal) {
@@ -88,7 +88,7 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
 
   deleteAttempt(attempt: SegmentHistoryTime) {
     GlobalEventEmitter.$emit('openConfirm', `Delete attempt #${attempt['@_id']}?`, () => {
-      whithLoadAsync((endLoad: Function) => this.doDeleteAttempt(attempt, endLoad));
+      withLoadAsync((endLoad: Function) => this.doDeleteAttempt(attempt, endLoad));
       GlobalEventEmitter.$emit('closeConfirm');
     });
   }

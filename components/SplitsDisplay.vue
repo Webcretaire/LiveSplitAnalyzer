@@ -61,7 +61,7 @@ import {
 }                               from '~/util/splits';
 import {Component, Vue, Watch}  from 'nuxt-property-decorator';
 import VueSlider                from 'vue-slider-component';
-import {whithLoadAsync}         from '~/util/loading';
+import {withLoadAsync}          from '~/util/loading';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
@@ -101,7 +101,7 @@ export default class SplitsDisplay extends Vue {
 
   @Watch('splitFile')
   fileChange(newVal: File) {
-    whithLoadAsync((endLoad: Function) => {
+    withLoadAsync((endLoad: Function) => {
       newVal.text()
         .then(text => {
           // Not very elegant, but efficient and decently fast

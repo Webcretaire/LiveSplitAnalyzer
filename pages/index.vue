@@ -31,7 +31,7 @@
 <script lang="ts">
 import {Vue, Component}     from 'nuxt-property-decorator';
 import {GlobalEventEmitter} from '~/util/globalEvents';
-import {whithLoadAsync}     from '~/util/loading';
+import {withLoadAsync}      from '~/util/loading';
 import store                from '~/util/store';
 
 @Component
@@ -62,7 +62,7 @@ export default class IndexPage extends Vue {
       this.loadingCallback = null;
     });
     GlobalEventEmitter.$on('openModal', (modal: string, args: Record<string, any> = {}) => {
-      whithLoadAsync((endLoad: Function) => {
+      withLoadAsync((endLoad: Function) => {
         this.modalArgs         = args;
         // This needs to be an attribute because if it's a getter it gets cached way too aggressively
         this.componentInstance = () => import(`~/components/${modal}`);

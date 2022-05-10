@@ -7,7 +7,7 @@
       </b-col>
       <b-col>
         <div v-b-tooltip.hover :title="renameComparisonTooltip">
-          <b-button @click="comparisonRenameModal" variant="success" :disabled="!allowRename" class="mt-1 mr-2">
+          <b-button @click="comparisonRenameModal" variant="success" :disabled="!allowRename">
             Rename comparison
           </b-button>
         </div>

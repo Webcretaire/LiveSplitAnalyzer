@@ -2,7 +2,7 @@
   <b-modal :ref="modalRef" title="Rename comparison" class="text-center" @hidden="destroyModal" hide-footer centered size="lg">
     <div class="text-center" style="max-height: 80vh; overflow: auto">
       <h4>Rename "{{ oldComparisonName }}" to:</h4>
-      <b-form-input v-model="newComparisonName" required debounce="500" class="mt-2 mb-2"/>
+      <b-form-input v-model="newComparisonName" required class="mt-2 mb-2"/>
       <b-button @click="renameComparison" variant="success" :disabled="newNameInput" class="mb-1">
         Confirm
       </b-button>
@@ -11,11 +11,11 @@
 </template>
 
 <script lang="ts">
-import {Segments}                  from '~/util/splits';
-import {Component, Prop, mixins}   from 'nuxt-property-decorator';
-import BaseModal                   from '~/components/BaseModal.vue';
-import {whithLoad}                 from '~/util/loading';
-import store                       from '~/util/store';
+import {Segments, splitFileIsModified} from '~/util/splits';
+import {Component, Prop, mixins}       from 'nuxt-property-decorator';
+import BaseModal                       from '~/components/BaseModal.vue';
+import {whithLoad}                     from '~/util/loading';
+import store                           from '~/util/store';
 
 @Component
 export default class ComparisonRenameModal extends mixins(BaseModal) {
@@ -43,6 +43,7 @@ export default class ComparisonRenameModal extends mixins(BaseModal) {
         if (selectedComparison)
           selectedComparison['@_name'] = this.newComparisonName;
       });
+      splitFileIsModified(true);
       this.applyCallback();
     });
   }

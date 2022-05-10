@@ -1,53 +1,53 @@
 <template>
   <b-modal :ref="modalRef" title="Rename comparison" class="text-center" @hidden="destroyModal" hide-footer centered size="lg">
     <div class="text-center" style="max-height: 80vh; overflow: auto">
-			<h4>Rename "{{ oldComparisonName }}" to:</h4>
-			<b-form-input v-model="newComparisonName" required debounce="500" class="mt-2 mb-2"/>
-			<b-button @click="renameComparison" variant="success" :disabled="newNameInput" class="mb-1">
-				Confirm
-			</b-button>
+      <h4>Rename "{{ oldComparisonName }}" to:</h4>
+      <b-form-input v-model="newComparisonName" required debounce="500" class="mt-2 mb-2"/>
+      <b-button @click="renameComparison" variant="success" :disabled="newNameInput" class="mb-1">
+        Confirm
+      </b-button>
     </div>
   </b-modal>
 </template>
 
 <script lang="ts">
-import {Segments}			from '~/util/splits';
-import {Component, Prop, mixins}  from 'nuxt-property-decorator';
-import BaseModal            			from '~/components/BaseModal.vue';
-import {whithLoad} 								from '~/util/loading';
-import store 											from '~/util/store';
+import {Segments}                  from '~/util/splits';
+import {Component, Prop, mixins}   from 'nuxt-property-decorator';
+import BaseModal                   from '~/components/BaseModal.vue';
+import {whithLoad}                 from '~/util/loading';
+import store                       from '~/util/store';
 
 @Component
 export default class ComparisonRenameModal extends mixins(BaseModal) {
   modalRef: string = 'ComparisonRenameModal';
 
-	newComparisonName: string = '';
+  newComparisonName: string = '';
 
-	segments: Segments = store.state.splitFile!.Run?.Segments;
+  // splitfile needs to be loaded to access this modal so the value can't be null 
+  segments: Segments = store.state.splitFile!.Run?.Segments;
 
-	@Prop()
-	oldComparisonName!: string;
+  @Prop()
+  oldComparisonName!: string;
 
-	@Prop()
-	callback!: Function;
+  @Prop()
+  callback!: Function;
 
-	get newNameInput() {
-		return this.newComparisonName === '';
-	}
+  get newNameInput() {
+    return this.newComparisonName.trim() === '';
+  }
 
-	renameComparison() {
-		whithLoad(() => {
-			this.segments.Segment.forEach((segment) => {
-				const selectedComparison = segment.SplitTimes.SplitTime.find(s => s['@_name'] === this.oldComparisonName);
-				if (selectedComparison)
-					selectedComparison['@_name'] = this.newComparisonName;
-			});
-			this.applyCallback();
-		});
-	}
+  renameComparison() {
+    whithLoad(() => {
+      this.segments.Segment.forEach((segment) => {
+        const selectedComparison = segment.SplitTimes.SplitTime.find(s => s['@_name'] === this.oldComparisonName);
+        if (selectedComparison)
+          selectedComparison['@_name'] = this.newComparisonName;
+      });
+      this.applyCallback();
+    });
+  }
 
-	applyCallback() {
-    this.$emit('input', this.newComparisonName);
+  applyCallback() {
     this.callback(this.newComparisonName);
     this.hideModal();
   }

@@ -121,35 +121,21 @@ export default class AttemptOverview extends Vue {
   }
 
   get segmentLabels() {
-    if (this.mergeSubsplits) {
-      return this.detailedSegments.map(segment => {
-          const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-          const segmentName = this.segmentNameFormat(segment.Name)
-          return time ? `${segmentName} (${formatTime(time)})` : segmentName;
-      });
-    } else {
-      return this.run.Segments.Segment.map(segment => {
+    const segmentData = this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
+    return segmentData.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        const segmentName = this.segmentNameFormat(segment.Name);
+        const segmentName = this.segmentNameFormat(segment.Name)
         return time ? `${segmentName} (${formatTime(time)})` : segmentName;
-      });
-    }
+    });
   }
 
   get timesaveLabels() {
-    if (this.mergeSubsplits) {
-      return this.detailedSegments.map((segment, i) => {
-        const ast = this.attemptSplitTimesaves[i];
-        const segmentName = this.segmentNameFormat(segment.Name);
-        return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
-      });
-    } else {
-      return this.run.Segments.Segment.map((segment, i) => {
-        const ast = this.attemptSplitTimesaves[i];
-        const segmentName = this.segmentNameFormat(segment.Name);
-        return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
-      });
-    }
+    const segmentData = this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
+    return segmentData.map((segment, i) => {
+      const ast = this.attemptSplitTimesaves[i];
+      const segmentName = this.segmentNameFormat(segment.Name);
+      return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
+    });
   }
 
   makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {

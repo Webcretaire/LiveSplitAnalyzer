@@ -24,6 +24,7 @@ import {Attempt, Run, selectTime} from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                   from 'vue-plotly';
+import {DetailedSegment}          from '~/util/splitProcessing';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {
@@ -32,6 +33,9 @@ export default class AttemptOverview extends Vue {
 
   @Prop()
   attempt!: Attempt;
+
+  @Prop()
+  detailedSegments!: DetailedSegment[];
 
   @Prop()
   graphYAxisToZero!: boolean;
@@ -101,6 +105,53 @@ export default class AttemptOverview extends Vue {
     return this.attemptSplitTimesaves.reduce((acc: number, n: number | null) => acc + (n || 0), 0);
   }
 
+  segmentNameFormat(name: string) {
+    if (name.startsWith('-'))
+      return name.substring(1);
+    
+    if (name.startsWith('{')){
+      const cutIndex = name.indexOf('}') ;
+      const splitName = name.substring(1, cutIndex);
+      const subsplitName = name.substring(cutIndex + 2);
+
+      return `${splitName} | ${subsplitName}`;
+    }
+
+    return name;
+  }
+
+  get segmentLabels() {
+    if (this.mergeSubsplits) {
+      return this.detailedSegments.map(segment => {
+          const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
+          const segmentName = this.segmentNameFormat(segment.Name)
+          return time ? `${segmentName} (${formatTime(time)})` : segmentName;
+      });
+    } else {
+      return this.run.Segments.Segment.map(segment => {
+        const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
+        const segmentName = this.segmentNameFormat(segment.Name);
+        return time ? `${segmentName} (${formatTime(time)})` : segmentName;
+      });
+    }
+  }
+
+  get timesaveLabels() {
+    if (this.mergeSubsplits) {
+      return this.detailedSegments.map((segment, i) => {
+        const ast = this.attemptSplitTimesaves[i];
+        const segmentName = this.segmentNameFormat(segment.Name);
+        return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
+      });
+    } else {
+      return this.run.Segments.Segment.map((segment, i) => {
+        const ast = this.attemptSplitTimesaves[i];
+        const segmentName = this.segmentNameFormat(segment.Name);
+        return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
+      });
+    }
+  }
+
   makePlotData(title: string, data: Array<number | null>, labels: string[], sortByTimesave: boolean) {
     return [
       {
@@ -122,27 +173,16 @@ export default class AttemptOverview extends Vue {
     return this.makePlotData(
       'Split times',
       this.AttemptSplitTimes,
-      this.run.Segments.Segment.map(segment => {
-        const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
-        return time ? `${segmentName} (${formatTime(time)})` : segment.Name;
-      }),
+      this.segmentLabels,
       false
     );
   }
 
   plotDataTimesave() {
-    const labels = this.run.Segments.Segment.map((segment, i) => {
-      // We need to introduce this variable otherwise TS is too dumb to realise that what we're doing is safe
-      const ast = this.attemptSplitTimesaves[i];
-      const segmentName = segment.Name.startsWith('-') ? segment.Name.substring(1) : segment.Name;
-      return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
-    });
-
     return this.makePlotData(
       'Attempt compared to golds',
       this.attemptSplitTimesaves.map(v => v ? +(v.toFixed(2)) : null),
-      labels,
+      this.timesaveLabels,
       this.sortByTimesave
     );
   }

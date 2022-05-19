@@ -19,20 +19,25 @@
       </b-card>
 
       <b-collapse :id="collapseName" class="mt-1" v-model="collapseVisible">
-      <b-card class="text-left">
+        <b-card class="text-left">
           <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true"/>
-      </b-card>
+        </b-card>
       </b-collapse>
 
-      <div class="pl-4 ml-3 mt-3 subsplit-container">
-        <split-display :split="subsplit"
-                    v-for="subsplit in split.Subsplits"
-                    :key="`split-${subsplit.Index}-${subsplit.Name}`"
-                    :splitIndex="subsplit.Index"
-                    :graphYAxisToZero="graphYAxisToZero"
-                    :graphCurrentAttemptHline="graphCurrentAttemptHline"
-                    :currentAttemptNumber="currentAttemptNumber"
-                    class="mb-3"/>
+      <div class="pl-4 mt-3 subsplit-container">
+        <div class="ml-2 mr-4 subsplit-collapser-hitbox" @click="subsplitsVisible = !subsplitsVisible">
+          <div class="subsplit-collapser"></div>
+        </div>
+        <b-collapse :visible="subsplitsVisible" class="w-100">
+          <split-display :split="subsplit"
+                         v-for="(subsplit, i) in split.Subsplits"
+                         :key="`split-${subsplit.Index}-${subsplit.Name}`"
+                         :splitIndex="subsplit.Index"
+                         :graphYAxisToZero="graphYAxisToZero"
+                         :graphCurrentAttemptHline="graphCurrentAttemptHline"
+                         :currentAttemptNumber="currentAttemptNumber"
+                         :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
+        </b-collapse>
       </div>
     </div>
     <div v-else>
@@ -55,6 +60,7 @@ import {Plotly}              from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
+  subsplitsVisible: boolean = true;
 }
 </script>
 
@@ -94,6 +100,28 @@ img {
 }
 
 .subsplit-container {
-  border-left: 0.2rem solid white;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+
+  .subsplit-collapser-hitbox {
+    width: 1rem;
+    cursor: pointer;
+    min-height: 2rem;
+  }
+
+  .subsplit-collapser {
+    width: 0.3rem;
+    background-color: white;
+    transition: all 100ms;
+    height: 100%;
+    margin: auto;
+    border-radius: 0.15rem;
+
+    &:hover {
+      filter: drop-shadow(0 0 0.2rem white);
+    }
+  }
 }
 </style>

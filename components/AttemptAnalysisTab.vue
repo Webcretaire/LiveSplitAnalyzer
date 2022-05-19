@@ -8,13 +8,18 @@
       <loading-switch v-model="displayLabels" class="mb-2">
         Display labels for doughnut charts
       </loading-switch>
+      <loading-switch v-model="displayLabels" class="mb-2">
+        Merge subsplits
+      </loading-switch>
     </collapsible-card>
     <toolbox :current-attempt-number="currentAttemptNumber" class="mb-4"/>
 
     <attempt-overview :run="globalState.splitFile.Run"
                       :attempt="currentAttempt"
                       :is-pb="isPb"
-                      :display-labels="displayLabels"/>
+                      :display-labels="displayLabels"
+                      :merge-subsplits="mergeSubsplits"/>
+                      
   </div>
 </template>
 
@@ -28,6 +33,8 @@ export default class AttemptAnalysisTab extends Vue {
   currentAttemptNumber: number = 1;
 
   displayLabels: boolean = false;
+
+  mergeSubsplits: boolean = false;
 
   globalState = store.state;
 

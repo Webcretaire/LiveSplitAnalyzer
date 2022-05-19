@@ -42,6 +42,9 @@ export default class AttemptOverview extends Vue {
   @Prop()
   displayLabels!: boolean;
 
+  @Prop()
+  mergeSubsplits!: boolean;
+
   renderGraph: boolean = true;
 
   visible: boolean = false;

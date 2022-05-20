@@ -127,7 +127,7 @@ export default class AttemptOverview extends Vue {
   get segmentLabels() {
     return this.segmentData.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        const segmentName = this.segmentNameFormat(segment.Name)
+        const segmentName = this.segmentNameFormat(segment.Name);
         return time ? `${segmentName} (${formatTime(time)})` : segmentName;
     });
   }

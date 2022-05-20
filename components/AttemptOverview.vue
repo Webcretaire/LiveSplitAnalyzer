@@ -65,8 +65,12 @@ export default class AttemptOverview extends Vue {
     return `Possible timesave (${secondsToFormattedString(this.attemptTimesave)} total)`;
   }
 
+  get segmentData() {
+    return this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
+  }
+
   get AttemptSegments() {
-    return this.run.Segments.Segment.map(
+    return this.segmentData.map(
       segment => (segment.SegmentHistory?.Time || []).find(segmentTime => segmentTime['@_id'] == this.attempt['@_id'])
     );
   }
@@ -87,7 +91,7 @@ export default class AttemptOverview extends Vue {
   get attemptSplitTimesaves() {
     let timeSaveSoFar = 0;
 
-    return this.run.Segments.Segment.map((segment, index) => {
+    return this.segmentData.map((segment, index) => {
       const s          = this.AttemptSegments[index];
       const seg_t      = selectTime(s);
       const best_seg_t = selectTime(segment.BestSegmentTime);
@@ -121,8 +125,7 @@ export default class AttemptOverview extends Vue {
   }
 
   get segmentLabels() {
-    const segmentData = this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
-    return segmentData.map(segment => {
+    return this.segmentData.map(segment => {
         const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
         const segmentName = this.segmentNameFormat(segment.Name)
         return time ? `${segmentName} (${formatTime(time)})` : segmentName;
@@ -130,8 +133,7 @@ export default class AttemptOverview extends Vue {
   }
 
   get timesaveLabels() {
-    const segmentData = this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
-    return segmentData.map((segment, i) => {
+    return this.segmentData.map((segment, i) => {
       const ast = this.attemptSplitTimesaves[i];
       const segmentName = this.segmentNameFormat(segment.Name);
       return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;

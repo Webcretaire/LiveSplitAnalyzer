@@ -31,7 +31,7 @@
               </b-tab>
 
               <b-tab title="Attempt analysis">
-                <attempt-analysis-tab/>
+                <attempt-analysis-tab :detailed-segments="detailedSegments"/>
               </b-tab>
               <b-tab title="Comparisons">
                 <comparisons-display :segments="parsedSplits.Run.Segments"/>

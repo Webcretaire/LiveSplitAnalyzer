@@ -16,6 +16,9 @@
                       v-b-tooltip.hover :title="mergeSplitTooltip">
               Merge into next split
             </b-button>
+            <b-button @click="moveTimeModal" size="sm" variant="success" class="ml-2">
+              Move time to next split
+            </b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -56,6 +59,12 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
     GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal');
     singleSplitState.currentSplit = this.split;
     GlobalEventEmitter.$emit('setCurrentSplit', this.split);
+  }
+
+  moveTimeModal() {
+    GlobalEventEmitter.$emit('openModal', 'MoveTimeModal', {
+      currentSplitIndex: this.splitIndex
+    });
   }
 
   get nextSplit(): Segment | undefined {

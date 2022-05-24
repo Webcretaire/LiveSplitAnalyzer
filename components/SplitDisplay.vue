@@ -17,7 +17,7 @@
               Merge into next split
             </b-button>
             <b-button @click="moveTimeModal" size="sm" variant="success" class="ml-2">
-              Move time to next split
+              Move time between splits
             </b-button>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>

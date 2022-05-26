@@ -66,35 +66,34 @@ export default class MoveTimeModal extends mixins(BaseModal) {
     whithLoad(() => {
       const currentSplitTimes = this.currentSplit?.SegmentHistory?.Time;
       const nextSplitTimes = this.nextSplit?.SegmentHistory?.Time;
+      const hasGameTime = store.state.hasGameTime;
 
-      currentSplitTimes?.forEach((currentSplit) => {
-        const nextSplit = nextSplitTimes?.find(t => t['@_id'] === currentSplit['@_id']);
+      let currentSplitGold = this.currentSplit?.BestSegmentTime;
+      let nextSplitGold = this.nextSplit ?.BestSegmentTime;
 
-        if (nextSplit) {
-          if(currentSplit.RealTime && nextSplit.RealTime) {
-            let currentRealTime = stringTimeToSeconds(currentSplit.RealTime);
-            let nextRealTime = stringTimeToSeconds(nextSplit.RealTime);
+      this.currentSplit!.BestSegmentTime.RealTime = secondsToLivesplitFormat(stringTimeToSeconds(currentSplitGold?.RealTime || "0.0.0.0") - this.transferTime);
+      this.nextSplit!.BestSegmentTime.RealTime = secondsToLivesplitFormat(stringTimeToSeconds(nextSplitGold?.RealTime || "0.0.0.0") + this.transferTime);
+      if (hasGameTime) {
+        this.currentSplit!.BestSegmentTime.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(currentSplitGold?.GameTime || "0.0.0.0") - this.transferTime);
+        this.nextSplit!.BestSegmentTime.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(nextSplitGold?.GameTime || "0.0.0.0") + this.transferTime);
+      }
 
-            currentRealTime -= this.transferTime;
-            nextRealTime += this.transferTime;
+      currentSplitTimes?.forEach((attemptCurrentSplit) => {
+        const attemptNextSplit = nextSplitTimes?.find(t => t['@_id'] === attemptCurrentSplit['@_id']);
 
-            currentSplit.RealTime = secondsToLivesplitFormat(currentRealTime);
-            nextSplit.RealTime = secondsToLivesplitFormat(currentRealTime);
-          }
-          if (currentSplit.GameTime && nextSplit.GameTime) {
-            let currentGameTime = stringTimeToSeconds(currentSplit.GameTime);
-            let nextGameTime = stringTimeToSeconds(nextSplit.GameTime);
+        attemptCurrentSplit.RealTime = secondsToLivesplitFormat(stringTimeToSeconds(attemptCurrentSplit.RealTime || "0.0.0.0") - this.transferTime);
+        if (hasGameTime)
+          attemptCurrentSplit.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(attemptCurrentSplit.GameTime || "0.0.0.0") - this.transferTime);
 
-            currentGameTime -= this.transferTime;
-            nextGameTime += this.transferTime;
-
-            currentSplit.GameTime = secondsToLivesplitFormat(currentGameTime);
-            nextSplit.GameTime = secondsToLivesplitFormat(currentGameTime);
-          }
+        if (attemptNextSplit) {
+          attemptNextSplit.RealTime = secondsToLivesplitFormat(stringTimeToSeconds(attemptNextSplit.RealTime || "0.0.0.0") + this.transferTime);
+          if (hasGameTime)
+            attemptNextSplit.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(attemptNextSplit.GameTime || "0.0.0.0") + this.transferTime);
         }
       });
       splitFileIsModified(true);
     });
+    this.destroyModal();
   }
 }
 </script>

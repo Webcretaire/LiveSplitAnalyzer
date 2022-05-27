@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import {Segment, splitFileIsModified} from '~/util/splits';
-import {Component, mixins}            from 'nuxt-property-decorator';
+import {Component, mixins, Prop}      from 'nuxt-property-decorator';
 import {GlobalEventEmitter}           from '~/util/globalEvents';
 import {singleSplitState}             from '~/util/singleSplit';
 import {withLoadAsync}                from '~/util/loading';
@@ -51,6 +51,9 @@ import {Plotly}                       from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
+  @Prop()
+  segments!: Segment[];
+
   get mergeSplitTooltip() {
     return this.nextSplit ? `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"` : '';
   }
@@ -63,6 +66,7 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
 
   moveTimeModal() {
     GlobalEventEmitter.$emit('openModal', 'MoveTimeModal', {
+      splits: this.segments,
       currentSplitIndex: this.splitIndex
     });
   }

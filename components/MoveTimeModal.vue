@@ -25,7 +25,7 @@ import {
   secondsToLivesplitFormat,
   stringTimeToSeconds
 }                                        from '~/util/durations';
-import {splitFileIsModified, selectTime} from '~/util/splits';
+import {splitFileIsModified, selectTime, Segment} from '~/util/splits';
 import {Component, Prop, mixins}         from 'nuxt-property-decorator';
 import BaseModal                         from '~/components/BaseModal.vue';
 import Multiselect                       from 'vue-multiselect';
@@ -41,22 +41,25 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   transferSplitName: string = "";
 
   @Prop()
+  splits!: Segment[];
+
+  @Prop()
   currentSplitIndex!: number;
 
   get segmentGold() {
-    const gold = selectTime(this.currentSplit?.BestSegmentTime);
+    const gold = selectTime(this.currentSplit.BestSegmentTime);
     return stringTimeToSeconds(gold || "0.0.0.0");
   }
 
   get splitOptions() {
     if (this.currentSplitIndex == 0)
-      return [this.nextSplit?.Name];
+      return [this.nextSplit.Name];
 
-    const lastSplitIndex = (store.state.splitFile?.Run.Segments.Segment.length  || 0) - 1;
+    const lastSplitIndex = this.splits.length - 1;
     if (this.currentSplitIndex == lastSplitIndex)
-      return [this.previousSplit?.Name];
+      return [this.previousSplit.Name];
 
-    return [this.previousSplit?.Name, this.nextSplit?.Name];
+    return [this.previousSplit.Name, this.nextSplit.Name];
   }
 
   get timeValid() {
@@ -81,33 +84,33 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   get currentSplit() {
-    return store.state.splitFile?.Run.Segments.Segment[this.currentSplitIndex];
+    return this.splits[this.currentSplitIndex];
   }
 
   get nextSplit() {
-    return store.state.splitFile?.Run.Segments.Segment[this.currentSplitIndex + 1];
+    return this.splits[this.currentSplitIndex + 1];
   }
 
   get previousSplit() {
-    return store.state.splitFile?.Run.Segments.Segment[this.currentSplitIndex - 1];
+    return this.splits[this.currentSplitIndex - 1];
   }
 
   get chosenSplitFunction() {
-    if (this.transferSplitName === this.nextSplit?.Name)
+    if (this.transferSplitName === this.nextSplit.Name)
       return () => this.moveTimeNext();
     
-    if (this.transferSplitName === this.previousSplit?.Name)
+    if (this.transferSplitName === this.previousSplit.Name)
       return () => this.moveTimePrevious();
   }
 
   moveTimePrevious() {
     whithLoad(() => {
-      const currentSplitTimes = this.currentSplit?.SegmentHistory?.Time;
-      const previousSplitTimes = this.previousSplit?.SegmentHistory?.Time;
+      const currentSplitTimes = this.currentSplit.SegmentHistory?.Time;
+      const previousSplitTimes = this.previousSplit.SegmentHistory?.Time;
       const hasGameTime = store.state.hasGameTime;
 
-      let currentSplitGold = this.currentSplit?.BestSegmentTime;
-      let previousSplitGold = this.previousSplit?.BestSegmentTime;
+      let currentSplitGold = this.currentSplit.BestSegmentTime;
+      let previousSplitGold = this.previousSplit.BestSegmentTime;
 
       const newCurrentRealGold = stringTimeToSeconds(currentSplitGold?.RealTime || "0.0.0.0") - this.transferTime;
       const newPreviousRealGold = stringTimeToSeconds(previousSplitGold?.RealTime || "0.0.0.0") + this.transferTime;
@@ -147,12 +150,12 @@ export default class MoveTimeModal extends mixins(BaseModal) {
 
   moveTimeNext() {
     whithLoad(() => {
-      const currentSplitTimes = this.currentSplit?.SegmentHistory?.Time;
-      const nextSplitTimes = this.nextSplit?.SegmentHistory?.Time;
+      const currentSplitTimes = this.currentSplit.SegmentHistory?.Time;
+      const nextSplitTimes = this.nextSplit.SegmentHistory?.Time;
       const hasGameTime = store.state.hasGameTime;
 
-      let currentSplitGold = this.currentSplit?.BestSegmentTime;
-      let nextSplitGold = this.nextSplit?.BestSegmentTime;
+      let currentSplitGold = this.currentSplit.BestSegmentTime;
+      let nextSplitGold = this.nextSplit.BestSegmentTime;
 
       const newCurrentRealGold = stringTimeToSeconds(currentSplitGold?.RealTime || "0.0.0.0") - this.transferTime;
       const newNextRealGold = stringTimeToSeconds(nextSplitGold?.RealTime || "0.0.0.0") + this.transferTime;

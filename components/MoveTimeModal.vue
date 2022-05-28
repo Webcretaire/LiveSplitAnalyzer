@@ -20,17 +20,13 @@
 </template>
 
 <script lang="ts">
-import {
-  secondsToFormattedString,
-  secondsToLivesplitFormat,
-  stringTimeToSeconds
-}                                        from '~/util/durations';
-import {splitFileIsModified, selectTime, Segment, OptionalRealAndGameTime} from '~/util/splits';
-import {Component, Prop, mixins}         from 'nuxt-property-decorator';
-import BaseModal                         from '~/components/BaseModal.vue';
-import Multiselect                       from 'vue-multiselect';
-import {whithLoad}                       from '~/util/loading';
-import store                             from '~/util/store';
+import {secondsToFormattedString, secondsToLivesplitFormat, stringTimeToSeconds}  from '~/util/durations';
+import {splitFileIsModified, selectTime, Segment, OptionalRealAndGameTime}        from '~/util/splits';
+import {Component, Prop, mixins}                                                  from 'nuxt-property-decorator';
+import BaseModal                                                                  from '~/components/BaseModal.vue';
+import Multiselect                                                                from 'vue-multiselect';
+import {whithLoad}                                                                from '~/util/loading';
+import store                                                                      from '~/util/store';
 
 @Component({components: {Multiselect}})
 export default class MoveTimeModal extends mixins(BaseModal) {
@@ -95,19 +91,15 @@ export default class MoveTimeModal extends mixins(BaseModal) {
     return this.splits[this.currentSplitIndex - 1];
   }
 
-  get chosenSplitFunction() {
+  chosenSplitFunction() {
     if (this.transferSplitName === this.nextSplit?.Name)
-      return () => this.moveTimeNext();
+      this.moveTime(this.currentSplit, this.nextSplit);
     
     if (this.transferSplitName === this.previousSplit?.Name)
-      return () => this.moveTimePrevious();
+      this.moveTime(this.currentSplit, this.previousSplit);
   }
 
-  moveTransferTime(chosenTime: OptionalRealAndGameTime, isCurrentSplit: boolean) {
-    let transferTime = this.transferTime;
-    if (isCurrentSplit)
-      transferTime = -transferTime;
-
+  moveTransferTime(chosenTime: OptionalRealAndGameTime, transferTime: number) {
     const newRealTime = stringTimeToSeconds(chosenTime.RealTime || "0.0.0.0") + transferTime;
     chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
 
@@ -117,39 +109,22 @@ export default class MoveTimeModal extends mixins(BaseModal) {
     }
   }
 
-  moveTimePrevious() {
+  moveTime(currentSplit: Segment, otherSplit: Segment) {
     whithLoad(() => {
-      const currentSplitTimes = this.currentSplit.SegmentHistory?.Time;
-      const previousSplitTimes = this.previousSplit.SegmentHistory?.Time;
+      const currentSplitTimes = currentSplit.SegmentHistory?.Time;
+      const otherSplitTimes = otherSplit.SegmentHistory?.Time;
 
-      this.moveTransferTime(this.currentSplit.BestSegmentTime, true);
-      this.moveTransferTime(this.previousSplit.BestSegmentTime, false);
-
-      previousSplitTimes?.forEach((attemptPreviousSplit) => {
-        const attemptCurrentSplit = currentSplitTimes?.find(t => t['@_id'] === attemptPreviousSplit['@_id']);
-        this.moveTransferTime(attemptPreviousSplit, false);
-        if (attemptCurrentSplit)
-          this.moveTransferTime(attemptCurrentSplit, true);
-      });
-      splitFileIsModified(true);
-    });
-    this.destroyModal();
-  }
-
-  moveTimeNext() {
-    whithLoad(() => {
-      const currentSplitTimes = this.currentSplit.SegmentHistory?.Time;
-      const nextSplitTimes = this.nextSplit.SegmentHistory?.Time;
-
-      this.moveTransferTime(this.currentSplit.BestSegmentTime, true);
-      this.moveTransferTime(this.nextSplit.BestSegmentTime, false);
+      this.moveTransferTime(currentSplit.BestSegmentTime, -this.transferTime);
+      this.moveTransferTime(otherSplit.BestSegmentTime, this.transferTime);
 
       currentSplitTimes?.forEach((attemptCurrentSplit) => {
-        const attemptNextSplit = nextSplitTimes?.find(t => t['@_id'] === attemptCurrentSplit['@_id']);
-        this.moveTransferTime(attemptCurrentSplit, true);
-        if (attemptNextSplit)
-          this.moveTransferTime(attemptNextSplit, false);
+        this.moveTransferTime(attemptCurrentSplit, -this.transferTime);
       });
+
+      otherSplitTimes?.forEach((attemptOtherSplit) => {
+        this.moveTransferTime(attemptOtherSplit, this.transferTime);
+      });
+
       splitFileIsModified(true);
     });
     this.destroyModal();

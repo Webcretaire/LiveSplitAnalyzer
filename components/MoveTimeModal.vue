@@ -113,6 +113,8 @@ export default class MoveTimeModal extends mixins(BaseModal) {
     whithLoad(() => {
       const currentSplitTimes = currentSplit.SegmentHistory?.Time;
       const otherSplitTimes = otherSplit.SegmentHistory?.Time;
+      const currentSplitComparisons = currentSplit.SplitTimes.SplitTime;
+      const otherSplitComparisons = otherSplit.SplitTimes.SplitTime;
 
       this.moveTransferTime(currentSplit.BestSegmentTime, -this.transferTime);
       this.moveTransferTime(otherSplit.BestSegmentTime, this.transferTime);
@@ -123,6 +125,14 @@ export default class MoveTimeModal extends mixins(BaseModal) {
 
       otherSplitTimes?.forEach((attemptOtherSplit) => {
         this.moveTransferTime(attemptOtherSplit, this.transferTime);
+      });
+
+      currentSplitComparisons.forEach((comparison) => {
+        this.moveTransferTime(comparison, -this.transferTime);
+      });
+
+      otherSplitComparisons?.forEach((comparison) => {
+        this.moveTransferTime(comparison, this.transferTime);
       });
 
       splitFileIsModified(true);

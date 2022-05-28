@@ -136,6 +136,12 @@ export default class MoveTimeModal extends mixins(BaseModal) {
       });
 
       splitFileIsModified(true);
+      this.$bvToast.toast(`Moved ${secondsToFormattedString(this.transferTime)} from ${currentSplit.Name} to ${otherSplit.Name}`, {
+          title: 'Times changed',
+          autoHideDelay: 5000,
+          appendToast: false,
+          variant: 'success'
+      });
     });
     this.destroyModal();
   }

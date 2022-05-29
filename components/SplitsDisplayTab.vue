@@ -20,6 +20,7 @@
                        :graphYAxisToZero="graphYAxisToZero"
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
                        :currentAttemptNumber="currentAttemptNumber"
+                       :segments="segments"
                        class="mb-3"/>
   </div>
 </template>
@@ -27,7 +28,7 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt}                     from '~/util/splits';
+import {Attempt, Segment}            from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
 
 @Component
@@ -40,6 +41,9 @@ export default class SplitsDisplayTab extends Vue {
 
   @Prop()
   splits!: DetailedSegment[];
+
+  @Prop()
+  segments!: Segment[];
 
   get PB() {
     return store.state.PB;

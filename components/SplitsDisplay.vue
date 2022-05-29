@@ -41,7 +41,8 @@
                 <comparison-remover/>
               </b-tab>
               <b-tab title="Splits analysis">
-                <splits-display-tab :splits="detailedSegments"/>
+                <splits-display-tab :splits="detailedSegments"
+                                    :segments="parsedSplits.Run.Segments.Segment"/>
               </b-tab>
             </b-tabs>
           </b-card>

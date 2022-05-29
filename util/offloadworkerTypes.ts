@@ -7,7 +7,8 @@ export enum OffloadWorkerOperation {
   MERGE_SPLIT_INTO_NEXT_ONE,
   UPDATE_STORE_DATA,
   GET_PB,
-  GENERATE_SPLIT_DETAIL
+  GENERATE_SPLIT_DETAIL,
+  MOVE_TIME_TO_OTHER_SPLIT
 }
 
 export interface OffloadWorkerMessage {

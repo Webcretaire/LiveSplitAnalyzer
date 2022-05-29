@@ -40,21 +40,13 @@ export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTim
   moveTransferTime(currentSplit.BestSegmentTime, -transferTime);
   moveTransferTime(otherSplit.BestSegmentTime, transferTime);
 
-  currentSplitTimes?.forEach((attemptCurrentSplit) => {
-    moveTransferTime(attemptCurrentSplit, -transferTime);
-  });
+  currentSplitTimes?.forEach((attemptCurrentSplit) => moveTransferTime(attemptCurrentSplit, -transferTime));
 
-  otherSplitTimes?.forEach((attemptOtherSplit) => {
-    moveTransferTime(attemptOtherSplit, transferTime);
-  });
+  otherSplitTimes?.forEach((attemptOtherSplit) => moveTransferTime(attemptOtherSplit, transferTime));
 
-  currentSplitComparisons.forEach((comparison) => {
-    moveTransferTime(comparison, -transferTime);
-  });
+  currentSplitComparisons.forEach((comparison) => moveTransferTime(comparison, -transferTime));
 
-  otherSplitComparisons?.forEach((comparison) => {
-    moveTransferTime(comparison, transferTime);
-  });
+  otherSplitComparisons?.forEach((comparison) => moveTransferTime(comparison, transferTime));
 
   return [currentSplit, otherSplit];
 }

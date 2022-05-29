@@ -112,29 +112,30 @@ export default class AttemptOverview extends Vue {
   segmentNameFormat(name: string) {
     if (name.startsWith('-'))
       return name.substring(1);
-    
-    if (name.startsWith('{')){
-      const cutIndex = name.indexOf('}') ;
-      const splitName = name.substring(1, cutIndex);
-      const subsplitName = name.substring(cutIndex + 2);
+
+    const nameMatches = name.match(/\{(.*)\}(.*)/);
+    if (nameMatches?.length) {
+      // nameMatches[0] has the whole string, [1] has the split name, [2] has the subsplit name
+      const splitName    = nameMatches[1];
+      const subsplitName = nameMatches[2].trim();
 
       return `${splitName} | ${subsplitName}`;
     }
 
-    return name;
+    return name.trim();
   }
 
   get segmentLabels() {
     return this.segmentData.map(segment => {
-        const time = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
-        const segmentName = this.segmentNameFormat(segment.Name);
-        return time ? `${segmentName} (${formatTime(time)})` : segmentName;
+      const time        = selectTime((segment.SegmentHistory?.Time || []).find(t => t['@_id'] == this.attempt['@_id']));
+      const segmentName = this.segmentNameFormat(segment.Name);
+      return time ? `${segmentName} (${formatTime(time)})` : segmentName;
     });
   }
 
   get timesaveLabels() {
     return this.segmentData.map((segment, i) => {
-      const ast = this.attemptSplitTimesaves[i];
+      const ast         = this.attemptSplitTimesaves[i];
       const segmentName = this.segmentNameFormat(segment.Name);
       return `${segmentName} (${ast ? secondsToFormattedString(ast) : ''})`;
     });

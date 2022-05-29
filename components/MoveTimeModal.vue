@@ -45,7 +45,7 @@ export default class MoveTimeModal extends mixins(BaseModal) {
 
   get segmentGold() {
     const gold = selectTime(this.currentSplit.BestSegmentTime);
-    return stringTimeToSeconds(gold || '0.0.0.0');
+    return stringTimeToSeconds(gold || '0:0:0.0');
   }
 
   get splitOptions() {

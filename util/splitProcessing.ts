@@ -22,11 +22,11 @@ export interface DetailedSegment extends Segment {
 }
 
 const moveTransferTime = (chosenTime: OptionalRealAndGameTime, transferTime: number) => {
-  const newRealTime   = stringTimeToSeconds(chosenTime.RealTime || '0.0.0.0') + transferTime;
+  const newRealTime   = stringTimeToSeconds(chosenTime.RealTime || '0:0:0.0') + transferTime;
   chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
 
   if (store.state.hasGameTime) {
-    const newGameTime   = stringTimeToSeconds(chosenTime?.GameTime || '0.0.0.0') + transferTime;
+    const newGameTime   = stringTimeToSeconds(chosenTime?.GameTime || '0:0:0.0') + transferTime;
     chosenTime.GameTime = secondsToLivesplitFormat(newGameTime);
   }
 };

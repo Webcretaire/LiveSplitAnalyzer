@@ -1,6 +1,7 @@
 import {
   Attempt,
   AttemptHistory,
+  OptionalRealAndGameTime,
   RealAndGameTime,
   Run,
   Segment,
@@ -12,11 +13,50 @@ import {asArray, XYCoordinates}                        from '~/util/util';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {xmlParser}                                     from '~/util/xml';
 import {extractPng}                                    from './pngExtractor';
+import store                                           from './store';
 
 export interface DetailedSegment extends Segment {
   Subsplits: DetailedSegment[],
   Index: number, // Index in the original raw SplitFile
   IsSubsplit: boolean
+}
+
+const moveTransferTime = (chosenTime: OptionalRealAndGameTime, transferTime: number) => {
+  const newRealTime = stringTimeToSeconds(chosenTime.RealTime || "0.0.0.0") + transferTime;
+  chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
+  
+  if (store.state.hasGameTime) {
+    const newGameTime = stringTimeToSeconds(chosenTime?.GameTime || "0.0.0.0") + transferTime;
+    chosenTime.GameTime = secondsToLivesplitFormat(newGameTime);
+  }
+}
+
+export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTime: number) => {
+  const currentSplitTimes = currentSplit.SegmentHistory?.Time;
+  const otherSplitTimes = otherSplit.SegmentHistory?.Time;
+  const currentSplitComparisons = currentSplit.SplitTimes.SplitTime;
+  const otherSplitComparisons = otherSplit.SplitTimes.SplitTime;
+
+  moveTransferTime(currentSplit.BestSegmentTime, -transferTime);
+  moveTransferTime(otherSplit.BestSegmentTime, transferTime);
+
+  currentSplitTimes?.forEach((attemptCurrentSplit) => {
+    moveTransferTime(attemptCurrentSplit, -transferTime);
+  });
+
+  otherSplitTimes?.forEach((attemptOtherSplit) => {
+    moveTransferTime(attemptOtherSplit, transferTime);
+  });
+
+  currentSplitComparisons.forEach((comparison) => {
+    moveTransferTime(comparison, -transferTime);
+  });
+
+  otherSplitComparisons?.forEach((comparison) => {
+    moveTransferTime(comparison, transferTime);
+  });
+
+  return [currentSplit, otherSplit];
 }
 
 export const segTimeArrayToSeconds = (times: SegmentHistoryTime[]) => times.map((t) => {

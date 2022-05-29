@@ -5,7 +5,8 @@ import {
   goldCoordinatesFromSecondsArray,
   mergeSplitIntoNextOne,
   parseSplitFile,
-  segTimeArrayToSeconds
+  segTimeArrayToSeconds,
+  moveTime
 }                                                     from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import store                                          from '~/util/store';
@@ -48,6 +49,9 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.GENERATE_SPLIT_DETAIL:
       out = generateSplitDetail(a[0]);
+      break;
+    case OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT:
+      out = moveTime(a[0], a[1], a[2]);
       break;
   }
 

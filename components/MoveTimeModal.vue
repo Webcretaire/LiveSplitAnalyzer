@@ -23,9 +23,11 @@
 import {secondsToFormattedString, secondsToLivesplitFormat, stringTimeToSeconds}  from '~/util/durations';
 import {splitFileIsModified, selectTime, Segment, OptionalRealAndGameTime}        from '~/util/splits';
 import {Component, Prop, mixins}                                                  from 'nuxt-property-decorator';
+import {whithLoad}                                                                from '~/util/loading';
+import {offload}                                                                  from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                                   from '~/util/offloadworkerTypes';
 import BaseModal                                                                  from '~/components/BaseModal.vue';
 import Multiselect                                                                from 'vue-multiselect';
-import {whithLoad}                                                                from '~/util/loading';
 import store                                                                      from '~/util/store';
 
 @Component({components: {Multiselect}})
@@ -35,6 +37,9 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   transferTime: number = 0;
 
   transferSplitName: string = "";
+
+  // this value will be set when the move time function is called
+  chosenSplitIndex!: number;
 
   @Prop()
   splits!: Segment[];
@@ -92,55 +97,35 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   chosenSplitFunction() {
-    if (this.transferSplitName === this.nextSplit?.Name)
-      this.moveTime(this.currentSplit, this.nextSplit);
+    if (this.transferSplitName === this.nextSplit?.Name) {
+      this.chosenSplitIndex = this.splits.indexOf(this.nextSplit);
+      this.doMoveTime(this.currentSplit, this.nextSplit);
+    }
     
-    if (this.transferSplitName === this.previousSplit?.Name)
-      this.moveTime(this.currentSplit, this.previousSplit);
-  }
-
-  moveTransferTime(chosenTime: OptionalRealAndGameTime, transferTime: number) {
-    const newRealTime = stringTimeToSeconds(chosenTime.RealTime || "0.0.0.0") + transferTime;
-    chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
-
-    if (store.state.hasGameTime) {
-      const newGameTime = stringTimeToSeconds(chosenTime?.GameTime || "0.0.0.0") + transferTime;
-      chosenTime.GameTime = secondsToLivesplitFormat(newGameTime);
+    if (this.transferSplitName === this.previousSplit?.Name) {
+      this.chosenSplitIndex = this.splits.indexOf(this.previousSplit);
+      this.doMoveTime(this.currentSplit, this.previousSplit);
     }
   }
 
-  moveTime(currentSplit: Segment, otherSplit: Segment) {
+  doMoveTime(currentSplit: Segment, otherSplit: Segment) {
     whithLoad(() => {
-      const currentSplitTimes = currentSplit.SegmentHistory?.Time;
-      const otherSplitTimes = otherSplit.SegmentHistory?.Time;
-      const currentSplitComparisons = currentSplit.SplitTimes.SplitTime;
-      const otherSplitComparisons = otherSplit.SplitTimes.SplitTime;
+      offload(
+        OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT,
+        currentSplit,
+        otherSplit,
+        this.transferTime
+      ).then(modifiedSplits => {
+        Object.assign(currentSplit, modifiedSplits[0]);
+        Object.assign(otherSplit, modifiedSplits[1]);
 
-      this.moveTransferTime(currentSplit.BestSegmentTime, -this.transferTime);
-      this.moveTransferTime(otherSplit.BestSegmentTime, this.transferTime);
-
-      currentSplitTimes?.forEach((attemptCurrentSplit) => {
-        this.moveTransferTime(attemptCurrentSplit, -this.transferTime);
-      });
-
-      otherSplitTimes?.forEach((attemptOtherSplit) => {
-        this.moveTransferTime(attemptOtherSplit, this.transferTime);
-      });
-
-      currentSplitComparisons.forEach((comparison) => {
-        this.moveTransferTime(comparison, -this.transferTime);
-      });
-
-      otherSplitComparisons?.forEach((comparison) => {
-        this.moveTransferTime(comparison, this.transferTime);
-      });
-
-      splitFileIsModified(true);
-      this.$bvToast.toast(`Moved ${secondsToFormattedString(this.transferTime)} from ${currentSplit.Name} to ${otherSplit.Name}`, {
-          title: 'Times changed',
-          autoHideDelay: 5000,
-          appendToast: false,
-          variant: 'success'
+        splitFileIsModified(true);
+        this.$bvToast.toast(`Moved ${secondsToFormattedString(this.transferTime)} from ${currentSplit.Name} to ${otherSplit.Name}`, {
+            title: 'Times changed',
+            autoHideDelay: 5000,
+            appendToast: false,
+            variant: 'success'
+        });
       });
     });
     this.destroyModal();

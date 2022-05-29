@@ -10,7 +10,7 @@ import {Component, Vue}      from 'nuxt-property-decorator';
 import {xmlBuilder}          from '~/util/xml';
 import store                 from '~/util/store';
 import {splitFileIsModified} from '~/util/splits';
-import {whithLoad}           from '~/util/loading';
+import {withLoad}            from '~/util/loading';
 
 @Component
 export default class DownloadSplits extends Vue {
@@ -23,7 +23,7 @@ export default class DownloadSplits extends Vue {
   }
 
   downloadSplits() {
-    whithLoad(() => {
+    withLoad(() => {
       let element = document.createElement('a');
       element.setAttribute('href', 'data:binary/octet-stream,' + encodeURIComponent(xmlBuilder.build(store.state.splitFile)));
       element.setAttribute('download', 'splits.lss');

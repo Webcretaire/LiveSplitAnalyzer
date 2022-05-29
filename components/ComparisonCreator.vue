@@ -62,7 +62,7 @@ import {Component, mixins}        from 'nuxt-property-decorator';
 import BaseModal                  from '~/components/BaseModal.vue';
 import store                      from '~/util/store';
 import {secondsToLivesplitFormat} from '~/util/durations';
-import {whithLoad}                from '~/util/loading';
+import {withLoad}                 from '~/util/loading';
 import Multiselect                from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
@@ -96,7 +96,7 @@ export default class ComparisonCreator extends mixins(BaseModal) {
   }
 
   makeBalanced() {
-    whithLoad(() => {
+    withLoad(() => {
       const comparisonAlreadyExists = this.segments.Segment.find(
         segment => segment.SplitTimes.SplitTime.find(
           (splitTime: SplitTime) => splitTime['@_name'] == this.comparisonName

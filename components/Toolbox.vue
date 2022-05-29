@@ -33,7 +33,7 @@ import {
   SplitTime
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
-import {whithLoad, withLoadAsync}                      from '~/util/loading';
+import {withLoad, withLoadAsync}                       from '~/util/loading';
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
@@ -106,7 +106,7 @@ export default class Toolbox extends Vue {
   }
 
   fixPB() {
-    whithLoad(() => {
+    withLoad(() => {
       splitFileIsModified(true);
 
       const realPB = this.pbFromAttemptHistory || this.pbFromSplitHistory;

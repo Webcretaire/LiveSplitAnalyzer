@@ -110,8 +110,7 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
         appendToast: false,
         variant: 'success'
       });
-      endLoad();
-    });
+    }).finally(() => endLoad());
   }
 
   mergeNextSplit() {

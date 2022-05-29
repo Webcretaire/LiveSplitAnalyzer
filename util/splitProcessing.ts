@@ -22,20 +22,20 @@ export interface DetailedSegment extends Segment {
 }
 
 const moveTransferTime = (chosenTime: OptionalRealAndGameTime, transferTime: number) => {
-  const newRealTime = stringTimeToSeconds(chosenTime.RealTime || "0.0.0.0") + transferTime;
+  const newRealTime   = stringTimeToSeconds(chosenTime.RealTime || '0.0.0.0') + transferTime;
   chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
-  
+
   if (store.state.hasGameTime) {
-    const newGameTime = stringTimeToSeconds(chosenTime?.GameTime || "0.0.0.0") + transferTime;
+    const newGameTime   = stringTimeToSeconds(chosenTime?.GameTime || '0.0.0.0') + transferTime;
     chosenTime.GameTime = secondsToLivesplitFormat(newGameTime);
   }
-}
+};
 
-export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTime: number) => {
-  const currentSplitTimes = currentSplit.SegmentHistory?.Time;
-  const otherSplitTimes = otherSplit.SegmentHistory?.Time;
+export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTime: number): Segment[] => {
+  const currentSplitTimes       = currentSplit.SegmentHistory?.Time;
+  const otherSplitTimes         = otherSplit.SegmentHistory?.Time;
   const currentSplitComparisons = currentSplit.SplitTimes.SplitTime;
-  const otherSplitComparisons = otherSplit.SplitTimes.SplitTime;
+  const otherSplitComparisons   = otherSplit.SplitTimes.SplitTime;
 
   moveTransferTime(currentSplit.BestSegmentTime, -transferTime);
   moveTransferTime(otherSplit.BestSegmentTime, transferTime);
@@ -49,7 +49,7 @@ export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTim
   otherSplitComparisons?.forEach((comparison) => moveTransferTime(comparison, transferTime));
 
   return [currentSplit, otherSplit];
-}
+};
 
 export const segTimeArrayToSeconds = (times: SegmentHistoryTime[]) => times.map((t) => {
   const time = selectTime(t);
@@ -162,21 +162,21 @@ export const parseSplitFile = (fileContent: string): SplitFile => {
 };
 
 export const generateSplitDetail = (rawSplits: Segment[]) => {
-  const out: DetailedSegment[] = [];
-  let virtualSplitIndex = 0;
+  const out: DetailedSegment[]               = [];
+  let virtualSplitIndex                      = 0;
   let accumulateSubsplits: DetailedSegment[] = [];
   rawSplits.forEach((rawSplit: Segment, index: number) => {
-    const rawIcon = extractPng(rawSplit.Icon); 
-    const icon = rawIcon
+    const rawIcon = extractPng(rawSplit.Icon);
+    const icon    = rawIcon
       ? `data:image/jpeg;base64,${btoa(new Uint8Array(rawIcon).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
-      : ''
+      : '';
 
     // If current split is a subsplit, add it to the pile and go to next one
     if (rawSplit.Name.startsWith('-')) {
       accumulateSubsplits.push({
-        ...rawSplit, 
-        Subsplits: [], 
-        Name: rawSplit.Name.substring(1).trim(), 
+        ...rawSplit,
+        Subsplits: [],
+        Name: rawSplit.Name.substring(1).trim(),
         Index: index,
         Icon: icon,
         IsSubsplit: true
@@ -184,10 +184,10 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
       return;
     }
 
-    const nameMatches = rawSplit.Name.match(/\{(.*)\}(.*)/);
+    const nameMatches                 = rawSplit.Name.match(/\{(.*)\}(.*)/);
     const splitToAdd: DetailedSegment = {
-      ...rawSplit, 
-      Subsplits: [], 
+      ...rawSplit,
+      Subsplits: [],
       Index: index,
       Icon: icon,
       IsSubsplit: false
@@ -211,7 +211,7 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
     // If we have stored subsplits, agregate their times in the "big split"
     if (accumulateSubsplits.length) {
       // This split is "virtual", it doesn't really exist in the splitfile, so give it a negative Index
-      splitToAdd.Index = --virtualSplitIndex; 
+      splitToAdd.Index = --virtualSplitIndex;
 
       const lastSubsplit = accumulateSubsplits[accumulateSubsplits.length - 1];
 
@@ -221,33 +221,35 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
         delete splitToAdd.SegmentHistory;
       } else {
         // Iterate other attempts of current split
-        splitToAdd.SegmentHistory = {Time: timeHistoryToSum.map(time => {
-          // Iterate over the subsplits of current group, and find corresponding attempt
-          const times = accumulateSubsplits.reduce((acc: RealAndGameTime, accSplit: DetailedSegment) => {
-            const curAttemptTime = accSplit.SegmentHistory?.Time.find(t => t['@_id'] === time['@_id']);
+        splitToAdd.SegmentHistory = {
+          Time: timeHistoryToSum.map(time => {
+            // Iterate over the subsplits of current group, and find corresponding attempt
+            const times = accumulateSubsplits.reduce((acc: RealAndGameTime, accSplit: DetailedSegment) => {
+              const curAttemptTime = accSplit.SegmentHistory?.Time.find(t => t['@_id'] === time['@_id']);
 
-            const outAcc = {...acc};
+              const outAcc = {...acc};
 
-            if (curAttemptTime?.GameTime) {
-              if (!outAcc.GameTime) outAcc.GameTime = '0:0:0.0';
-              outAcc.GameTime = secondsToLivesplitFormat(
-                stringTimeToSeconds(outAcc.GameTime) +
-                stringTimeToSeconds(curAttemptTime.GameTime)
-              );
-            }
+              if (curAttemptTime?.GameTime) {
+                if (!outAcc.GameTime) outAcc.GameTime = '0:0:0.0';
+                outAcc.GameTime = secondsToLivesplitFormat(
+                  stringTimeToSeconds(outAcc.GameTime) +
+                  stringTimeToSeconds(curAttemptTime.GameTime)
+                );
+              }
 
-            if (curAttemptTime?.RealTime) {
-              outAcc.RealTime = secondsToLivesplitFormat(
-                stringTimeToSeconds(outAcc.RealTime) +
-                stringTimeToSeconds(curAttemptTime.RealTime)
-              );
-            }
+              if (curAttemptTime?.RealTime) {
+                outAcc.RealTime = secondsToLivesplitFormat(
+                  stringTimeToSeconds(outAcc.RealTime) +
+                  stringTimeToSeconds(curAttemptTime.RealTime)
+                );
+              }
 
-            return outAcc;
-          }, {RealTime: '0:0:0.0'});
+              return outAcc;
+            }, {RealTime: '0:0:0.0'});
 
-          return {...times, "@_id": time['@_id']};
-        })};
+            return {...times, '@_id': time['@_id']};
+          })
+        };
       }
 
       // Re-compute gold
@@ -256,7 +258,7 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
           splitToAdd.SegmentHistory.Time.map(t => stringTimeToSeconds(selectTime(t) as string))
         );
 
-        const goldSplit = splitToAdd.SegmentHistory.Time[goldCoord.x];
+        const goldSplit            = splitToAdd.SegmentHistory.Time[goldCoord.x];
         // We know RealTime exists from "filter" above
         splitToAdd.BestSegmentTime = {RealTime: goldSplit.RealTime as string};
         if (goldSplit.GameTime)
@@ -268,7 +270,7 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
     }
 
     out.push(splitToAdd);
-  })
+  });
 
   return out;
 };

@@ -1,6 +1,6 @@
 import {GlobalEventEmitter} from '~/util/globalEvents';
 
-export const whithLoad = (f: Function) => {
+export const withLoad = (f: Function) => {
   GlobalEventEmitter.$emit('startLoading', () => {
     f();
     GlobalEventEmitter.$emit('stopLoading');

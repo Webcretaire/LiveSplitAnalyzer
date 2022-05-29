@@ -20,15 +20,14 @@
 </template>
 
 <script lang="ts">
-import {secondsToFormattedString, secondsToLivesplitFormat, stringTimeToSeconds}  from '~/util/durations';
-import {splitFileIsModified, selectTime, Segment, OptionalRealAndGameTime}        from '~/util/splits';
+import {secondsToFormattedString, stringTimeToSeconds}                            from '~/util/durations';
+import {splitFileIsModified, selectTime, Segment}                                 from '~/util/splits';
 import {Component, Prop, mixins}                                                  from 'nuxt-property-decorator';
 import {whithLoad}                                                                from '~/util/loading';
 import {offload}                                                                  from '~/util/offloadWorker';
 import {OffloadWorkerOperation}                                                   from '~/util/offloadworkerTypes';
 import BaseModal                                                                  from '~/components/BaseModal.vue';
 import Multiselect                                                                from 'vue-multiselect';
-import store                                                                      from '~/util/store';
 
 @Component({components: {Multiselect}})
 export default class MoveTimeModal extends mixins(BaseModal) {

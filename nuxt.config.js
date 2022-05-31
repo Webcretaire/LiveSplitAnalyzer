@@ -26,8 +26,15 @@ export default {
     '@/assets/css/main.scss'
   ],
 
+  publicRuntimeConfig: {
+    matomoUrl: process.env.MATOMO_URL,
+    matomoSiteId: process.env.MATOMO_SITE_ID
+  },
+
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    { src: '~/plugins/matomo.config.js', mode: 'client' },
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

@@ -27,7 +27,8 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/node",
-      "~/types/worker-loader"
+      "~/types/worker-loader",
+      "~/types/matomo"
     ]
   },
   "exclude": [

@@ -113,6 +113,10 @@ export default class SplitsDisplay extends Vue {
         .then((parsedSplits: SplitFile) => {
           this.globalState.useRealTime = !this.globalState.hasGameTime;
           this.globalState.splitFile   = parsedSplits;
+
+          if (this.$matomo)
+            this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
+
           splitFileIsModified(false);
         })
         .finally(() => endLoad());

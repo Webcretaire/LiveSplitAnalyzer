@@ -11,14 +11,11 @@
           </h3>
           <p v-if="split.BestSegmentTime" class="m-0">
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
-            <b-button @click="fixGoldsModal" size="sm" variant="warning" class="mr-2">Fix fake golds</b-button>
-            <b-button v-if="nextSplit" @click="mergeNextSplit" size="sm" variant="info"
-                      v-b-tooltip.hover :title="mergeSplitTooltip">
-              Merge into next split
-            </b-button>
-            <b-button @click="moveTimeModal" size="sm" variant="success" class="ml-2">
-              Move time between splits
-            </b-button>
+            <b-dropdown text="Edit split" variant="outline-dark" lazy>
+              <b-dropdown-item-button @click="fixGoldsModal" variant="dark">Fix fake golds</b-dropdown-item-button>
+              <b-dropdown-item-button @click="moveTimeModal" variant="dark">Move time between splits</b-dropdown-item-button>
+              <b-dropdown-item-button v-if="nextSplit" @click="mergeNextSplit" variant="dark">Merge into next split</b-dropdown-item-button>
+            </b-dropdown>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
             <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>

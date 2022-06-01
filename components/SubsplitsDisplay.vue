@@ -35,6 +35,7 @@
                          :splitIndex="subsplit.Index"
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
+                         :graphMedianAttemptHline="graphMedianAttemptHline"
                          :currentAttemptNumber="currentAttemptNumber"
                          :segments="segments"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
@@ -46,6 +47,7 @@
                      :splitIndex="split.Index"
                      :graphYAxisToZero="graphYAxisToZero"
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
+                     :graphMedianAttemptHline="graphMedianAttemptHline"
                      :currentAttemptNumber="currentAttemptNumber"
                      :segments="segments"
                      class="mb-3"/>

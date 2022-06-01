@@ -11,6 +11,9 @@
       <loading-switch v-model="graphCurrentAttemptHline" class="mb-2">
         Display current attempt's times as a horizontal line
       </loading-switch>
+      <loading-switch v-model="graphCurrentAttemptMline" class="mb-2">
+        Display median attempt's times as a horizontal line
+      </loading-switch>
     </collapsible-card>
 
     <subsplits-display :split="split"
@@ -19,6 +22,7 @@
                        :splitIndex="split.Index"
                        :graphYAxisToZero="graphYAxisToZero"
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
+                       :graphMedianAttemptHline="graphMedianAttemptHline"
                        :currentAttemptNumber="currentAttemptNumber"
                        :segments="segments"
                        class="mb-3"/>
@@ -34,6 +38,8 @@ import {DetailedSegment}             from '~/util/splitProcessing';
 @Component
 export default class SplitsDisplayTab extends Vue {
   graphCurrentAttemptHline: boolean = false;
+
+  graphMedianAttemptHline: boolean = false;
 
   graphYAxisToZero: boolean = false;
 

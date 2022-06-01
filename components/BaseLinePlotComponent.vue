@@ -1,5 +1,5 @@
 <script lang="ts">
-import {Component, Prop, Vue, Watch}            from 'nuxt-property-decorator';
+import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
 import {SegmentHistoryTime, selectTime}            from '~/util/splits';
 import {formatTime, stringTimeToSeconds}           from '~/util/durations';
 import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
@@ -19,6 +19,9 @@ export default class BaseLinePlotComponent extends Vue {
 
   @Prop({default: false})
   graphCurrentAttemptHline!: boolean;
+
+  @Prop({default: false})
+  graphMedianAttemptHline!: boolean;
 
   @Prop()
   currentAttemptNumber?: number;
@@ -46,6 +49,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('timesWithPositiveIds')
   @Watch('graphYAxisToZero')
   @Watch('graphCurrentAttemptHline')
+  @Watch('graphMedianAttemptHline')
   updateLayout() {
     const l: any = {
       title: 'Time history',
@@ -78,7 +82,7 @@ export default class BaseLinePlotComponent extends Vue {
 
     const t = selectTime(this.currentAttempt);
     if (this.graphCurrentAttemptHline && this.currentAttemptNumber && t) {
-      l.shapes = [
+      l.shapes.push(
         {
           type: 'line',
           x0: 0,
@@ -91,9 +95,28 @@ export default class BaseLinePlotComponent extends Vue {
             dash: 'dot'
           }
         }
-      ];
+      );
     }
 
+    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => a - b);
+    const medianAttempt = Math.round(this.timesSeconds.length / 2) - 1;
+    if (this.graphMedianAttemptHline && medianAttempt && sortedTimesSeconds[medianAttempt]) {
+      l.shapes.push(
+        {
+          type: 'line',
+          x0: 0,
+          y0: sortedTimesSeconds[medianAttempt],
+          x1: this.timesSeconds.length - 1,
+          y1: sortedTimesSeconds[medianAttempt],
+          line: {
+            color: CUR_ATTEMPT_COLOR,
+            width: 1,
+            dash: 'dot'
+          }
+        }
+      );
+    }
+    
     this.layout = l;
   }
 

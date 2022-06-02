@@ -35,7 +35,7 @@ describe('Main page', () => {
         .invoke('text')
         .then(text => {
           cy.wrap(cleanText(text))
-            .should('equal', '34 finished runs in the range [ 18m38.83s ; 28m13.43s ]');
+            .should('equal', '34 finished runs in the range [ 0s ; 28m14.43s ]');
         });
     });
   });

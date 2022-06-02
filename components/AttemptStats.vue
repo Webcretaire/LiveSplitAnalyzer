@@ -123,8 +123,9 @@ export default class AttemptStats extends Vue {
 
         return stringTimeToSeconds(time);
       }).filter(t => t >= 0);
-    this.higherBoundFilter = Math.max(...attemptsTimes);
-    this.lowerBoundFilter  = Math.min(...attemptsTimes);
+      console.log(attemptsTimes);
+    this.higherBoundFilter = Math.max(...attemptsTimes) + 1;
+    this.lowerBoundFilter  = 0;
   }
 }
 </script>

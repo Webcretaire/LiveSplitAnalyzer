@@ -3,18 +3,17 @@
     <b-row>
       <b-col class="column" cols="4">
         <b-input-group append="h">
-          <b-form-input v-model.number="hours" placeholder="Hours" type="number" step="1"/>
+          <b-form-input v-model.number="hours" placeholder="Hours" type="number" step="1" debounce="500"/>
         </b-input-group>
       </b-col>
       <b-col class="column" cols="4">
         <b-input-group append="m">
-          <b-form-input v-model.number="minutes" placeholder="Minutes" type="number" step="1"/>
+          <b-form-input v-model.number="minutes" placeholder="Minutes" type="number" step="1" debounce="500"/>
         </b-input-group>
       </b-col>
       <b-col class="column" cols="4">
         <b-input-group append="s">
-          <b-form-input v-model.number="seconds" placeholder="Seconds" type="number" step="0.01"
-                        @change="onInputChange"/>
+          <b-form-input v-model.number="seconds" placeholder="Seconds" type="number" step="0.01" debounce="500"/>
         </b-input-group>
       </b-col>
     </b-row>

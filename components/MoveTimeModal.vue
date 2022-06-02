@@ -2,10 +2,12 @@
   <b-modal :ref="modalRef" title="Move time between splits" @hidden="destroyModal" hide-footer centered size="lg">
     <div class="text-center">
       <b-form-group label="Transfer time to:">
-        <multiselect v-model="transferSplitName" :options="splitOptions" placeholder="Pick a split" class="mb-4"/>
+        <multiselect v-model="transferSplit" :options="splitOptions" placeholder="Pick a split" track-by="id" label="name"/>
       </b-form-group>
-      <time-selector v-model="transferTime"/>
-      <div v-b-tooltip.hover :title="invalidTimeTooltip">
+      <b-form-group label="Amount to transfer:">
+        <time-selector v-model="transferTime"/>
+      </b-form-group>
+      <div v-b-tooltip.hover :title="invalidTimeTooltip" class="d-inline-block">
         <b-button @click="chosenSplitFunction" variant="success" class="mt-2 mb-2 text-center" :disabled="!timeValid">
           Confirm
         </b-button>
@@ -24,13 +26,18 @@ import {OffloadWorkerOperation}                        from '~/util/offloadworke
 import BaseModal                                       from '~/components/BaseModal.vue';
 import Multiselect                                     from 'vue-multiselect';
 
+interface TransferSplitOption {
+  id: number,
+  name: string
+}
+
 @Component({components: {Multiselect}})
 export default class MoveTimeModal extends mixins(BaseModal) {
   modalRef: string = 'MoveTimeModal';
 
   transferTime: number = 0;
 
-  transferSplitName: string = '';
+  transferSplit: TransferSplitOption = {id: -1, name: ''};
 
   @Prop()
   splits!: Segment[];
@@ -44,25 +51,28 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   get splitOptions() {
+    const nextSplitOption = {name: `(next) ${this.nextSplit?.Name}`, id: this.currentSplitIndex + 1};
+    const previousSplitOption = {name: `(prev) ${this.previousSplit?.Name}`, id: this.currentSplitIndex - 1};
+
     if (this.currentSplitIndex == 0)
-      return [this.nextSplit.Name];
+      return [nextSplitOption];
 
     const lastSplitIndex = this.splits.length - 1;
     if (this.currentSplitIndex == lastSplitIndex)
-      return [this.previousSplit.Name];
+      return [previousSplitOption];
 
-    return [this.previousSplit.Name, this.nextSplit.Name];
+    return [previousSplitOption, nextSplitOption];
   }
 
   get timeValid() {
-    return this.transferTime > 0 && this.transferTime <= this.segmentGold && this.transferSplitName != '';
+    return this.transferTime > 0 && this.transferTime <= this.segmentGold && this.transferSplit.id >= 0;
   }
 
   get invalidTimeTooltip() {
     if (this.transferTime == 0)
       return 'Please provide a time';
 
-    if (this.transferSplitName == '')
+    if (this.transferSplit.id < 0)
       return 'Please select a split to transfer time to';
 
     if (this.transferTime > this.segmentGold)
@@ -84,10 +94,10 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   chosenSplitFunction() {
-    if (this.transferSplitName === this.nextSplit?.Name)
+    if (this.transferSplit.id === this.currentSplitIndex + 1)
       this.doMoveTime(this.currentSplit, this.nextSplit);
 
-    if (this.transferSplitName === this.previousSplit?.Name)
+    if (this.transferSplit.id === this.currentSplitIndex - 1)
       this.doMoveTime(this.currentSplit, this.previousSplit);
   }
 

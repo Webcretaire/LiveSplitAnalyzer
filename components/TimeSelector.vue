@@ -3,12 +3,12 @@
     <b-row>
       <b-col class="column" cols="4">
         <b-input-group append="h">
-          <b-form-input v-model.number="hours" placeholder="Hours" type="number" step="1" @change="onInputChange"/>
+          <b-form-input v-model.number="hours" placeholder="Hours" type="number" step="1"/>
         </b-input-group>
       </b-col>
       <b-col class="column" cols="4">
         <b-input-group append="m">
-          <b-form-input v-model.number="minutes" placeholder="Minutes" type="number" step="1" @change="onInputChange"/>
+          <b-form-input v-model.number="minutes" placeholder="Minutes" type="number" step="1"/>
         </b-input-group>
       </b-col>
       <b-col class="column" cols="4">
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 
 @Component
 export default class TimeSelector extends Vue {
@@ -39,6 +39,7 @@ export default class TimeSelector extends Vue {
     return 3600 * this.hours + 60 * this.minutes + this.seconds;
   }
 
+  @Watch('outputInSeconds')
   onInputChange() {
     this.$emit('input', this.outputInSeconds);
   }

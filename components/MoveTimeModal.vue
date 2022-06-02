@@ -1,14 +1,9 @@
 <template>
   <b-modal :ref="modalRef" title="Move time between splits" @hidden="destroyModal" hide-footer centered size="lg">
-    <div class="text-center" style="max-height: 80vh; overflow: auto">
-      <b-row>
-        <b-col>
-          Transfer time to:
-        </b-col>
-        <b-col cols=10>
-          <multiselect v-model="transferSplitName" :options="splitOptions" placeholder="Pick a split" class="mb-4"/>
-        </b-col>
-      </b-row>
+    <div class="text-center">
+      <b-form-group label="Transfer time to:">
+        <multiselect v-model="transferSplitName" :options="splitOptions" placeholder="Pick a split" class="mb-4"/>
+      </b-form-group>
       <time-selector v-model="transferTime"/>
       <div v-b-tooltip.hover :title="invalidTimeTooltip">
         <b-button @click="chosenSplitFunction" variant="success" class="mt-2 mb-2 text-center" :disabled="!timeValid">
@@ -65,13 +60,13 @@ export default class MoveTimeModal extends mixins(BaseModal) {
 
   get invalidTimeTooltip() {
     if (this.transferTime == 0)
-      return 'You must add a time.';
+      return 'Please provide a time';
 
     if (this.transferSplitName == '')
-      return 'You need select a split to transfer to.';
+      return 'Please select a split to transfer time to';
 
     if (this.transferTime > this.segmentGold)
-      return `You cannot transfer more than ${secondsToFormattedString(this.segmentGold)}.`;
+      return `You cannot transfer more than ${secondsToFormattedString(this.segmentGold)}`;
 
     return '';
   }

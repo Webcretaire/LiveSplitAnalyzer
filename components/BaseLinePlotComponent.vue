@@ -1,13 +1,13 @@
 <script lang="ts">
-import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime}            from '~/util/splits';
-import {formatTime, stringTimeToSeconds}           from '~/util/durations';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
-import {XYCoordinates}                             from '~/util/util';
-import store                                       from '~/util/store';
-import {offload}                                   from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
-import {DetailedSegment}                           from '~/util/splitProcessing';
+import {Component, Prop, Vue, Watch}                             from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime}                          from '~/util/splits';
+import {formatTime, stringTimeToSeconds}                         from '~/util/durations';
+import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR} from '~/util/plot';
+import {XYCoordinates}                                           from '~/util/util';
+import store                                                     from '~/util/store';
+import {offload}                                                 from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                  from '~/util/offloadworkerTypes';
+import {DetailedSegment}                                         from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -98,18 +98,17 @@ export default class BaseLinePlotComponent extends Vue {
       );
     }
 
-    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => a - b);
-    const medianAttempt = Math.round(this.timesSeconds.length / 2) - 1;
-    if (this.graphMedianAttemptHline && medianAttempt && sortedTimesSeconds[medianAttempt]) {
+    const m = selectTime(this.medianAttempt);
+    if (this.graphMedianAttemptHline && m) {
       l.shapes.push(
         {
           type: 'line',
           x0: 0,
-          y0: sortedTimesSeconds[medianAttempt],
+          y0: stringTimeToSeconds(m),
           x1: this.timesSeconds.length - 1,
-          y1: sortedTimesSeconds[medianAttempt],
+          y1: stringTimeToSeconds(m),
           line: {
-            color: CUR_ATTEMPT_COLOR,
+            color: MEDIAN_COLOR,
             width: 1,
             dash: 'dot'
           }
@@ -131,6 +130,12 @@ export default class BaseLinePlotComponent extends Vue {
 
   get currentAttempt(): SegmentHistoryTime | undefined {
     return this.timesWithPositiveIds.find(t => t['@_id'] === this.currentAttemptNumber);
+  }
+
+  get medianAttempt() {
+    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => a - b);
+    const medianAttemptNumber = Math.round(this.timesSeconds.length / 2) - 1;
+    return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || "0:0:0.0") === sortedTimesSeconds[medianAttemptNumber]);
   }
 
   get goldsMap() {
@@ -166,6 +171,7 @@ export default class BaseLinePlotComponent extends Vue {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
       if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(CUR_ATTEMPT_COLOR);
+      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(MEDIAN_COLOR);
       else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
     }
     return out;
@@ -175,6 +181,7 @@ export default class BaseLinePlotComponent extends Vue {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
       if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
+      if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;

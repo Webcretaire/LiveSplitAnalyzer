@@ -11,7 +11,7 @@
       <loading-switch v-model="graphCurrentAttemptHline" class="mb-2">
         Display current attempt's times as a horizontal line
       </loading-switch>
-      <loading-switch v-model="graphCurrentAttemptMline" class="mb-2">
+      <loading-switch v-model="graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
     </collapsible-card>
@@ -71,15 +71,24 @@ export default class SplitsDisplayTab extends Vue {
     localStorage.setItem('graphCurrentAttemptHline', JSON.stringify(this.graphCurrentAttemptHline));
   }
 
+  @Watch('graphMedianAttemptHline')
+  medianLineStore() {
+    localStorage.setItem('graphMedianAttemptHline', JSON.stringify(this.graphMedianAttemptHline));
+  }
+
   mounted() {
     const yAxisSetting       = localStorage.getItem('graphYAxisToZero');
     const attemptLineSetting = localStorage.getItem('graphCurrentAttemptHline');
+    const medianLineSetting  = localStorage.getItem('graphMedianAttemptHline');
 
     if (yAxisSetting)
       this.graphYAxisToZero = JSON.parse(yAxisSetting);
 
     if (attemptLineSetting)
       this.graphCurrentAttemptHline = JSON.parse(attemptLineSetting);
+
+    if (medianLineSetting)
+      this.graphMedianAttemptHline = JSON.parse(medianLineSetting);
   }
 }
 </script>

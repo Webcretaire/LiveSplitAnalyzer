@@ -133,7 +133,7 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get medianAttempt() {
-    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => (a || 0) - (b || 0));
+    const sortedTimesSeconds = [...this.timesSeconds].sort((a, b) => (a || 0) - (b || 0));
     const medianAttemptNumber = Math.round(this.timesSeconds.length / 2) - 1;
     return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || "0:0:0.0") === sortedTimesSeconds[medianAttemptNumber]);
   }
@@ -181,7 +181,7 @@ export default class BaseLinePlotComponent extends Vue {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
       if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
-      if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
+      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;

@@ -133,7 +133,7 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get medianAttempt() {
-    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => a - b);
+    const sortedTimesSeconds = this.timesSeconds.slice().sort((a, b) => (a || 0) - (b || 0));
     const medianAttemptNumber = Math.round(this.timesSeconds.length / 2) - 1;
     return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || "0:0:0.0") === sortedTimesSeconds[medianAttemptNumber]);
   }

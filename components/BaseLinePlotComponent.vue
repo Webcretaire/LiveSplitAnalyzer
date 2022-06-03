@@ -1,13 +1,13 @@
 <script lang="ts">
-import {Component, Prop, Vue, Watch}            from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime}            from '~/util/splits';
-import {formatTime, stringTimeToSeconds}           from '~/util/durations';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR} from '~/util/plot';
-import {XYCoordinates}                             from '~/util/util';
-import store                                       from '~/util/store';
-import {offload}                                   from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
-import {DetailedSegment}                           from '~/util/splitProcessing';
+import {Component, Prop, Vue, Watch}                             from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime}                          from '~/util/splits';
+import {formatTime, stringTimeToSeconds}                         from '~/util/durations';
+import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR} from '~/util/plot';
+import {XYCoordinates}                                           from '~/util/util';
+import store                                                     from '~/util/store';
+import {offload}                                                 from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                  from '~/util/offloadworkerTypes';
+import {DetailedSegment}                                         from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -19,6 +19,9 @@ export default class BaseLinePlotComponent extends Vue {
 
   @Prop({default: false})
   graphCurrentAttemptHline!: boolean;
+
+  @Prop({default: false})
+  graphMedianAttemptHline!: boolean;
 
   @Prop()
   currentAttemptNumber?: number;
@@ -46,6 +49,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('timesWithPositiveIds')
   @Watch('graphYAxisToZero')
   @Watch('graphCurrentAttemptHline')
+  @Watch('graphMedianAttemptHline')
   updateLayout() {
     const l: any = {
       title: 'Time history',
@@ -78,7 +82,7 @@ export default class BaseLinePlotComponent extends Vue {
 
     const t = selectTime(this.currentAttempt);
     if (this.graphCurrentAttemptHline && this.currentAttemptNumber && t) {
-      l.shapes = [
+      l.shapes.push(
         {
           type: 'line',
           x0: 0,
@@ -91,9 +95,27 @@ export default class BaseLinePlotComponent extends Vue {
             dash: 'dot'
           }
         }
-      ];
+      );
     }
 
+    const m = selectTime(this.medianAttempt);
+    if (this.graphMedianAttemptHline && m) {
+      l.shapes.push(
+        {
+          type: 'line',
+          x0: 0,
+          y0: stringTimeToSeconds(m),
+          x1: this.timesSeconds.length - 1,
+          y1: stringTimeToSeconds(m),
+          line: {
+            color: MEDIAN_COLOR,
+            width: 1,
+            dash: 'dot'
+          }
+        }
+      );
+    }
+    
     this.layout = l;
   }
 
@@ -108,6 +130,12 @@ export default class BaseLinePlotComponent extends Vue {
 
   get currentAttempt(): SegmentHistoryTime | undefined {
     return this.timesWithPositiveIds.find(t => t['@_id'] === this.currentAttemptNumber);
+  }
+
+  get medianAttempt() {
+    const sortedTimesSeconds = [...this.timesSeconds].sort((a, b) => (a || 0) - (b || 0));
+    const medianAttemptNumber = Math.round(this.timesSeconds.length / 2) - 1;
+    return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || "0:0:0.0") === sortedTimesSeconds[medianAttemptNumber]);
   }
 
   get goldsMap() {
@@ -143,6 +171,7 @@ export default class BaseLinePlotComponent extends Vue {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
       if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(CUR_ATTEMPT_COLOR);
+      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(MEDIAN_COLOR);
       else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
     }
     return out;
@@ -152,6 +181,7 @@ export default class BaseLinePlotComponent extends Vue {
     let out = [];
     for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
       if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
+      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;

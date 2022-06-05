@@ -55,10 +55,10 @@
 import {
   cumulatedSumOfBests,
   splitFileIsModified,
-  Segments,
+  Segment,
   SplitTime
 }                                 from '~/util/splits';
-import {Component, mixins}        from 'nuxt-property-decorator';
+import {Component, mixins, Prop}  from 'nuxt-property-decorator';
 import BaseModal                  from '~/components/BaseModal.vue';
 import store                      from '~/util/store';
 import {secondsToLivesplitFormat} from '~/util/durations';
@@ -75,19 +75,8 @@ export default class ComparisonCreator extends mixins(BaseModal) {
 
   useTargetTime: boolean = false;
 
-  get segments(): Segments {
-    if (!store.state.splitFile!.Run?.Segments) {
-      this.$bvToast.toast(`No splitfile selected`, {
-        title: 'Error',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'danger'
-      });
-      return {Segment: []};
-    }
-
-    return store.state.splitFile!.Run.Segments;
-  }
+  @Prop()
+  segments!: Segment[];
 
   get selectedSobTotal() {
     const sob = cumulatedSumOfBests(this.segments);
@@ -97,7 +86,7 @@ export default class ComparisonCreator extends mixins(BaseModal) {
 
   makeBalanced() {
     withLoad(() => {
-      const comparisonAlreadyExists = this.segments.Segment.find(
+      const comparisonAlreadyExists = this.segments.find(
         segment => segment.SplitTimes.SplitTime.find(
           (splitTime: SplitTime) => splitTime['@_name'] == this.comparisonName
         )
@@ -129,7 +118,7 @@ export default class ComparisonCreator extends mixins(BaseModal) {
         balancedGT = sobGT.map((time) => time + actualFactor / 100 * time);
       }
 
-      this.segments.Segment.forEach((segment, index, segArray) => {
+      this.segments.forEach((segment, index, segArray) => {
         const splitTimes = segArray[index].SplitTimes.SplitTime;
 
         const newSplitTime: SplitTime = {

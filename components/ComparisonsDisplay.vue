@@ -3,7 +3,7 @@
     <b-row>
       <b-col cols=9>
         <multiselect v-model="referenceComparison" :options="comparisons" placeholder="Pick a reference comparison"
-                 class="mb-2"/>
+                     class="mb-2"/>
       </b-col>
       <b-col>
         <div v-b-tooltip.hover :title="renameComparisonTooltip">
@@ -23,8 +23,8 @@
 
       <b-table striped hover :items="tableData">
         <template v-for="slot in comparisonColumns" v-slot:[`cell(${slot})`]="slotProps">
-          <comparison-table-cell :reference-comparison-name="referenceComparison"
-                                 :comparison-name="slot" :cell-data="slotProps"/>
+          <comparison-table-cell :reference-comparison-name="referenceComparison" :comparison-name="slot"
+                                 :cell-data="slotProps" :segments="segments"/>
         </template>
       </b-table>
     </div>
@@ -35,7 +35,7 @@
 import {
   availableComparisons,
   cumulatedSumOfBests,
-  Segments,
+  Segment,
   selectTime
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
@@ -53,7 +53,7 @@ interface NameTime {
 @Component({components: {Multiselect}})
 export default class ComparisonsDisplay extends Vue {
   @Prop()
-  segments!: Segments;
+  segments!: Segment[];
 
   referenceComparison: string = '';
 
@@ -66,20 +66,20 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get allowRename() {
-    const notPB = this.referenceComparison != 'Personal Best';
-    const notSoB = this.referenceComparison != 'Sum of Best';
+    const notPB    = this.referenceComparison != 'Personal Best';
+    const notSoB   = this.referenceComparison != 'Sum of Best';
     const notEmpty = Boolean(this.referenceComparison);
     return notPB && notSoB && notEmpty;
   }
 
   get renameComparisonTooltip() {
     if (this.referenceComparison == 'Personal Best' || this.referenceComparison == 'Sum of Best')
-      return "You can't rename this.";
+      return 'You can\'t rename this.';
 
     if (!this.referenceComparison)
-      return "You need to select a comparison to rename.";
+      return 'You need to select a comparison to rename.';
 
-    return "";
+    return '';
   }
 
   get comparisonColumns() {
@@ -99,7 +99,7 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get splitTimeswithSoB(): NameTime[][] {
-    return this.segments.Segment.map(
+    return this.segments.map(
       (segment, index) => [
         ...segment.SplitTimes.SplitTime.map(t => {
           let outTime    = null;
@@ -115,13 +115,13 @@ export default class ComparisonsDisplay extends Vue {
   }
 
   get tableData() {
-    const out: any = this.segments.Segment.map(s => ({split: this.subsplitLabel(s.Name)}));
+    const out: any = this.segments.map(s => ({split: this.subsplitLabel(s.Name)}));
 
-    let timeSoFar = 0;
+    let timeSoFar                                  = 0;
     const timesSoFarOthers: Record<string, number> = {};
     this.otherComparisons.forEach(name => timesSoFarOthers[name] = 0);
 
-    this.segments.Segment.forEach((segment, index) => {
+    this.segments.forEach((segment, index) => {
       // Add reference data
       const timeForReferenceComparison = this.splitTimeswithSoB[index].find(st => st.name === this.referenceComparison)?.time;
 
@@ -174,7 +174,8 @@ export default class ComparisonsDisplay extends Vue {
   comparisonRenameModal() {
     GlobalEventEmitter.$emit('openModal', 'ComparisonRenameModal', {
       oldComparisonName: this.referenceComparison,
-      callback: (newComparisonName:string) => this.refreshReference(newComparisonName)
+      segments: this.segments,
+      callback: (newComparisonName: string) => this.refreshReference(newComparisonName)
     });
   }
 

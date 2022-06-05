@@ -36,14 +36,11 @@
                                       :attempts="parsedSplits.Run.AttemptHistory.Attempt"/>
               </b-tab>
               <b-tab title="Comparisons">
-                <comparisons-display :segments="parsedSplits.Run.Segments"/>
-
-                <comparison-creator/>
-
-                <comparison-remover/>
+                <comparison-tab :segments="parsedSplits.Run.Segments.Segment"/>
               </b-tab>
               <b-tab title="Splits analysis">
-                <splits-display-tab :detailed-segments="detailedSegments" :attempts="parsedSplits.Run.AttemptHistory.Attempt"
+                <splits-display-tab :detailed-segments="detailedSegments"
+                                    :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                                     :segments="parsedSplits.Run.Segments.Segment"/>
               </b-tab>
             </b-tabs>

@@ -1,5 +1,5 @@
 <template>
-  <b-checkbox switch v-model="value">
+  <b-checkbox switch v-model="internalValue">
     <slot/>
   </b-checkbox>
 </template>
@@ -13,7 +13,14 @@ export default class LoadingSwitch extends Vue {
   @Prop()
   value!: boolean;
 
-  @Watch('value')
+  internalValue: boolean = true;
+
+  @Watch('value', {immediate: true})
+  valueChange(newVal: boolean) {
+    this.internalValue = newVal;
+  }
+
+  @Watch('internalValue')
   inputChange(newVal: boolean) {
     withLoadAsync((endLoad: Function) => {
       this.$emit('input', newVal);

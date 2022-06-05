@@ -14,11 +14,16 @@
       <loading-switch v-model="graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
+      <b-col class="text-center mt-3">
+        <b-button @click="unfoldAllSplits" variant="success">Expand all split info</b-button>
+        <b-button @click="foldAllSplits" variant="success">Collapse all split info</b-button>
+      </b-col>
     </collapsible-card>
 
     <subsplits-display :split="split"
                        v-for="split in splits"
                        :key="`split-${split.Index}-${split.Name}`"
+                       :ref="splitAccess"
                        :splitIndex="split.Index"
                        :graphYAxisToZero="graphYAxisToZero"
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -51,8 +56,20 @@ export default class SplitsDisplayTab extends Vue {
   @Prop()
   segments!: Segment[];
 
+  @Prop()
+  splitAccess!: Array<any>;
+
   get PB() {
     return store.state.PB;
+  }
+
+  foldAllSplits() {
+    const splitAccess = this.$refs.splitAccess;
+    splitAccess.forEach(split => split.foldSplit());
+  }
+
+  unfoldAllSplits() {
+    this.$refs.splitAccess.forEach(split => split.unfoldSplit());
   }
 
   @Watch('PB', {immediate: true})

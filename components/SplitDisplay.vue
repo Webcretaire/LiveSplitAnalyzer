@@ -68,6 +68,14 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
     });
   }
 
+  foldSplit() {
+    this.collapseVisible = false;
+  }
+
+  unfoldSplit() {
+    this.collapseVisible = true;
+  }
+
   get nextSplit(): Segment | undefined {
     return store.state.splitFile!.Run.Segments.Segment[this.splitIndex + 1];
   }

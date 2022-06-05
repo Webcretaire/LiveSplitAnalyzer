@@ -32,6 +32,7 @@
           <split-display :split="subsplit"
                          v-for="(subsplit, i) in split.Subsplits"
                          :key="`split-${subsplit.Index}-${subsplit.Name}`"
+                         :ref="splitAccess"
                          :splitIndex="subsplit.Index"
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -44,6 +45,7 @@
     </div>
     <div v-else>
       <split-display :split="split"
+                     :ref="splitAccess"
                      :splitIndex="split.Index"
                      :graphYAxisToZero="graphYAxisToZero"
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -68,7 +70,22 @@ export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
   segments!: Segment[];
 
+  @Prop()
+  splitAccess!: Array<any>;
+
   subsplitsVisible: boolean = true;
+
+  foldSplit() {
+    this.collapseVisible = false;
+
+    this.$refs.splitAccess.foldSplit();
+  }
+
+  unfoldSplit() {
+    this.collapseVisible = true;
+
+    this.$refs.splitAccess.unfoldSplit();
+  }
 }
 </script>
 

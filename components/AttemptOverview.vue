@@ -18,18 +18,18 @@ import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds
-}                                 from '~/util/durations';
-import {Component, Prop, Vue}     from 'nuxt-property-decorator';
-import {Attempt, Run, selectTime} from '~/util/splits';
+}                                     from '~/util/durations';
+import {Component, Prop, Vue}         from 'nuxt-property-decorator';
+import {Attempt, Segment, selectTime} from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                   from 'vue-plotly';
-import {DetailedSegment}          from '~/util/splitProcessing';
+import {Plotly}                       from 'vue-plotly';
+import {DetailedSegment}              from '~/util/splitProcessing';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {
   @Prop()
-  run!: Run;
+  segments!: Segment[];
 
   @Prop()
   attempt!: Attempt;
@@ -66,7 +66,7 @@ export default class AttemptOverview extends Vue {
   }
 
   get segmentData() {
-    return this.mergeSubsplits ? this.detailedSegments : this.run.Segments.Segment;
+    return this.mergeSubsplits ? this.detailedSegments : this.segments;
   }
 
   get AttemptSegments() {

@@ -14,7 +14,7 @@
     </collapsible-card>
     <toolbox :current-attempt-number="currentAttemptNumber" class="mb-4"/>
 
-    <attempt-overview :run="globalState.splitFile.Run"
+    <attempt-overview :segments="segments"
                       :attempt="currentAttempt"
                       :detailed-segments="detailedSegments"
                       :is-pb="isPb"

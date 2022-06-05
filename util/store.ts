@@ -1,12 +1,13 @@
-import Vue                  from 'vue';
-import {Attempt, SplitFile} from '~/util/splits';
+import Vue                                        from 'vue';
+import {Attempt, AutoSplitterSettings, SplitFile} from '~/util/splits';
 
 export interface Store {
   hasGameTime: boolean,
   useRealTime: boolean,
   splitFile: SplitFile | null,
   splitFileIsModified: boolean,
-  PB: Attempt | null
+  PB: Attempt | null,
+  autoSplitterSettings: AutoSplitterSettings | null
 }
 
 const state = Vue.observable({
@@ -14,7 +15,8 @@ const state = Vue.observable({
   useRealTime: false,
   splitFile: null,
   splitFileIsModified: false,
-  PB: null
+  PB: null,
+  autoSplitterSettings: null
 } as Store);
 
 export default {

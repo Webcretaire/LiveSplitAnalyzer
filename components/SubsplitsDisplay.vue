@@ -37,7 +37,7 @@
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
                          :graphMedianAttemptHline="graphMedianAttemptHline"
                          :currentAttemptNumber="currentAttemptNumber"
-                         :segments="segments"
+                         :segments-holder="segmentsHolder"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
         </b-collapse>
       </div>
@@ -49,24 +49,24 @@
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
                      :graphMedianAttemptHline="graphMedianAttemptHline"
                      :currentAttemptNumber="currentAttemptNumber"
-                     :segments="segments"
+                     :segments-holder="segmentsHolder"
                      class="mb-3"/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, mixins}   from 'nuxt-property-decorator';
-import {Segment}                   from '~/util/splits';
-import BaseLinePlotComponent from '~/components/BaseLinePlotComponent.vue';
+import {Component, Prop, mixins} from 'nuxt-property-decorator';
+import {Segments}                from '~/util/splits';
+import BaseLinePlotComponent     from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}              from 'vue-plotly';
+import {Plotly}                  from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
-  segments!: Segment[];
+  segmentsHolder!: Segments;
 
   subsplitsVisible: boolean = true;
 }

@@ -13,8 +13,10 @@
             <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
             <b-dropdown text="Edit split" variant="outline-dark" lazy>
               <b-dropdown-item-button @click="fixGoldsModal" variant="dark">Fix fake golds</b-dropdown-item-button>
-              <b-dropdown-item-button @click="moveTimeModal" variant="dark">Move time between splits</b-dropdown-item-button>
-              <b-dropdown-item-button v-if="nextSplit" @click="mergeNextSplit" variant="dark">Merge into next split</b-dropdown-item-button>
+              <b-dropdown-item-button @click="moveTimeModal" variant="dark">Move time between splits
+              </b-dropdown-item-button>
+              <b-dropdown-item-button v-if="nextSplit" @click="mergeNextSplit" variant="dark">Merge into next split
+              </b-dropdown-item-button>
             </b-dropdown>
           </p>
           <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
@@ -33,27 +35,27 @@
 </template>
 
 <script lang="ts">
-import {Segment, splitFileIsModified} from '~/util/splits';
-import {Component, mixins, Prop}      from 'nuxt-property-decorator';
-import {GlobalEventEmitter}           from '~/util/globalEvents';
-import {singleSplitState}             from '~/util/singleSplit';
-import {withLoadAsync}                from '~/util/loading';
-import store                          from '~/util/store';
-import {offload}                      from '~/util/offloadWorker';
-import {OffloadWorkerOperation}       from '~/util/offloadworkerTypes';
-import BaseLinePlotComponent          from '~/components/BaseLinePlotComponent.vue';
+import {
+  Segments,
+  Segment,
+  splitFileIsModified
+}                                from '~/util/splits';
+import {Component, mixins, Prop} from 'nuxt-property-decorator';
+import {GlobalEventEmitter}      from '~/util/globalEvents';
+import {singleSplitState}        from '~/util/singleSplit';
+import {withLoadAsync}           from '~/util/loading';
+import store                     from '~/util/store';
+import {offload}                 from '~/util/offloadWorker';
+import {OffloadWorkerOperation}  from '~/util/offloadworkerTypes';
+import BaseLinePlotComponent     from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                       from 'vue-plotly';
+import {Plotly}                  from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
-  segments!: Segment[];
-
-  get mergeSplitTooltip() {
-    return this.nextSplit ? `"${this.split.Name}" will be deleted, and its times merged with "${this.nextSplit.Name}"` : '';
-  }
+  segmentsHolder!: Segments;
 
   fixGoldsModal() {
     GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal');
@@ -63,18 +65,18 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
 
   moveTimeModal() {
     GlobalEventEmitter.$emit('openModal', 'MoveTimeModal', {
-      splits: this.segments,
+      splits: this.segmentsHolder.Segment,
       currentSplitIndex: this.splitIndex
     });
   }
 
   get nextSplit(): Segment | undefined {
-    return store.state.splitFile!.Run.Segments.Segment[this.splitIndex + 1];
+    return this.segmentsHolder.Segment[this.splitIndex + 1];
   }
 
   doMergeNextSplit(endLoad: Function) {
     if (!this.nextSplit) {
-      this.$bvToast.toast("Next split doesn't exist", {
+      this.$bvToast.toast('Next split doesn\'t exist', {
         title: 'Splits merged',
         autoHideDelay: 5000,
         appendToast: false,
@@ -89,25 +91,22 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
     const curSplitName  = this.split.Name;
     const nextSplitName = this.nextSplit.Name;
 
-    offload(
-      OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE,
-      store.state.splitFile!.Run.Segments.Segment,
-      this.splitIndex
-    ).then(segments => {
-      splitFileIsModified(true);
+    offload(OffloadWorkerOperation.MERGE_SPLIT_INTO_NEXT_ONE, this.segmentsHolder.Segment, this.splitIndex)
+      .then(segments => {
+        splitFileIsModified(true);
 
-      const autosplitterSettings = store.state.splitFile!.Run.AutoSplitterSettings;
-      if (autosplitterSettings?.Splits?.Split)
-        autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
-      store.state.splitFile!.Run.Segments.Segment = segments;
+        const autosplitterSettings = store.state.autoSplitterSettings;
+        if (autosplitterSettings?.Splits?.Split)
+          autosplitterSettings.Splits.Split.splice(this.splitIndex, 1);
+        this.segmentsHolder.Segment = segments;
 
-      this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
-        title: 'Splits merged',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'success'
-      });
-    }).finally(() => endLoad());
+        this.$bvToast.toast(`Merged ${curSplitName} with ${nextSplitName}`, {
+          title: 'Splits merged',
+          autoHideDelay: 5000,
+          appendToast: false,
+          variant: 'success'
+        });
+      }).finally(() => endLoad());
   }
 
   mergeNextSplit() {

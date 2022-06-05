@@ -41,7 +41,7 @@
               <b-tab title="Splits analysis">
                 <splits-display-tab :detailed-segments="detailedSegments"
                                     :attempts="parsedSplits.Run.AttemptHistory.Attempt"
-                                    :segments="parsedSplits.Run.Segments.Segment"/>
+                                    :segments-holder="parsedSplits.Run.Segments"/>
               </b-tab>
             </b-tabs>
           </b-card>
@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import {
-  Attempt,
+  Attempt, AutoSplitterSettings,
   Segment,
   selectTime,
   SplitFile,
@@ -122,7 +122,7 @@ export default class SplitsDisplay extends Vue {
     });
   }
 
-  @Watch('globalState.splitFile.Run.Segments.Segment', {deep: true})
+  @Watch('parsedSplits.Run.Segments.Segment', {deep: true})
   segmentsChange(newVal: Segment[]) {
     offload(OffloadWorkerOperation.GENERATE_SPLIT_DETAIL, newVal).then(s => this.detailedSegments = s);
   }
@@ -130,6 +130,11 @@ export default class SplitsDisplay extends Vue {
   @Watch('globalState', {deep: true})
   onStateUpdate(newVal: Store) {
     offload(OffloadWorkerOperation.UPDATE_STORE_DATA, newVal);
+  }
+
+  @Watch('parsedSplits.Run.AutoSplitterSettings', {deep: true})
+  onAutoSplitterSettingsUpdate(newVal: AutoSplitterSettings) {
+    this.globalState.autoSplitterSettings = newVal;
   }
 
   @Watch('parsedSplits', {deep: true})

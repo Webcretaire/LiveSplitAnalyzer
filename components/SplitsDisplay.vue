@@ -31,7 +31,9 @@
               </b-tab>
 
               <b-tab title="Attempt analysis">
-                <attempt-analysis-tab :detailed-segments="detailedSegments"/>
+                <attempt-analysis-tab :detailed-segments="detailedSegments"
+                                      :segments="parsedSplits.Run.Segments.Segment"
+                                      :attempts="parsedSplits.Run.AttemptHistory.Attempt"/>
               </b-tab>
               <b-tab title="Comparisons">
                 <comparisons-display :segments="parsedSplits.Run.Segments"/>
@@ -41,7 +43,7 @@
                 <comparison-remover/>
               </b-tab>
               <b-tab title="Splits analysis">
-                <splits-display-tab :splits="detailedSegments"
+                <splits-display-tab :detailed-segments="detailedSegments" :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                                     :segments="parsedSplits.Run.Segments.Segment"/>
               </b-tab>
             </b-tabs>

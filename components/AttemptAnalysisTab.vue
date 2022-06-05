@@ -1,7 +1,7 @@
 <template>
   <div>
     <collapsible-card title="Options" :lazy="false">
-      <attempt-selector v-model="currentAttemptNumber"/>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
@@ -20,20 +20,25 @@
                       :is-pb="isPb"
                       :display-labels="displayLabels"
                       :merge-subsplits="mergeSubsplits"/>
-                      
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Vue, Watch, Prop} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt}                     from '~/util/splits';
+import {Attempt, Segment}            from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
 
 @Component
 export default class AttemptAnalysisTab extends Vue {
   @Prop()
   detailedSegments!: DetailedSegment[];
+
+  @Prop()
+  attempts!: Attempt[];
+
+  @Prop()
+  segments!: Segment[];
 
   currentAttemptNumber: number = 1;
 
@@ -58,7 +63,7 @@ export default class AttemptAnalysisTab extends Vue {
   }
 
   get currentAttempt() {
-    return this.globalState.splitFile!.Run.AttemptHistory.Attempt.find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
+    return this.attempts.find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
   }
 
   @Watch('mergeSubsplits')
@@ -67,7 +72,7 @@ export default class AttemptAnalysisTab extends Vue {
   }
 
   mounted() {
-    this.displayLabels = (this.globalState.splitFile!.Run.Segments.Segment.length || 0) <= 30;
+    this.displayLabels = this.segments.length <= 30;
 
     const mergeSetting = localStorage.getItem('mergeSubsplits');
     if (mergeSetting)

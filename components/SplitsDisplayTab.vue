@@ -1,7 +1,7 @@
 <template>
   <div>
     <collapsible-card title="Options" :lazy="false">
-      <attempt-selector v-model="currentAttemptNumber"/>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
@@ -17,7 +17,7 @@
     </collapsible-card>
 
     <subsplits-display :split="split"
-                       v-for="split in splits"
+                       v-for="split in detailedSegments"
                        :key="`split-${split.Index}-${split.Name}`"
                        :splitIndex="split.Index"
                        :graphYAxisToZero="graphYAxisToZero"
@@ -46,7 +46,10 @@ export default class SplitsDisplayTab extends Vue {
   currentAttemptNumber: number = 1;
 
   @Prop()
-  splits!: DetailedSegment[];
+  attempts!: Attempt[];
+
+  @Prop()
+  detailedSegments!: DetailedSegment[];
 
   @Prop()
   segments!: Segment[];

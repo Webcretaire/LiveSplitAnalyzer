@@ -78,6 +78,8 @@ export default class IndexPage extends Vue {
 
   detailedSegments: DetailedSegment[] = [];
 
+  globalState: Store = store.state;
+
   get panelSize() {
     return (12 - (2 * this.panelOffset));
   }

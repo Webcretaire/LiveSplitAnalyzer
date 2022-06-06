@@ -18,14 +18,13 @@ import {
   splitFileIsModified,
   Segment,
   SplitTime
-}                                from '~/util/splits';
-import {Component, mixins, Prop} from 'nuxt-property-decorator';
-import BaseModal                 from '~/components/BaseModal.vue';
-import Multiselect               from 'vue-multiselect';
-import {GlobalEventEmitter}      from '~/util/globalEvents';
+}                             from '~/util/splits';
+import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import Multiselect            from 'vue-multiselect';
+import {GlobalEventEmitter}   from '~/util/globalEvents';
 
 @Component({components: {Multiselect}})
-export default class ComparisonRemover extends mixins(BaseModal) {
+export default class ComparisonRemover extends Vue {
   comparisonsToDelete: string[] = [];
 
   @Prop()

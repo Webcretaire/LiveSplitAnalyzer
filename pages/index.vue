@@ -58,7 +58,10 @@ import {DetailedSegment}        from '~/util/splitProcessing';
 import {Vue, Component, Watch}  from 'nuxt-property-decorator';
 import VueSlider                from 'vue-slider-component';
 
-@Component({components: {VueSlider}})
+const LoadingModal = () => import('~/components/modals/LoadingModal.vue');
+const ConfirmModal = () => import('~/components/modals/ConfirmModal.vue');
+
+@Component({components: {LoadingModal, ConfirmModal, VueSlider}})
 export default class IndexPage extends Vue {
   loadingCallback: Function | null = null;
 
@@ -151,7 +154,7 @@ export default class IndexPage extends Vue {
       withLoadAsync((endLoad: Function) => {
         this.modalArgs         = args;
         // This needs to be an attribute because if it's a getter it gets cached way too aggressively
-        this.componentInstance = () => import(`~/components/${modal}`);
+        this.componentInstance = () => import(`~/components/modals/${modal}`);
         this.$nextTick(() => endLoad());
       });
     });

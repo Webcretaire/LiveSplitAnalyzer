@@ -14,7 +14,7 @@
 <script lang="ts">
 import {Segment, splitFileIsModified} from '~/util/splits';
 import {Component, Prop, mixins}      from 'nuxt-property-decorator';
-import BaseModal                      from '~/components/BaseModal.vue';
+import BaseModal                      from '~/components/modals/BaseModal.vue';
 import {withLoad}                     from '~/util/loading';
 
 @Component

@@ -23,7 +23,7 @@ import {Component, Prop, mixins}                       from 'nuxt-property-decor
 import {withLoadAsync}                                 from '~/util/loading';
 import {offload}                                       from '~/util/offloadWorker';
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
-import BaseModal                                       from '~/components/BaseModal.vue';
+import BaseModal                                       from '~/components/modals/BaseModal.vue';
 import Multiselect                                     from 'vue-multiselect';
 
 interface TransferSplitOption {

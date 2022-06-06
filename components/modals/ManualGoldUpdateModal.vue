@@ -25,7 +25,7 @@ import {
   splitFileIsModified
 }                                        from '~/util/splits';
 import {Component, mixins, Prop}         from 'nuxt-property-decorator';
-import BaseModal                         from '~/components/BaseModal.vue';
+import BaseModal                         from '~/components/modals/BaseModal.vue';
 import {GlobalEventEmitter}              from '~/util/globalEvents';
 import {formatTime, stringTimeToSeconds} from '~/util/durations';
 import {withLoadAsync}                   from '~/util/loading';

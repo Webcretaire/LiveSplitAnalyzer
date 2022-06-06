@@ -58,15 +58,14 @@ import {
   Segment,
   SplitTime
 }                                 from '~/util/splits';
-import {Component, mixins, Prop}  from 'nuxt-property-decorator';
-import BaseModal                  from '~/components/BaseModal.vue';
+import {Component, Prop, Vue}     from 'nuxt-property-decorator';
 import store                      from '~/util/store';
 import {secondsToLivesplitFormat} from '~/util/durations';
 import {withLoad}                 from '~/util/loading';
 import Multiselect                from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
-export default class ComparisonCreator extends mixins(BaseModal) {
+export default class ComparisonCreator extends Vue {
   comparisonName: string = '';
 
   targetTime: number = this.selectedSobTotal;

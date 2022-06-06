@@ -24,10 +24,9 @@ import {
   selectTime,
   splitFileIsModified
 }                                        from '~/util/splits';
-import {Component, mixins}               from 'nuxt-property-decorator';
+import {Component, mixins, Prop}         from 'nuxt-property-decorator';
 import BaseModal                         from '~/components/BaseModal.vue';
 import {GlobalEventEmitter}              from '~/util/globalEvents';
-import {singleSplitState}                from '~/util/singleSplit';
 import {formatTime, stringTimeToSeconds} from '~/util/durations';
 import {withLoadAsync}                   from '~/util/loading';
 
@@ -35,7 +34,8 @@ import {withLoadAsync}                   from '~/util/loading';
 export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   modalRef: string = 'ManualGoldUpdateModal';
 
-  split: Segment | null = null;
+  @Prop()
+  split!: Segment;
 
   fields = [
     {key: '@_id', label: 'Attempt #'},
@@ -91,12 +91,6 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
       withLoadAsync((endLoad: Function) => this.doDeleteAttempt(attempt, endLoad));
       GlobalEventEmitter.$emit('closeConfirm');
     });
-  }
-
-  created() {
-    if (singleSplitState.currentSplit)
-      this.split = singleSplitState.currentSplit;
-    GlobalEventEmitter.$on('setCurrentSplit', (split: Segment) => this.split = split);
   }
 }
 </script>

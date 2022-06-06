@@ -42,7 +42,6 @@ import {
 }                                from '~/util/splits';
 import {Component, mixins, Prop} from 'nuxt-property-decorator';
 import {GlobalEventEmitter}      from '~/util/globalEvents';
-import {singleSplitState}        from '~/util/singleSplit';
 import {withLoadAsync}           from '~/util/loading';
 import store                     from '~/util/store';
 import {offload}                 from '~/util/offloadWorker';
@@ -58,9 +57,7 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
   segmentsHolder!: Segments;
 
   fixGoldsModal() {
-    GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal');
-    singleSplitState.currentSplit = this.split;
-    GlobalEventEmitter.$emit('setCurrentSplit', this.split);
+    GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal', {split: this.split});
   }
 
   moveTimeModal() {

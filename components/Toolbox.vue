@@ -25,20 +25,14 @@
 </template>
 
 <script lang="ts">
-import {
-  Attempt, Run,
-  Segment,
-  selectTime,
-  splitFileIsModified,
-  SplitTime
-}                                                      from '~/util/splits';
-import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
-import {withLoad, withLoadAsync}                       from '~/util/loading';
-import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
-import {GlobalEventEmitter}                            from '~/util/globalEvents';
-import store                                           from '~/util/store';
-import {offload}                                       from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
+import {Attempt, Run, Segment, selectTime, SplitFile, splitFileIsModified, SplitTime} from '~/util/splits';
+import {secondsToLivesplitFormat, stringTimeToSeconds}                                from '~/util/durations';
+import {withLoad, withLoadAsync}                                                      from '~/util/loading';
+import {Component, Prop, Vue}                                                         from 'nuxt-property-decorator';
+import {GlobalEventEmitter}                                                           from '~/util/globalEvents';
+import store                                                                          from '~/util/store';
+import {offload}                                                                      from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                                       from '~/util/offloadworkerTypes';
 
 @Component
 export default class Toolbox extends Vue {
@@ -50,8 +44,11 @@ export default class Toolbox extends Vue {
   @Prop()
   pb!: Attempt | null;
 
+  @Prop()
+  parsedSplits!: SplitFile;
+
   get splits() {
-    return store.state.splitFile!.Run.Segments.Segment;
+    return this.parsedSplits.Run.Segments.Segment;
   }
 
   reconstructAttemptTime(id: number) {
@@ -63,7 +60,7 @@ export default class Toolbox extends Vue {
   }
 
   get allRunAttempts(): Attempt[] {
-    return store.state.splitFile!.Run.AttemptHistory.Attempt;
+    return this.parsedSplits.Run.AttemptHistory.Attempt;
   }
 
   get pbFromSplitHistory(): Attempt | undefined {
@@ -116,9 +113,8 @@ export default class Toolbox extends Vue {
         return;
       }
       let timeSoFar = {RealTime: 0, GameTime: 0};
-      for (let i = 0; i < store.state.splitFile!.Run.Segments.Segment.length; ++i) {
-        const st                 = this.splits[i].SplitTimes.SplitTime || [];
-        const times: SplitTime[] = st;
+      for (let i = 0; i < this.splits.length; ++i) {
+        const times: SplitTime[] = this.splits[i].SplitTimes.SplitTime;
         const realPBTime         = this.splits[i].SegmentHistory!.Time.find(t => t['@_id'] == realPB?.['@_id']);
         const out                = times.filter(t => t['@_name'] != 'Personal Best'); // Remove pre-existing PB time
 
@@ -140,10 +136,10 @@ export default class Toolbox extends Vue {
         }
 
         // It appears sometimes PB is so messed up there is no SplitTimes property
-        if (!store.state.splitFile!.Run.Segments.Segment[i].SplitTimes)
-          store.state.splitFile!.Run.Segments.Segment[i].SplitTimes = {SplitTime: []};
+        if (!this.parsedSplits.Run.Segments.Segment[i].SplitTimes)
+          this.parsedSplits.Run.Segments.Segment[i].SplitTimes = {SplitTime: []};
 
-        store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime = out;
+        this.parsedSplits.Run.Segments.Segment[i].SplitTimes.SplitTime = out;
       }
 
       this.$bvToast.toast(`PB time for each split was updated with run ${realPB?.['@_id']}`, {
@@ -160,14 +156,14 @@ export default class Toolbox extends Vue {
       withLoadAsync(
         (endLoad: Function) => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,
-          store.state.splitFile!.Run,
+          this.parsedSplits.Run,
           store.state.PB?.['@_id'],
           this.currentAttemptNumber
         ).then((r: Run) => {
           splitFileIsModified(true);
 
-          store.state.splitFile!.Run              = r;
-          store.state.splitFile!.Run.AttemptCount = r.AttemptHistory.Attempt.length;
+          this.parsedSplits.Run              = r;
+          this.parsedSplits.Run.AttemptCount = r.AttemptHistory.Attempt.length;
           endLoad();
         })
       );

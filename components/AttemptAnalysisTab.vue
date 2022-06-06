@@ -12,7 +12,7 @@
         Merge subsplits
       </loading-switch>
     </collapsible-card>
-    <toolbox :current-attempt-number="currentAttemptNumber" class="mb-4"/>
+    <toolbox :current-attempt-number="currentAttemptNumber" :parsed-splits="parsedSplits" class="mb-4"/>
 
     <attempt-overview :segments="segments"
                       :attempt="currentAttempt"
@@ -26,7 +26,7 @@
 <script lang="ts">
 import {Component, Vue, Watch, Prop} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt, Segment}            from '~/util/splits';
+import {Attempt, Segment, SplitFile} from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
 
 @Component
@@ -39,6 +39,9 @@ export default class AttemptAnalysisTab extends Vue {
 
   @Prop()
   segments!: Segment[];
+
+  @Prop()
+  parsedSplits!: SplitFile;
 
   currentAttemptNumber: number = 1;
 

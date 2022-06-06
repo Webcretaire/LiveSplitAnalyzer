@@ -22,7 +22,8 @@
       <b-tab title="Attempt analysis">
         <attempt-analysis-tab :detailed-segments="detailedSegments"
                               :segments="parsedSplits.Run.Segments.Segment"
-                              :attempts="parsedSplits.Run.AttemptHistory.Attempt"/>
+                              :attempts="parsedSplits.Run.AttemptHistory.Attempt"
+                              :parsed-splits="parsedSplits"/>
       </b-tab>
       <b-tab title="Comparisons">
         <comparison-tab :segments="parsedSplits.Run.Segments.Segment"/>

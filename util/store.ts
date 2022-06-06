@@ -1,5 +1,9 @@
-import Vue                                        from 'vue';
-import {Attempt, AutoSplitterSettings, SplitFile} from '~/util/splits';
+import {
+  Attempt,
+  AutoSplitterSettings,
+  SplitFile
+}          from '~/util/splits';
+import Vue from 'vue';
 
 export interface Store {
   hasGameTime: boolean,

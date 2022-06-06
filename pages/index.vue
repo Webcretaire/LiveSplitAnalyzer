@@ -107,7 +107,6 @@ export default class IndexPage extends Vue {
         })
         .then((parsedSplits: SplitFile) => {
           store.state.useRealTime = !store.state.hasGameTime;
-          store.state.splitFile   = parsedSplits;
           this.parsedSplits       = parsedSplits;
 
           if (this.$matomo)

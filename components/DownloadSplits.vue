@@ -1,19 +1,22 @@
 <template>
-  <b-button v-b-tooltip.hover="'Download splits'" pill size="lg" :variant="variant"
-            @click="downloadSplits" :class="classList">
+  <b-button v-b-tooltip.hover="'Download splits'" pill size="lg" :variant="variant" @click="downloadSplits"
+            :class="classList">
     <font-awesome-icon icon="floppy-disk"/>
   </b-button>
 </template>
 
 <script lang="ts">
-import {Component, Vue}      from 'nuxt-property-decorator';
-import {xmlBuilder}          from '~/util/xml';
-import store                 from '~/util/store';
-import {splitFileIsModified} from '~/util/splits';
-import {withLoad}            from '~/util/loading';
+import {Component, Prop, Vue}           from 'nuxt-property-decorator';
+import {xmlBuilder}                     from '~/util/xml';
+import store                            from '~/util/store';
+import {SplitFile, splitFileIsModified} from '~/util/splits';
+import {withLoad}                       from '~/util/loading';
 
 @Component
 export default class DownloadSplits extends Vue {
+  @Prop()
+  parsedSplits!: SplitFile;
+
   get variant() {
     return store.state.splitFileIsModified ? 'success' : 'light';
   }
@@ -25,8 +28,11 @@ export default class DownloadSplits extends Vue {
   downloadSplits() {
     withLoad(() => {
       let element = document.createElement('a');
-      element.setAttribute('href', 'data:binary/octet-stream,' + encodeURIComponent(xmlBuilder.build(store.state.splitFile)));
       element.setAttribute('download', 'splits.lss');
+      element.setAttribute(
+        'href',
+        `data:binary/octet-stream,${encodeURIComponent(xmlBuilder.build(this.parsedSplits))}`
+      );
 
       element.style.display = 'none';
       document.body.appendChild(element);

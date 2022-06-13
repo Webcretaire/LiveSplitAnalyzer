@@ -32,7 +32,7 @@
           <split-display :split="subsplit"
                          v-for="(subsplit, i) in split.Subsplits"
                          :key="`split-${subsplit.Index}-${subsplit.Name}`"
-                         :ref="splitAccess"
+                         ref="splitAccess"
                          :splitIndex="subsplit.Index"
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -60,10 +60,12 @@
 <script lang="ts">
 import {Component, Prop, mixins}   from 'nuxt-property-decorator';
 import {Segment}                   from '~/util/splits';
+import {asArray}                   from '~/util/util';
 import BaseLinePlotComponent from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}              from 'vue-plotly';
+import SplitDisplay          from './SplitDisplay.vue';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
@@ -72,16 +74,22 @@ export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
 
   subsplitsVisible: boolean = true;
 
+  $refs!: {
+    splitAccess: SplitDisplay | SplitDisplay[];
+  }
+
   foldSplit() {
     this.collapseVisible = false;
 
-    this.$refs.splitAccess.foldSplit();
+    const splitAccess = asArray(this.$refs.splitAccess);
+    splitAccess.forEach((split : SplitDisplay) => split.foldSplit());
   }
 
   unfoldSplit() {
     this.collapseVisible = true;
 
-    this.$refs.splitAccess.unfoldSplit();
+    const splitAccess = asArray(this.$refs.splitAccess);
+    splitAccess.forEach((split : SplitDisplay) => split.unfoldSplit());
   }
 }
 </script>

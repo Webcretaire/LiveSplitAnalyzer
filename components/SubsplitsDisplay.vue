@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import {Component, Prop, mixins}   from 'nuxt-property-decorator';
-import {Segment}                   from '~/util/splits';
+import {Segments}                   from '~/util/splits';
 import {asArray}                   from '~/util/util';
 import BaseLinePlotComponent       from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors

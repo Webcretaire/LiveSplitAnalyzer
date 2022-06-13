@@ -17,10 +17,10 @@
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
-      <b-col class="text-center mt-3">
+      <div class="text-center mt-3">
         <b-button @click="unfoldAllSplits" variant="success">Expand all split info</b-button>
         <b-button @click="foldAllSplits" variant="success">Collapse all split info</b-button>
-      </b-col>
+      </div>
     </collapsible-card>
 
     <subsplits-display :split="split"

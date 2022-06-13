@@ -14,11 +14,19 @@
       <loading-switch v-model="graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
+      <b-col cols="10" offset="1">
+        <hr/>
+      </b-col>
+      <div class="text-center mt-3">
+        <b-button @click="unfoldAllSplits" variant="success">Expand all split info</b-button>
+        <b-button @click="foldAllSplits" variant="success">Collapse all split info</b-button>
+      </div>
     </collapsible-card>
 
     <subsplits-display :split="split"
                        v-for="split in detailedSegments"
                        :key="`split-${split.Index}-${split.Name}`"
+                       ref="splitAccess"
                        :splitIndex="split.Index"
                        :graphYAxisToZero="graphYAxisToZero"
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -34,6 +42,8 @@ import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
 import {Attempt, Segments}           from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
+import {asArray}                     from '~/util/util';
+import SubsplitsDisplay              from './SubsplitsDisplay.vue';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
@@ -56,6 +66,20 @@ export default class SplitsDisplayTab extends Vue {
 
   get PB() {
     return store.state.PB;
+  }
+
+  $refs!: {
+    splitAccess: SubsplitsDisplay | SubsplitsDisplay[]
+  }
+
+  foldAllSplits() {
+    const splitAccess = asArray(this.$refs.splitAccess);
+    splitAccess.forEach((split : SubsplitsDisplay) => split.foldSplit());
+  }
+
+  unfoldAllSplits() {
+    const splitAccess = asArray(this.$refs.splitAccess);
+    splitAccess.forEach((split : SubsplitsDisplay) => split.unfoldSplit());
   }
 
   @Watch('PB', {immediate: true})

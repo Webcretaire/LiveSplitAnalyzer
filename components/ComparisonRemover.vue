@@ -1,12 +1,13 @@
 <template>
   <div v-if="deletableComparisons.length">
     <collapsible-card id="ComparisonRemoverCard" title="Delete comparison">
-    <multiselect style="max-width: 30rem" class="m-auto" v-model="comparisonsToDelete" :options="deletableComparisons" multiple/>
-    <div class="text-center">
-      <b-button @click="deleteComparisons" class="mt-2" variant="danger" :disabled="!comparisonsToDelete.length">
-        Delete
-      </b-button>
-    </div>
+      <multiselect style="max-width: 30rem" class="m-auto" v-model="comparisonsToDelete" :options="deletableComparisons"
+                   multiple/>
+      <div class="text-center">
+        <b-button @click="deleteComparisons" class="mt-2" variant="danger" :disabled="!comparisonsToDelete.length">
+          Delete
+        </b-button>
+      </div>
     </collapsible-card>
   </div>
 </template>
@@ -15,44 +16,29 @@
 import {
   availableComparisons,
   splitFileIsModified,
-  Segments,
+  Segment,
   SplitTime
-}                                 from '~/util/splits';
-import {Component, mixins}        from 'nuxt-property-decorator';
-import BaseModal                  from '~/components/BaseModal.vue';
-import store                      from '~/util/store';
-import Multiselect                from 'vue-multiselect';
-import {GlobalEventEmitter}       from '~/util/globalEvents';
+}                             from '~/util/splits';
+import {Component, Prop, Vue} from 'nuxt-property-decorator';
+import Multiselect            from 'vue-multiselect';
+import {GlobalEventEmitter}   from '~/util/globalEvents';
 
 @Component({components: {Multiselect}})
-export default class ComparisonRemover extends mixins(BaseModal) {
+export default class ComparisonRemover extends Vue {
   comparisonsToDelete: string[] = [];
 
+  @Prop()
+  segments!: Segment[];
+
   get deletableComparisons() {
-    if (!store.state.splitFile!.Run?.Segments) return [];
-
-    return availableComparisons(store.state.splitFile!.Run?.Segments).filter(s => s != 'Personal Best');
-  }
-
-  get segments(): Segments {
-    if (!store.state.splitFile!.Run?.Segments) {
-      this.$bvToast.toast(`No splitfile selected`, {
-        title: 'Error',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant: 'danger'
-      });
-      return {Segment: []};
-    }
-
-    return store.state.splitFile!.Run.Segments;
+    return availableComparisons(this.segments).filter(s => s != 'Personal Best');
   }
 
   deleteComparisons() {
     GlobalEventEmitter.$emit('openConfirm', `Delete ${this.comparisonsToDelete.join(', ')}?`, () => {
       splitFileIsModified(true);
 
-      this.segments.Segment.forEach((segment, index, segArray) => {
+      this.segments.forEach((segment, index, segArray) => {
         const splitTimes = segArray[index].SplitTimes.SplitTime;
 
         segArray[index].SplitTimes.SplitTime = splitTimes.filter(

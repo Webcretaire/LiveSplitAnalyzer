@@ -1,11 +1,25 @@
 <template>
   <div class="text-center">
     <main>
-      <img :class="logoClasses" src="~/assets/images/logo_flat.png" alt="LiveSplitAnalyzer logo"/>
+      <b-img :class="logoClasses" src="~/assets/images/logo_flat.png" alt="LiveSplitAnalyzer logo"/>
       <h1 class="mb-3">LiveSplit Analyzer</h1>
       <p>This tool extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
-      <SplitsDisplay class="mt-4"/>
+      <b-row>
+        <b-col cols="12" :lg="panelSize" :offset-lg="panelOffset" style="transition: all 500ms">
+          <div class="p-3">
+            <b-form-file
+              v-model="splitFile"
+              accept=".lss"
+              placeholder="Choose a file or drop it here..."
+              drop-placeholder="Drop file here..."
+              class="mb-4"
+            ></b-form-file>
+            <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"
+                            :page-width="widthValue" @updateWidth="e => widthValue = e"/>
+          </div>
+        </b-col>
+      </b-row>
     </main>
     <footer>
       This LiveSplit Analyzer is a tool made by
@@ -20,7 +34,7 @@
       </a>
     </footer>
 
-    <download-splits v-if="loadedSplitfile"/>
+    <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
     <loading-modal v-if="loadingCallback" :callback="loadingCallback"/>
@@ -29,12 +43,25 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component}     from 'nuxt-property-decorator';
-import {GlobalEventEmitter} from '~/util/globalEvents';
-import {withLoadAsync}      from '~/util/loading';
-import store                from '~/util/store';
+import {
+  AutoSplitterSettings,
+  Segment,
+  SplitFile,
+  splitFileIsModified
+}                               from '~/util/splits';
+import {GlobalEventEmitter}     from '~/util/globalEvents';
+import {withLoadAsync}          from '~/util/loading';
+import store, {Store}           from '~/util/store';
+import {offload}                from '~/util/offloadWorker';
+import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
+import {DetailedSegment}        from '~/util/splitProcessing';
+import {Vue, Component, Watch}  from 'nuxt-property-decorator';
+import VueSlider                from 'vue-slider-component';
 
-@Component
+const LoadingModal = () => import('~/components/modals/LoadingModal.vue');
+const ConfirmModal = () => import('~/components/modals/ConfirmModal.vue');
+
+@Component({components: {LoadingModal, ConfirmModal, VueSlider}})
 export default class IndexPage extends Vue {
   loadingCallback: Function | null = null;
 
@@ -46,12 +73,74 @@ export default class IndexPage extends Vue {
 
   confirmCallback: Function | null = null;
 
-  get loadedSplitfile() {
-    return store.state.splitFile?.Run != undefined;
+  widthValue: number = 0;
+
+  splitFile: File | null = null;
+
+  parsedSplits: SplitFile | null = null;
+
+  detailedSegments: DetailedSegment[] = [];
+
+  globalState: Store = store.state;
+
+  get panelSize() {
+    return (12 - (2 * this.panelOffset));
+  }
+
+  get panelOffset() {
+    return (0 - (this.widthValue - 3));
   }
 
   get logoClasses() {
-    return this.loadedSplitfile ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
+    return this.parsedSplits ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
+  }
+
+  @Watch('widthValue')
+  panelWidthStore() {
+    localStorage.setItem('widthValue', JSON.stringify(this.widthValue));
+  }
+
+  @Watch('splitFile')
+  fileChange(newVal: File) {
+    withLoadAsync((endLoad: Function) => {
+      newVal.text()
+        .then(text => {
+          // Not very elegant, but efficient and decently fast
+          store.state.hasGameTime = text.includes('<GameTime>');
+
+          return offload(OffloadWorkerOperation.XML_PARSE_TEXT, text);
+        })
+        .then((parsedSplits: SplitFile) => {
+          store.state.useRealTime = !store.state.hasGameTime;
+          this.parsedSplits       = parsedSplits;
+
+          if (this.$matomo)
+            this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
+
+          splitFileIsModified(false);
+        })
+        .finally(() => endLoad());
+    });
+  }
+
+  @Watch('parsedSplits.Run.Segments.Segment', {deep: true})
+  segmentsChange(newVal: Segment[]) {
+    offload(OffloadWorkerOperation.GENERATE_SPLIT_DETAIL, newVal).then(s => this.detailedSegments = s);
+  }
+
+  @Watch('globalState', {deep: true})
+  onStateUpdate(newVal: Store) {
+    offload(OffloadWorkerOperation.UPDATE_STORE_DATA, newVal);
+  }
+
+  @Watch('parsedSplits.Run.AutoSplitterSettings', {deep: true})
+  onAutoSplitterSettingsUpdate(newVal: AutoSplitterSettings) {
+    store.state.autoSplitterSettings = newVal;
+  }
+
+  @Watch('parsedSplits', {deep: true})
+  onSplitFileLoad(newVal: SplitFile) {
+    offload(OffloadWorkerOperation.GET_PB, newVal.Run.AttemptHistory).then(PB => store.state.PB = PB);
   }
 
   created() {
@@ -65,7 +154,7 @@ export default class IndexPage extends Vue {
       withLoadAsync((endLoad: Function) => {
         this.modalArgs         = args;
         // This needs to be an attribute because if it's a getter it gets cached way too aggressively
-        this.componentInstance = () => import(`~/components/${modal}`);
+        this.componentInstance = () => import(`~/components/modals/${modal}`);
         this.$nextTick(() => endLoad());
       });
     });
@@ -80,6 +169,13 @@ export default class IndexPage extends Vue {
       this.confirmMessage  = '';
       this.confirmCallback = null;
     });
+
+    const savedWidthValue = localStorage.getItem('widthValue');
+    if (savedWidthValue) {
+      this.widthValue = JSON.parse(savedWidthValue);
+    } else {
+      this.widthValue = window.innerWidth > 1400 ? 0 : 1;
+    }
   }
 }
 </script>

@@ -24,7 +24,7 @@ import {
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import {GlobalEventEmitter}   from '~/util/globalEvents';
 import store                  from '~/util/store';
-import {SplitTime}            from '~/util/splits';
+import {Segment, SplitTime}   from '~/util/splits';
 
 @Component
 export default class ComparisonTableCell extends Vue {
@@ -37,6 +37,9 @@ export default class ComparisonTableCell extends Vue {
   @Prop()
   cellData!: any;
 
+  @Prop()
+  segments!: Segment[];
+
   format = secondsToFormattedString;
 
   formatWithDefault(time: number | undefined) {
@@ -46,10 +49,8 @@ export default class ComparisonTableCell extends Vue {
   doEditValue(newVal: number) {
     const delta = newVal - this.cellData.value.time;
 
-    const segments = store.state.splitFile!.Run.Segments.Segment;
-
-    for (let i = this.cellData.index; i < segments.length; ++i) {
-      const comparisons = store.state.splitFile!.Run.Segments.Segment[i].SplitTimes.SplitTime;
+    for (let i = this.cellData.index; i < this.segments.length; ++i) {
+      const comparisons = this.segments[i].SplitTimes.SplitTime;
 
       const relevantComparison: SplitTime | undefined = comparisons.find(
         comparison => comparison['@_name'] === this.comparisonName

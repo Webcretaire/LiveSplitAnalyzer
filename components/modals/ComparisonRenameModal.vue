@@ -12,11 +12,10 @@
 </template>
 
 <script lang="ts">
-import {Segments, splitFileIsModified} from '~/util/splits';
-import {Component, Prop, mixins}       from 'nuxt-property-decorator';
-import BaseModal                       from '~/components/BaseModal.vue';
-import {withLoad}                      from '~/util/loading';
-import store                           from '~/util/store';
+import {Segment, splitFileIsModified} from '~/util/splits';
+import {Component, Prop, mixins}      from 'nuxt-property-decorator';
+import BaseModal                      from '~/components/modals/BaseModal.vue';
+import {withLoad}                     from '~/util/loading';
 
 @Component
 export default class ComparisonRenameModal extends mixins(BaseModal) {
@@ -24,8 +23,8 @@ export default class ComparisonRenameModal extends mixins(BaseModal) {
 
   newComparisonName: string = '';
 
-  // splitfile needs to be loaded to access this modal so the value can't be null
-  segments: Segments = store.state.splitFile!.Run?.Segments;
+  @Prop()
+  segments!: Segment[];
 
   @Prop()
   oldComparisonName!: string;
@@ -39,7 +38,7 @@ export default class ComparisonRenameModal extends mixins(BaseModal) {
 
   renameComparison() {
     withLoad(() => {
-      this.segments.Segment.forEach((segment) => {
+      this.segments.forEach((segment) => {
         const selectedComparison = segment.SplitTimes.SplitTime.find(s => s['@_name'] === this.oldComparisonName);
         if (selectedComparison)
           selectedComparison['@_name'] = this.newComparisonName;

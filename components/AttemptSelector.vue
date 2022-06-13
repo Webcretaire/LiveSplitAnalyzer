@@ -30,6 +30,9 @@ export default class AttemptSelector extends Vue {
   @Prop()
   value!: number;
 
+  @Prop()
+  attempts!: Attempt[];
+
   internalValue: number = 1;
 
   filterRuns: boolean = false;
@@ -44,9 +47,9 @@ export default class AttemptSelector extends Vue {
 
   get runAttempts(): Attempt[] {
     if (this.filterRuns)
-      return store.state.splitFile!.Run.AttemptHistory.Attempt.filter(a => selectTime(a));
+      return this.attempts.filter(a => selectTime(a));
     else
-      return store.state.splitFile!.Run.AttemptHistory.Attempt;
+      return this.attempts;
   }
 
   get latestAttemptNumber(): number {

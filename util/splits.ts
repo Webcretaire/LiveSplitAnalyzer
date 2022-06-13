@@ -124,10 +124,10 @@ export const selectTime = (t: OptionalTimeLike): string | null => {
   return t?.RealTime || null;
 };
 
-export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | null = null): Array<number> => {
+export const cumulatedSumOfBests = (segments: Segment[], useGameTime: boolean | null = null): Array<number> => {
   let timeSoFar = 0;
 
-  return segments.Segment.map((segment) => {
+  return segments.map((segment) => {
     let best_seg_t;
     if (useGameTime === true) best_seg_t = segment.BestSegmentTime.GameTime;
     else if (useGameTime === false) best_seg_t = segment.BestSegmentTime.RealTime;
@@ -140,8 +140,8 @@ export const cumulatedSumOfBests = (segments: Segments, useGameTime: boolean | n
   });
 };
 
-export const availableComparisons = (segments: Segments) => {
-  return segments.Segment.reduce((acc: string[], segment: Segment) => {
+export const availableComparisons = (segments: Segment[]) => {
+  return segments.reduce((acc: string[], segment: Segment) => {
     const splitTime = segment.SplitTimes.SplitTime;
 
     splitTime.forEach((s: SplitTime) => {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <collapsible-card title="Options" :lazy="false">
-      <attempt-selector v-model="currentAttemptNumber"/>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
@@ -24,7 +24,7 @@
     </collapsible-card>
 
     <subsplits-display :split="split"
-                       v-for="split in splits"
+                       v-for="split in detailedSegments"
                        :key="`split-${split.Index}-${split.Name}`"
                        ref="splitAccess"
                        :splitIndex="split.Index"
@@ -32,7 +32,7 @@
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
                        :graphMedianAttemptHline="graphMedianAttemptHline"
                        :currentAttemptNumber="currentAttemptNumber"
-                       :segments="segments"
+                       :segments-holder="segmentsHolder"
                        class="mb-3"/>
   </div>
 </template>
@@ -40,7 +40,7 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt, Segment}            from '~/util/splits';
+import {Attempt, Segments}           from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
 import {asArray}                     from '~/util/util';
 import SubsplitsDisplay              from './SubsplitsDisplay.vue';
@@ -56,10 +56,13 @@ export default class SplitsDisplayTab extends Vue {
   currentAttemptNumber: number = 1;
 
   @Prop()
-  splits!: DetailedSegment[];
+  attempts!: Attempt[];
 
   @Prop()
-  segments!: Segment[];
+  detailedSegments!: DetailedSegment[];
+
+  @Prop()
+  segmentsHolder!: Segments;
 
   get PB() {
     return store.state.PB;

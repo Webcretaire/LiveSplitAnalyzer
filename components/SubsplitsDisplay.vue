@@ -45,7 +45,7 @@
     </div>
     <div v-else>
       <split-display :split="split"
-                     :ref="splitAccess"
+                     ref="splitAccess"
                      :splitIndex="split.Index"
                      :graphYAxisToZero="graphYAxisToZero"
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -69,9 +69,6 @@ import {Plotly}              from 'vue-plotly';
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
   segments!: Segment[];
-
-  @Prop()
-  splitAccess!: Array<any>;
 
   subsplitsVisible: boolean = true;
 

@@ -23,7 +23,7 @@
     <subsplits-display :split="split"
                        v-for="split in splits"
                        :key="`split-${split.Index}-${split.Name}`"
-                       :ref="splitAccess"
+                       ref="splitAccess"
                        :splitIndex="split.Index"
                        :graphYAxisToZero="graphYAxisToZero"
                        :graphCurrentAttemptHline="graphCurrentAttemptHline"
@@ -55,9 +55,6 @@ export default class SplitsDisplayTab extends Vue {
 
   @Prop()
   segments!: Segment[];
-
-  @Prop()
-  splitAccess!: Array<any>;
 
   get PB() {
     return store.state.PB;

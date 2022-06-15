@@ -113,7 +113,7 @@ export default class IndexPage extends Vue {
     withLoadAsync((endLoad: Function) => {
       fetch(splitsURL)
         .then(response => response.text())
-        .then(fileString => console.log(fileString));
+        .then(fileString => this.splitFile = fileString);
       endLoad();
     });
   }

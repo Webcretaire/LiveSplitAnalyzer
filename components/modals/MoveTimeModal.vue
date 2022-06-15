@@ -2,7 +2,8 @@
   <b-modal :ref="modalRef" title="Move time between splits" @hidden="destroyModal" hide-footer centered size="lg">
     <div class="text-center">
       <b-form-group label="Transfer time to:">
-        <multiselect v-model="transferSplit" :options="splitOptions" placeholder="Pick a split" track-by="id" label="name"/>
+        <multiselect v-model="transferSplit" :options="splitOptions" placeholder="Pick a split" track-by="id"
+                     label="name"/>
       </b-form-group>
       <b-form-group label="Amount to transfer:">
         <time-selector v-model="transferTime"/>
@@ -20,7 +21,7 @@
 import {secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
 import {splitFileIsModified, selectTime, Segment}      from '~/util/splits';
 import {Component, Prop, mixins}                       from 'nuxt-property-decorator';
-import {withLoadAsync}                                 from '~/util/loading';
+import {withLoad}                                      from '~/util/loading';
 import {offload}                                       from '~/util/offloadWorker';
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 import BaseModal                                       from '~/components/modals/BaseModal.vue';
@@ -51,7 +52,7 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   get splitOptions() {
-    const nextSplitOption = {name: `(next) ${this.nextSplit?.Name}`, id: this.currentSplitIndex + 1};
+    const nextSplitOption     = {name: `(next) ${this.nextSplit?.Name}`, id: this.currentSplitIndex + 1};
     const previousSplitOption = {name: `(prev) ${this.previousSplit?.Name}`, id: this.currentSplitIndex - 1};
 
     if (this.currentSplitIndex == 0)
@@ -102,7 +103,7 @@ export default class MoveTimeModal extends mixins(BaseModal) {
   }
 
   doMoveTime(currentSplit: Segment, otherSplit: Segment) {
-    withLoadAsync((endLoad: Function) => {
+    withLoad(() =>
       offload(
         OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT,
         currentSplit,
@@ -123,9 +124,8 @@ export default class MoveTimeModal extends mixins(BaseModal) {
             variant: 'success'
           }
         );
-      }).finally(() => endLoad());
-    });
-    this.destroyModal();
+      }).then(() => this.destroyModal())
+    );
   }
 }
 </script>

@@ -18,17 +18,12 @@
 </template>
 
 <script lang="ts">
-import {
-  Segment,
-  SegmentHistoryTime,
-  selectTime,
-  splitFileIsModified
-}                                        from '~/util/splits';
-import {Component, mixins, Prop}         from 'nuxt-property-decorator';
-import BaseModal                         from '~/components/modals/BaseModal.vue';
-import {GlobalEventEmitter}              from '~/util/globalEvents';
-import {formatTime, stringTimeToSeconds} from '~/util/durations';
-import {withLoadAsync}                   from '~/util/loading';
+import {Segment, SegmentHistoryTime, selectTime, splitFileIsModified} from '~/util/splits';
+import {Component, mixins, Prop}                                      from 'nuxt-property-decorator';
+import BaseModal                                                      from '~/components/modals/BaseModal.vue';
+import {GlobalEventEmitter}                                           from '~/util/globalEvents';
+import {formatTime, stringTimeToSeconds}                              from '~/util/durations';
+import {withLoad}                                                     from '~/util/loading';
 
 @Component
 export default class ManualGoldUpdateModal extends mixins(BaseModal) {
@@ -88,7 +83,7 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
 
   deleteAttempt(attempt: SegmentHistoryTime) {
     GlobalEventEmitter.$emit('openConfirm', `Delete attempt #${attempt['@_id']}?`, () => {
-      withLoadAsync((endLoad: Function) => this.doDeleteAttempt(attempt, endLoad));
+      withLoad(() => new Promise<void>(resolve => this.doDeleteAttempt(attempt, resolve)));
       GlobalEventEmitter.$emit('closeConfirm');
     });
   }

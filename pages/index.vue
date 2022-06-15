@@ -42,7 +42,7 @@
     <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
-    <loading-modal v-if="loadingCallback" :callback="loadingCallback"/>
+    <loading-modal ref="loadingModal"/>
     <confirm-modal v-if="confirmMessage" :message="confirmMessage" :callback="confirmCallback"/>
   </div>
 </template>
@@ -55,20 +55,22 @@ import {
   splitFileIsModified
 }                               from '~/util/splits';
 import {GlobalEventEmitter}     from '~/util/globalEvents';
-import {withLoadAsync}          from '~/util/loading';
+import {withLoad}               from '~/util/loading';
 import store, {Store}           from '~/util/store';
 import {offload}                from '~/util/offloadWorker';
 import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import {DetailedSegment}        from '~/util/splitProcessing';
 import {Vue, Component, Watch}  from 'nuxt-property-decorator';
 import VueSlider                from 'vue-slider-component';
+import LoadingModal             from '~/components/modals/LoadingModal.vue';
 
-const LoadingModal = () => import('~/components/modals/LoadingModal.vue');
 const ConfirmModal = () => import('~/components/modals/ConfirmModal.vue');
 
 @Component({components: {LoadingModal, ConfirmModal, VueSlider}})
 export default class IndexPage extends Vue {
-  loadingCallback: Function | null = null;
+  $refs!: {
+    loadingModal: LoadingModal
+  };
 
   componentInstance: Function | null = null;
 
@@ -138,10 +140,11 @@ export default class IndexPage extends Vue {
 
   @Watch('splitFile')
   fileChange(newVal: string) {
-    withLoadAsync((endLoad: Function) => {
+    withLoad(() => {
       // Not very elegant, but efficient and decently fast
       store.state.hasGameTime = newVal.includes('<GameTime>');
-      offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
+
+      return offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
       .then((parsedSplits: SplitFile) => {
         store.state.useRealTime = !store.state.hasGameTime;
         this.parsedSplits       = parsedSplits;
@@ -151,7 +154,6 @@ export default class IndexPage extends Vue {
 
         splitFileIsModified(false);
       })
-      .finally(() => endLoad());
     });
   }
 
@@ -176,23 +178,16 @@ export default class IndexPage extends Vue {
   }
 
   created() {
-    GlobalEventEmitter.$on('startLoading', (callback: Function) => {
-      this.loadingCallback = callback;
-    });
-    GlobalEventEmitter.$on('stopLoading', () => {
-      this.loadingCallback = null;
-    });
+    GlobalEventEmitter.$on('startLoading', (callback: () => any) => this.$refs.loadingModal.runCallback(callback));
     GlobalEventEmitter.$on('openModal', (modal: string, args: Record<string, any> = {}) => {
-      withLoadAsync((endLoad: Function) => {
+      withLoad(() => new Promise<void>(resolve => {
         this.modalArgs         = args;
         // This needs to be an attribute because if it's a getter it gets cached way too aggressively
         this.componentInstance = () => import(`~/components/modals/${modal}`);
-        this.$nextTick(() => endLoad());
-      });
+        this.$nextTick(resolve);
+      }));
     });
-    GlobalEventEmitter.$on('closeModal', () => {
-      this.componentInstance = null;
-    });
+    GlobalEventEmitter.$on('closeModal', () => this.componentInstance = null);
     GlobalEventEmitter.$on('openConfirm', (text: string, callback: Function) => {
       this.confirmCallback = callback;
       this.confirmMessage  = text;

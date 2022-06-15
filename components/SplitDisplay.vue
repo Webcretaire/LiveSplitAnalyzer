@@ -42,7 +42,7 @@ import {
 }                                from '~/util/splits';
 import {Component, mixins, Prop} from 'nuxt-property-decorator';
 import {GlobalEventEmitter}      from '~/util/globalEvents';
-import {withLoadAsync}           from '~/util/loading';
+import {withLoad}                from '~/util/loading';
 import store                     from '~/util/store';
 import {offload}                 from '~/util/offloadWorker';
 import {OffloadWorkerOperation}  from '~/util/offloadworkerTypes';
@@ -118,7 +118,7 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
     if (!this.nextSplit) return;
 
     GlobalEventEmitter.$emit('openConfirm', `Merge "${this.split.Name}" into "${this.nextSplit.Name}"?`, () => {
-      withLoadAsync((endLoad: Function) => this.doMergeNextSplit(endLoad));
+      withLoad(() => new Promise<void>(resolve => this.doMergeNextSplit(resolve)));
     });
   }
 }

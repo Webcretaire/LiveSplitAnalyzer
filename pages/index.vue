@@ -25,7 +25,7 @@
                             :page-width="widthValue" @updateWidth="e => widthValue = e"/>
           </div>
         </b-col>
-      </b-row> 
+      </b-row>
     </main>
     <footer>
       This LiveSplit Analyzer is a tool made by
@@ -112,7 +112,7 @@ export default class IndexPage extends Vue {
 
   getSplitsFromID() {
     const splitsURL = `https://splits.io/${this.splitsID}/export/livesplit?blank=0`;
-    withLoadAsync((endLoad: Function) => {
+    withLoad(() =>
       fetch(splitsURL)
         .then(response => response.text())
         .then(fileString => this.splitFile = fileString)
@@ -124,8 +124,7 @@ export default class IndexPage extends Vue {
               variant: 'danger'
           });
         })
-        .finally(() => endLoad());
-    });
+    );
   }
 
   @Watch('widthValue')

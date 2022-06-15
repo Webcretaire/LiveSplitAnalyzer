@@ -9,17 +9,23 @@
         <b-col cols="12" :lg="panelSize" :offset-lg="panelOffset" style="transition: all 500ms">
           <div class="p-3">
             <b-form-file
-              v-model="splitFile"
+              v-model="fileInput"
               accept=".lss"
               placeholder="Choose a file or drop it here..."
               drop-placeholder="Drop file here..."
-              class="mb-4"
+              class="mb-3"
             ></b-form-file>
+            <p>or import splits from splits.io:</p>
+            <b-row>
+              <b-col cols="1"><h5 class="mt-2">splits.io/</h5></b-col>
+              <b-col cols="11"><b-form-input v-model="splitsID" placeholder="Enter ID here" class="mb-2"/></b-col>
+            </b-row>
+            <b-button @click="getSplitsFromID" variant="info" class="mb-4" :disabled="emptyID">Get splits</b-button>
             <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"
                             :page-width="widthValue" @updateWidth="e => widthValue = e"/>
           </div>
         </b-col>
-      </b-row>
+      </b-row> 
     </main>
     <footer>
       This LiveSplit Analyzer is a tool made by
@@ -30,8 +36,7 @@
          target="_blank">
         awesome contributors</a>. Its source code is available on
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">
-        GitHub
-      </a>
+        GitHub</a>.
     </footer>
 
     <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
@@ -75,7 +80,11 @@ export default class IndexPage extends Vue {
 
   widthValue: number = 0;
 
-  splitFile: File | null = null;
+  splitsID: string = '';
+
+  fileInput: File | null = null;
+
+  splitFile: string | null = null;
 
   parsedSplits: SplitFile | null = null;
 
@@ -95,31 +104,47 @@ export default class IndexPage extends Vue {
     return this.parsedSplits ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
   }
 
+  get emptyID() {
+    return this.splitsID.trim() === '';
+  }
+
+  getSplitsFromID() {
+    const splitsURL = `https://splits.io/${this.splitsID}/export/livesplit?blank=0`;
+    withLoadAsync((endLoad: Function) => {
+      fetch(splitsURL)
+        .then(response => response.text())
+        .then(fileString => console.log(fileString));
+      endLoad();
+    });
+  }
+
   @Watch('widthValue')
   panelWidthStore() {
     localStorage.setItem('widthValue', JSON.stringify(this.widthValue));
   }
 
+  @Watch('fileInput')
+  splitFileSet(newFileInputVal: File) {
+    newFileInputVal.text().then(t => this.splitFile = t);
+  }
+
   @Watch('splitFile')
-  fileChange(newVal: File) {
+  fileChange(newVal: string) {
     withLoadAsync((endLoad: Function) => {
-      newVal.text()
-        .then(text => {
-          // Not very elegant, but efficient and decently fast
-          store.state.hasGameTime = text.includes('<GameTime>');
+      // Not very elegant, but efficient and decently fast
+      store.state.hasGameTime = newVal.includes('<GameTime>');
 
-          return offload(OffloadWorkerOperation.XML_PARSE_TEXT, text);
-        })
-        .then((parsedSplits: SplitFile) => {
-          store.state.useRealTime = !store.state.hasGameTime;
-          this.parsedSplits       = parsedSplits;
+      return offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
+      .then((parsedSplits: SplitFile) => {
+        store.state.useRealTime = !store.state.hasGameTime;
+        this.parsedSplits       = parsedSplits;
 
-          if (this.$matomo)
-            this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
+        if (this.$matomo)
+          this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
 
-          splitFileIsModified(false);
-        })
-        .finally(() => endLoad());
+        splitFileIsModified(false);
+      })
+      .finally(() => endLoad());
     });
   }
 

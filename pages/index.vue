@@ -113,8 +113,16 @@ export default class IndexPage extends Vue {
     withLoadAsync((endLoad: Function) => {
       fetch(splitsURL)
         .then(response => response.text())
-        .then(fileString => this.splitFile = fileString);
-      endLoad();
+        .then(fileString => this.splitFile = fileString)
+        .catch(() => {
+          this.$bvToast.toast(`${this.splitsID} is not a valid ID`, {
+              title: 'Invalid ID',
+              autoHideDelay: 5000,
+              appendToast: false,
+              variant: 'danger'
+          });
+        })
+        .finally(() => endLoad());
     });
   }
 
@@ -133,8 +141,7 @@ export default class IndexPage extends Vue {
     withLoadAsync((endLoad: Function) => {
       // Not very elegant, but efficient and decently fast
       store.state.hasGameTime = newVal.includes('<GameTime>');
-
-      return offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
+      offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
       .then((parsedSplits: SplitFile) => {
         store.state.useRealTime = !store.state.hasGameTime;
         this.parsedSplits       = parsedSplits;

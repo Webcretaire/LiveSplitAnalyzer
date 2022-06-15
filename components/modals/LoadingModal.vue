@@ -33,29 +33,37 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'nuxt-property-decorator';
+import {Component, Vue, Watch} from 'nuxt-property-decorator';
 
 @Component
 export default class LoadingModal extends Vue {
   runningCallbacks: number = 0;
 
-  runCallback(callback: () => any): Promise<void> {
+  modalDisplay: boolean = false;
+
+  runCallback(callback: () => any): void {
     ++this.runningCallbacks;
 
-    return new Promise<void>(resolve => {
-      this.$nextTick(() => Promise.resolve(callback()).finally(() => {
-        --this.runningCallbacks;
-        resolve();
-      }));
-    });
+    this.$nextTick(() => Promise.resolve(callback()).finally(() => --this.runningCallbacks));
   }
 
-  get modalDisplay(): boolean {
-    return this.runningCallbacks > 0;
+  @Watch('runningCallbacks')
+  onCallbacksUpdate(newVal: number) {
+    this.modalDisplay = newVal > 0;
   }
 
-  set modalDisplay(_) {
-    // modalDisplay is always computed but Bootstrap Vue might attempt to set it occasionally, just ignore it
+  /**
+   * I have no idea why this is needed, and I can't find an explanation in the documentation,
+   * but it seems that *on production builds only*, this value can change without me changing
+   * it (so the only explanation I have is that Bootstrap Vue is changing it itself because
+   * it's the only other piece of code which has access to it), so if anything tries to modify
+   * modalDisplay directly make sure its state is coherent with runningCallbacks value, and if
+   * it's not schedule a "re-sync" on next Vue "cycle"
+   */
+  @Watch('modalDisplay')
+  fixModalDisplayValueInCaseOfDeSync(newVal: boolean) {
+    if (newVal && !this.runningCallbacks)
+      this.$nextTick(() => this.modalDisplay = this.runningCallbacks > 0);
   }
 }
 </script>

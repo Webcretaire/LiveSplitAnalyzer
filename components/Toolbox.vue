@@ -27,7 +27,7 @@
 <script lang="ts">
 import {Attempt, Run, Segment, selectTime, SplitFile, splitFileIsModified, SplitTime} from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds}                                from '~/util/durations';
-import {withLoad, withLoadAsync}                                                      from '~/util/loading';
+import {withLoad}                                                                     from '~/util/loading';
 import {Component, Prop, Vue}                                                         from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                                                           from '~/util/globalEvents';
 import store                                                                          from '~/util/store';
@@ -153,8 +153,8 @@ export default class Toolbox extends Vue {
 
   deletePreviousRuns() {
     GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
-      withLoadAsync(
-        (endLoad: Function) => offload(
+      withLoad(
+        () => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,
           this.parsedSplits.Run,
           store.state.PB?.['@_id'],
@@ -164,7 +164,6 @@ export default class Toolbox extends Vue {
 
           this.parsedSplits.Run              = r;
           this.parsedSplits.Run.AttemptCount = r.AttemptHistory.Attempt.length;
-          endLoad();
         })
       );
     });

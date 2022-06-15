@@ -1,5 +1,5 @@
 <template>
-  <b-modal :ref="modalRef" hide-header hide-footer centered size="sm" no-close-on-backdrop no-close-on-esc @shown="runCallback">
+  <b-modal v-model="modalDisplay" hide-header hide-footer centered size="sm" no-close-on-backdrop no-close-on-esc>
     <div class="w-100 mt-2">
       <svg xmlns="http://www.w3.org/2000/svg"
            x="0px" y="0px" class="d-block m-auto"
@@ -33,18 +33,29 @@
 </template>
 
 <script lang="ts">
-import {Component, mixins, Prop} from 'nuxt-property-decorator';
-import BaseModal                 from '~/components/modals/BaseModal.vue';
+import {Component, Vue} from 'nuxt-property-decorator';
 
 @Component
-export default class LoadingModal extends mixins(BaseModal) {
-  modalRef: string = 'LoadingModal';
+export default class LoadingModal extends Vue {
+  runningCallbacks: number = 0;
 
-  @Prop()
-  callback!: Function;
+  runCallback(callback: () => any): Promise<void> {
+    ++this.runningCallbacks;
 
-  runCallback() {
-    this.$nextTick(() => this.callback());
+    return new Promise<void>(resolve => {
+      this.$nextTick(() => Promise.resolve(callback()).finally(() => {
+        --this.runningCallbacks;
+        resolve();
+      }));
+    });
+  }
+
+  get modalDisplay(): boolean {
+    return this.runningCallbacks > 0;
+  }
+
+  set modalDisplay(_) {
+    // modalDisplay is always computed but Bootstrap Vue might attempt to set it occasionally, just ignore it
   }
 }
 </script>

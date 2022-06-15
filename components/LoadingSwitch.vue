@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
-import {withLoadAsync}               from '~/util/loading';
+import {withLoad}                    from '~/util/loading';
 
 @Component
 export default class LoadingSwitch extends Vue {
@@ -22,10 +22,10 @@ export default class LoadingSwitch extends Vue {
 
   @Watch('internalValue')
   inputChange(newVal: boolean) {
-    withLoadAsync((endLoad: Function) => {
+    withLoad(() => new Promise<void>((resolve) => {
       this.$emit('input', newVal);
-      this.$nextTick(() => endLoad());
-    });
+      this.$nextTick(() => resolve());
+    }));
   }
 }
 </script>

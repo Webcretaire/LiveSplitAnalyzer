@@ -16,10 +16,10 @@
               class="mb-3"
             ></b-form-file>
             <p>or import splits from splits.io:</p>
-            <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline-block>
-              <b-input-group prepend="https://splits.io/">
+            <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline>
+              <b-input-group prepend="https://splits.io/" class="m-auto">
                 <b-form-input v-model="splitsID" placeholder="Enter ID here"/>
-                <b-button type="submit" variant="info" class="ml-2" :disabled="emptyID">Get splits</b-button>
+                <b-input-group-append><b-button type="submit" variant="info" :disabled="emptyID">Get splits</b-button></b-input-group-append>
               </b-input-group>
             </b-form>
             <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"

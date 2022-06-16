@@ -9,12 +9,19 @@
         <b-col cols="12" :lg="panelSize" :offset-lg="panelOffset" style="transition: all 500ms">
           <div class="p-3">
             <b-form-file
-              v-model="splitFile"
+              v-model="fileInput"
               accept=".lss"
               placeholder="Choose a file or drop it here..."
               drop-placeholder="Drop file here..."
-              class="mb-4"
+              class="mb-3"
             ></b-form-file>
+            <p>or import splits from splits.io:</p>
+            <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline>
+              <b-input-group prepend="https://splits.io/" class="m-auto">
+                <b-form-input v-model="splitsID" placeholder="Enter ID here"/>
+                <b-input-group-append><b-button type="submit" variant="info" :disabled="emptyID">Get splits</b-button></b-input-group-append>
+              </b-input-group>
+            </b-form>
             <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"
                             :page-width="widthValue" @updateWidth="e => widthValue = e"/>
           </div>
@@ -30,8 +37,7 @@
          target="_blank">
         awesome contributors</a>. Its source code is available on
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">
-        GitHub
-      </a>
+        GitHub</a>.
     </footer>
 
     <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
@@ -77,7 +83,11 @@ export default class IndexPage extends Vue {
 
   widthValue: number = 0;
 
-  splitFile: File | null = null;
+  splitsID: string = '';
+
+  fileInput: File | null = null;
+
+  splitFile: string | null = null;
 
   parsedSplits: SplitFile | null = null;
 
@@ -97,31 +107,54 @@ export default class IndexPage extends Vue {
     return this.parsedSplits ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
   }
 
+  get emptyID() {
+    return this.splitsID.trim() === '';
+  }
+
+  getSplitsFromID() {
+    const splitsURL = `https://splits.io/${this.splitsID}/export/livesplit?blank=0`;
+    withLoad(() =>
+      fetch(splitsURL)
+        .then(response => response.text())
+        .then(fileString => this.splitFile = fileString)
+        .catch(() => {
+          this.$bvToast.toast(`${this.splitsID} is not a valid ID`, {
+              title: 'Invalid ID',
+              autoHideDelay: 5000,
+              appendToast: false,
+              variant: 'danger'
+          });
+        })
+    );
+  }
+
   @Watch('widthValue')
   panelWidthStore() {
     localStorage.setItem('widthValue', JSON.stringify(this.widthValue));
   }
 
+  @Watch('fileInput')
+  splitFileSet(newFileInputVal: File) {
+    newFileInputVal.text().then(t => this.splitFile = t);
+  }
+
   @Watch('splitFile')
-  fileChange(newVal: File) {
-    withLoad(
-      () => newVal.text()
-        .then(text => {
-          // Not very elegant, but efficient and decently fast
-          store.state.hasGameTime = text.includes('<GameTime>');
+  fileChange(newVal: string) {
+    withLoad(() => {
+      // Not very elegant, but efficient and decently fast
+      store.state.hasGameTime = newVal.includes('<GameTime>');
 
-          return offload(OffloadWorkerOperation.XML_PARSE_TEXT, text);
-        })
-        .then((parsedSplits: SplitFile) => {
-          store.state.useRealTime = !store.state.hasGameTime;
-          this.parsedSplits       = parsedSplits;
+      return offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
+      .then((parsedSplits: SplitFile) => {
+        store.state.useRealTime = !store.state.hasGameTime;
+        this.parsedSplits       = parsedSplits;
 
-          if (this.$matomo)
-            this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
+        if (this.$matomo)
+          this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
 
-          splitFileIsModified(false);
-        })
-    );
+        splitFileIsModified(false);
+      })
+    });
   }
 
   @Watch('parsedSplits.Run.Segments.Segment', {deep: true})

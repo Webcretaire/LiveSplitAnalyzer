@@ -16,11 +16,12 @@
               class="mb-3"
             ></b-form-file>
             <p>or import splits from splits.io:</p>
-            <b-row>
-              <b-col cols="1"><h5 class="mt-2">splits.io/</h5></b-col>
-              <b-col cols="11"><b-form-input v-model="splitsID" placeholder="Enter ID here" class="mb-2"/></b-col>
-            </b-row>
-            <b-button @click="getSplitsFromID" variant="info" class="mb-4" :disabled="emptyID">Get splits</b-button>
+            <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline-block>
+              <b-input-group prepend="https://splits.io/">
+                <b-form-input v-model="splitsID" placeholder="Enter ID here"/>
+                <b-button type="submit" variant="info" class="ml-2" :disabled="emptyID">Get splits</b-button>
+              </b-input-group>
+            </b-form>
             <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"
                             :page-width="widthValue" @updateWidth="e => widthValue = e"/>
           </div>

@@ -14,6 +14,9 @@
       <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
+      <loading-switch v-model="cumulateSplits">
+        Show general pace instead of individual split times
+      </loading-switch>
     </collapsible-card>
 
     <div class="mb-2 text-left">
@@ -29,6 +32,7 @@
                        :graphYAxisToZero="savedSettings.graphYAxisToZero"
                        :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
                        :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
+                       :cumulateSplits="cumulateSplits"
                        :currentAttemptNumber="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        class="mb-3"/>
@@ -50,6 +54,8 @@ export default class SplitsDisplayTab extends Vue {
   graphMedianAttemptHline: boolean = false;
 
   graphYAxisToZero: boolean = false;
+
+  cumulateSplits: boolean = false;
 
   currentAttemptNumber: number = 1;
 

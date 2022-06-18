@@ -56,6 +56,9 @@ export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
   segmentsHolder!: Segments;
 
+  @Prop()
+  cumulateSplits!: boolean;
+
   fixGoldsModal() {
     GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal', {split: this.split});
   }

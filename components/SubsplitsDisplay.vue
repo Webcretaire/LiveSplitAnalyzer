@@ -37,6 +37,7 @@
                          :graphYAxisToZero="graphYAxisToZero"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
                          :graphMedianAttemptHline="graphMedianAttemptHline"
+                         :cumulateSplits="cumulateSplits"
                          :currentAttemptNumber="currentAttemptNumber"
                          :segments-holder="segmentsHolder"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
@@ -51,6 +52,7 @@
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
                      :graphMedianAttemptHline="graphMedianAttemptHline"
                      :currentAttemptNumber="currentAttemptNumber"
+                     :cumulateSplits="cumulateSplits"
                      :segments-holder="segmentsHolder"
                      class="mb-3"/>
     </div>
@@ -71,6 +73,9 @@ import SplitDisplay                from './SplitDisplay.vue';
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
   segmentsHolder!: Segments;
+
+  @Prop()
+  cumulateSplits: boolean = false;
 
   subsplitsVisible: boolean = true;
 

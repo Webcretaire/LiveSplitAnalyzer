@@ -1,8 +1,8 @@
 <template>
   <div class="text-center">
     <main>
-      <b-img :class="logoClasses" src="~/assets/images/logo_flat.png" alt="LiveSplitAnalyzer logo"/>
-      <h1 class="mb-3">LiveSplit Analyzer</h1>
+      <b-img :class="logoClasses" :src="logoSrc" alt="LiveSplitAnalyzer logo"/>
+      <h1 class="mb-3">{{ pageTitle }}</h1>
       <p>This tool extracts data from your split files, to display it into (hopefully) pretty graphs.
         Everything happens in your browser, the split file is not sent on the network.</p>
       <b-row>
@@ -109,6 +109,18 @@ export default class IndexPage extends Vue {
 
   get emptyID() {
     return this.splitsID.trim() === '';
+  }
+
+  get isPopFileLoaded() {
+    return this.parsedSplits?.Run?.CategoryName === 'Path of Pain';
+  }
+
+  get logoSrc() {
+    return require(`~/assets/images/logo_${this.isPopFileLoaded ? 'schy' : 'flat'}.png`);
+  }
+
+  get pageTitle() {
+    return this.isPopFileLoaded ? '💙' : 'LiveSplit Analyzer';
   }
 
   getSplitsFromID() {

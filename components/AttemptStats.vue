@@ -106,6 +106,7 @@ export default class AttemptStats extends Vue {
         hoverinfo: 'text',
         mode: 'lines+markers',
         line: {
+          shape: 'spline',
           color: LINE_COLOR,
           width: 1
         }
@@ -116,7 +117,7 @@ export default class AttemptStats extends Vue {
   timeFormat = secondsToFormattedString;
 
   mounted() {
-    const attemptsTimes    = this.attempts.map(
+    const attemptsTimes = this.attempts.map(
       (attempt: Attempt) => {
         const time = selectTime(attempt);
         if (!time) return -1;

@@ -90,6 +90,7 @@ export default class BaseLinePlotComponent extends Vue {
           x1: this.timesSeconds.length - 1,
           y1: stringTimeToSeconds(t),
           line: {
+            shape: 'spline',
             color: CUR_ATTEMPT_COLOR,
             width: 1,
             dash: 'dot'
@@ -108,6 +109,7 @@ export default class BaseLinePlotComponent extends Vue {
           x1: this.timesSeconds.length - 1,
           y1: stringTimeToSeconds(m),
           line: {
+            shape: 'spline',
             color: MEDIAN_COLOR,
             width: 1,
             dash: 'dot'
@@ -115,14 +117,14 @@ export default class BaseLinePlotComponent extends Vue {
         }
       );
     }
-    
+
     this.layout = l;
   }
 
   get bestTimeDisplay() {
     return formatTime(selectTime(this.split.BestSegmentTime) || '');
-  } 
-  
+  }
+
   @Watch('timesSeconds', {immediate: true})
   updateGold(newVal: Array<number | null>) {
     offload(OffloadWorkerOperation.GOLD_COORDINATES_FROM_SECONDS_ARRAY, newVal).then(r => this.gold = r);
@@ -133,9 +135,9 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get medianAttempt() {
-    const sortedTimesSeconds = [...this.timesSeconds].sort((a, b) => (a || 0) - (b || 0));
+    const sortedTimesSeconds  = [...this.timesSeconds].sort((a, b) => (a || 0) - (b || 0));
     const medianAttemptNumber = Math.round(this.timesSeconds.length / 2) - 1;
-    return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || "0:0:0.0") === sortedTimesSeconds[medianAttemptNumber]);
+    return this.split.SegmentHistory?.Time.find(t => stringTimeToSeconds(selectTime(t) || '0:0:0.0') === sortedTimesSeconds[medianAttemptNumber]);
   }
 
   get goldsMap() {
@@ -211,6 +213,7 @@ export default class BaseLinePlotComponent extends Vue {
           size: this.markerSizes
         },
         line: {
+          shape: 'spline',
           color: LINE_COLOR,
           width: 1
         }

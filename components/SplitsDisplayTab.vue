@@ -14,14 +14,12 @@
       <loading-switch v-model="graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
-      <b-col cols="10" offset="1">
-        <hr/>
-      </b-col>
-      <div class="text-center mt-3">
-        <b-button @click="unfoldAllSplits" variant="success">Expand all split info</b-button>
-        <b-button @click="foldAllSplits" variant="success">Collapse all split info</b-button>
-      </div>
     </collapsible-card>
+
+    <div class="mb-2 text-left">
+      <a @click="unfoldAllSplits" class="text-white" href="javascript:void(0)">Expand all split info</a>
+      <a @click="foldAllSplits" class="text-white ml-3" href="javascript:void(0)">Collapse all split info</a>
+    </div>
 
     <subsplits-display :split="split"
                        v-for="split in detailedSegments"
@@ -70,16 +68,16 @@ export default class SplitsDisplayTab extends Vue {
 
   $refs!: {
     splitAccess: SubsplitsDisplay | SubsplitsDisplay[]
-  }
+  };
 
   foldAllSplits() {
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SubsplitsDisplay) => split.foldSplit());
+    splitAccess.forEach((split: SubsplitsDisplay) => split.foldSplit());
   }
 
   unfoldAllSplits() {
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SubsplitsDisplay) => split.unfoldSplit());
+    splitAccess.forEach((split: SubsplitsDisplay) => split.unfoldSplit());
   }
 
   @Watch('PB', {immediate: true})

@@ -19,7 +19,8 @@
       <b-tab title="Splits analysis">
         <splits-display-tab :detailed-segments="detailedSegments"
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
-                            :segments-holder="parsedSplits.Run.Segments"/>
+                            :segments-holder="parsedSplits.Run.Segments"
+                            :parsed-splits="parsedSplits"/>
       </b-tab>
     </b-tabs>
   </b-card>

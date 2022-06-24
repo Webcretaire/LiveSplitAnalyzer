@@ -14,7 +14,7 @@
       <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
-      <loading-switch v-model="cumulateSplits">
+      <loading-switch v-model="savedSettings.cumulateSplits">
         Show general pace instead of individual split times
       </loading-switch>
     </collapsible-card>
@@ -35,17 +35,18 @@
                        :cumulateSplits="cumulateSplits"
                        :currentAttemptNumber="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
+                       :parsed-splits="parsedSplits"
                        class="mb-3"/>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
-import store                         from '~/util/store';
-import {Attempt, Segments}           from '~/util/splits';
-import {DetailedSegment}             from '~/util/splitProcessing';
-import {asArray}                     from '~/util/util';
-import SubsplitsDisplay              from './SubsplitsDisplay.vue';
+import {Component, Prop, Vue, Watch}  from 'nuxt-property-decorator';
+import store                          from '~/util/store';
+import {Attempt, Segments, SplitFile} from '~/util/splits';
+import {DetailedSegment}              from '~/util/splitProcessing';
+import {asArray}                      from '~/util/util';
+import SubsplitsDisplay               from './SubsplitsDisplay.vue';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
@@ -71,6 +72,9 @@ export default class SplitsDisplayTab extends Vue {
 
   @Prop()
   segmentsHolder!: Segments;
+
+  @Prop()
+  parsedSplits!: SplitFile;
 
   get PB() {
     return this.globalState.PB;

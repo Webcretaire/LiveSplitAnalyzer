@@ -1,7 +1,7 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch}                             from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime}                          from '~/util/splits';
-import {formatTime, stringTimeToSeconds}                         from '~/util/durations';
+import {SegmentHistoryTime, selectTime, SplitFile}               from '~/util/splits';
+import {formatTime, secondsToFormattedString, stringTimeToSeconds}                         from '~/util/durations';
 import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR} from '~/util/plot';
 import {XYCoordinates}                                           from '~/util/util';
 import store                                                     from '~/util/store';
@@ -23,11 +23,17 @@ export default class BaseLinePlotComponent extends Vue {
   @Prop({default: false})
   graphMedianAttemptHline!: boolean;
 
+  @Prop({default: false})
+  cumulateSplits!: boolean;
+
   @Prop()
   currentAttemptNumber?: number;
 
   @Prop()
   splitIndex!: number;
+
+  @Prop()
+  parsedSplits!: SplitFile
 
   collapseVisible: boolean = false;
 
@@ -190,6 +196,34 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get timesWithPositiveIds(): SegmentHistoryTime[] {
+    if (this.cumulateSplits) {
+      const individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+      const cumulatedTimes = individualTimes.map((split) => {
+        let toAccumulateReal = [];
+        let toAccumulateGame = [];
+        for (let i = 0; i < this.splitIndex; ++i) {
+          const iteratingSplitTime = this.parsedSplits.Run.Segments.Segment[i].SegmentHistory?.Time.find(s => s['@_id'] === split['@_id']);
+          toAccumulateReal.push(iteratingSplitTime?.RealTime);
+          toAccumulateGame.push(iteratingSplitTime?.GameTime);
+        }
+
+        let outAccReal = 0;
+        let outAccGame = 0;
+        toAccumulateReal.forEach(time => outAccReal += stringTimeToSeconds(time || "0:0:0.0"));
+        toAccumulateGame.forEach(time => outAccGame += stringTimeToSeconds(time || "0:0:0.0"));
+
+        const finalOut: SegmentHistoryTime = {
+          '@_id': split['@_id'],
+          RealTime: secondsToFormattedString(outAccReal),
+          GameTime: secondsToFormattedString(outAccGame)
+        };
+
+        return finalOut;
+      });
+
+      return cumulatedTimes;
+    }
+
     return (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <b-button v-b-tooltip.hover="'Download splits'" pill size="lg" :variant="variant" @click="downloadSplits"
+  <b-button v-b-tooltip.hover.left="'Download splits'" pill size="lg" :variant="variant" @click="downloadSplits"
             :class="classList">
     <font-awesome-icon icon="floppy-disk"/>
   </b-button>
@@ -22,7 +22,7 @@ export default class DownloadSplits extends Vue {
   }
 
   get classList() {
-    return store.state.splitFileIsModified ? 'dl-button-modified dl-button' : 'dl-button';
+    return store.state.splitFileIsModified ? 'dl-button-modified float-button' : 'float-button';
   }
 
   downloadSplits() {
@@ -47,21 +47,11 @@ export default class DownloadSplits extends Vue {
 }
 </script>
 
-<style lang="scss">
-.dl-button {
-  transition: all 500ms;
-  width: 4rem;
-  height: 4rem;
-  font-size: 1.5rem;
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  filter: drop-shadow(0 0 0.5rem black);
-}
-
-.dl-button.dl-button-modified {
-  width: 5rem;
-  height: 5rem;
-  font-size: 2rem;
+<style lang="scss" scoped>
+.dl-button-modified {
+  width: 4.8rem !important;
+  height: 4.8rem !important;
+  font-size: 2rem !important;
+  transform: translateY(0.4rem);
 }
 </style>

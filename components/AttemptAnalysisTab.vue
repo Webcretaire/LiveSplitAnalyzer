@@ -8,7 +8,7 @@
       <loading-switch v-model="displayLabels" class="mb-2">
         Display labels for doughnut charts
       </loading-switch>
-      <loading-switch v-model="mergeSubsplits" class="mb-2">
+      <loading-switch v-model="savedSettings.attemptAnalysisMergeSubsplits" class="mb-2">
         Merge subsplits
       </loading-switch>
     </collapsible-card>
@@ -19,7 +19,7 @@
                       :detailed-segments="detailedSegments"
                       :is-pb="isPb"
                       :display-labels="displayLabels"
-                      :merge-subsplits="mergeSubsplits"/>
+                      :merge-subsplits="savedSettings.attemptAnalysisMergeSubsplits"/>
   </div>
 </template>
 
@@ -47,9 +47,9 @@ export default class AttemptAnalysisTab extends Vue {
 
   displayLabels: boolean = false;
 
-  mergeSubsplits: boolean = false;
-
   globalState = store.state;
+
+  savedSettings = store.state.savedSettings;
 
   get PB() {
     return this.globalState.PB;
@@ -69,18 +69,8 @@ export default class AttemptAnalysisTab extends Vue {
     return this.attempts.find((a) => a['@_id'] == this.currentAttemptNumber) || this.PB;
   }
 
-  @Watch('mergeSubsplits')
-  mergeSubsplitsStore() {
-    localStorage.setItem('mergeSubsplits', JSON.stringify(this.mergeSubsplits));
-  }
-
   mounted() {
     this.displayLabels = this.segments.length <= 30;
-
-    const mergeSetting = localStorage.getItem('mergeSubsplits');
-    if (mergeSetting)
-      this.mergeSubsplits = JSON.parse(mergeSetting);
   }
 }
 </script>
-

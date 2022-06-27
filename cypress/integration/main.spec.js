@@ -27,7 +27,6 @@ describe('Main page', () => {
   it('Attempts stats work properly', () => {
     cy.get('#AttemptsStatsCard').within(() => {
       cy.get('h4.card-title').first().should('have.text', 'Attempts stats');
-      openCard();
       // Check that default lower and higher bound are computed properly
       cy.get('p')
         .filter((index, el) => el.innerText.includes('finished runs in the range'))

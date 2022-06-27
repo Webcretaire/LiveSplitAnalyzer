@@ -5,13 +5,13 @@
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
-      <loading-switch v-model="graphYAxisToZero" class="mt-2 mb-2">
+      <loading-switch v-model="savedSettings.graphYAxisToZero" class="mt-2 mb-2">
         Graphs' Y axis starts at zero
       </loading-switch>
-      <loading-switch v-model="graphCurrentAttemptHline" class="mb-2">
+      <loading-switch v-model="savedSettings.graphCurrentAttemptHline" class="mb-2">
         Display current attempt's times as a horizontal line
       </loading-switch>
-      <loading-switch v-model="graphMedianAttemptHline" class="mb-2">
+      <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
     </collapsible-card>
@@ -26,9 +26,9 @@
                        :key="`split-${split.Index}-${split.Name}`"
                        ref="splitAccess"
                        :splitIndex="split.Index"
-                       :graphYAxisToZero="graphYAxisToZero"
-                       :graphCurrentAttemptHline="graphCurrentAttemptHline"
-                       :graphMedianAttemptHline="graphMedianAttemptHline"
+                       :graphYAxisToZero="savedSettings.graphYAxisToZero"
+                       :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
+                       :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
                        :currentAttemptNumber="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        class="mb-3"/>
@@ -53,6 +53,10 @@ export default class SplitsDisplayTab extends Vue {
 
   currentAttemptNumber: number = 1;
 
+  globalState = store.state;
+
+  savedSettings = store.state.savedSettings;
+
   @Prop()
   attempts!: Attempt[];
 
@@ -63,7 +67,7 @@ export default class SplitsDisplayTab extends Vue {
   segmentsHolder!: Segments;
 
   get PB() {
-    return store.state.PB;
+    return this.globalState.PB;
   }
 
   $refs!: {
@@ -84,36 +88,6 @@ export default class SplitsDisplayTab extends Vue {
   onPbUpdate(newVal: Attempt | null) {
     if (newVal)
       this.currentAttemptNumber = newVal?.['@_id'];
-  }
-
-  @Watch('graphYAxisToZero')
-  yAxisStore() {
-    localStorage.setItem('graphYAxisToZero', JSON.stringify(this.graphYAxisToZero));
-  }
-
-  @Watch('graphCurrentAttemptHline')
-  attemptLineStore() {
-    localStorage.setItem('graphCurrentAttemptHline', JSON.stringify(this.graphCurrentAttemptHline));
-  }
-
-  @Watch('graphMedianAttemptHline')
-  medianLineStore() {
-    localStorage.setItem('graphMedianAttemptHline', JSON.stringify(this.graphMedianAttemptHline));
-  }
-
-  mounted() {
-    const yAxisSetting       = localStorage.getItem('graphYAxisToZero');
-    const attemptLineSetting = localStorage.getItem('graphCurrentAttemptHline');
-    const medianLineSetting  = localStorage.getItem('graphMedianAttemptHline');
-
-    if (yAxisSetting)
-      this.graphYAxisToZero = JSON.parse(yAxisSetting);
-
-    if (attemptLineSetting)
-      this.graphCurrentAttemptHline = JSON.parse(attemptLineSetting);
-
-    if (medianLineSetting)
-      this.graphMedianAttemptHline = JSON.parse(medianLineSetting);
   }
 }
 </script>

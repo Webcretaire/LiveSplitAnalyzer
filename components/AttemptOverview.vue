@@ -4,7 +4,7 @@
       <Plotly v-if="renderGraph" :data="plotDataAttempt()" :layout="layout" :display-mode-bar="true"/>
     </collapsible-card>
 
-    <collapsible-card id="AttemptOverviewTimesaveCard" class="text-center" :title="titleTimesave">
+    <collapsible-card id="AttemptOverviewTimesaveCard" class="text-center" :title="titleTimesave" starts-open>
       <loading-switch v-model="sortByTimesave" class="mt-2 mb-4">
         Sort by possible timesave
       </loading-switch>
@@ -25,6 +25,7 @@ import {Attempt, Segment, selectTime} from '~/util/splits';
 // @ts-ignore
 import {Plotly}                       from 'vue-plotly';
 import {DetailedSegment}              from '~/util/splitProcessing';
+import store                          from '~/util/store';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {

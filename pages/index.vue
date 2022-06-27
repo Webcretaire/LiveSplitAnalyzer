@@ -19,11 +19,12 @@
             <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline>
               <b-input-group prepend="https://splits.io/" class="m-auto">
                 <b-form-input v-model="splitsID" placeholder="Enter ID here"/>
-                <b-input-group-append><b-button type="submit" variant="info" :disabled="emptyID">Get splits</b-button></b-input-group-append>
+                <b-input-group-append>
+                  <b-button type="submit" variant="info" :disabled="emptyID">Get splits</b-button>
+                </b-input-group-append>
               </b-input-group>
             </b-form>
-            <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"
-                            :page-width="widthValue" @updateWidth="e => widthValue = e"/>
+            <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"/>
           </div>
         </b-col>
       </b-row>
@@ -40,7 +41,10 @@
         GitHub</a>.
     </footer>
 
-    <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
+    <div class="floating-buttons-holder">
+      <global-settings />
+      <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits" />
+    </div>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
     <loading-modal ref="loadingModal"/>
@@ -50,24 +54,27 @@
 
 <script lang="ts">
 import {
+  AttemptHistory,
   AutoSplitterSettings,
   Segment,
   SplitFile,
   splitFileIsModified
-}                               from '~/util/splits';
-import {GlobalEventEmitter}     from '~/util/globalEvents';
-import {withLoad}               from '~/util/loading';
-import store, {Store}           from '~/util/store';
-import {offload}                from '~/util/offloadWorker';
-import {OffloadWorkerOperation} from '~/util/offloadworkerTypes';
-import {DetailedSegment}        from '~/util/splitProcessing';
-import {Vue, Component, Watch}  from 'nuxt-property-decorator';
-import VueSlider                from 'vue-slider-component';
-import LoadingModal             from '~/components/modals/LoadingModal.vue';
+}                                    from '~/util/splits';
+import {GlobalEventEmitter}          from '~/util/globalEvents';
+import {withLoad}                    from '~/util/loading';
+import store, {SavedSettings, Store} from '~/util/store';
+import {offload}                     from '~/util/offloadWorker';
+import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
+import {DetailedSegment}             from '~/util/splitProcessing';
+import {Vue, Component, Watch}       from 'nuxt-property-decorator';
+import VueSlider                     from 'vue-slider-component';
+import LoadingModal                  from '~/components/modals/LoadingModal.vue';
 
-const ConfirmModal = () => import('~/components/modals/ConfirmModal.vue');
+const DownloadSplits = () => import('~/components/floating_buttons/DownloadSplits.vue');
+const GlobalSettings = () => import('~/components/floating_buttons/GlobalSettings.vue');
+const ConfirmModal   = () => import('~/components/modals/ConfirmModal.vue');
 
-@Component({components: {LoadingModal, ConfirmModal, VueSlider}})
+@Component({components: {LoadingModal, ConfirmModal, DownloadSplits, GlobalSettings, VueSlider}})
 export default class IndexPage extends Vue {
   $refs!: {
     loadingModal: LoadingModal
@@ -81,8 +88,6 @@ export default class IndexPage extends Vue {
 
   confirmCallback: Function | null = null;
 
-  widthValue: number = 0;
-
   splitsID: string = '';
 
   fileInput: File | null = null;
@@ -94,6 +99,10 @@ export default class IndexPage extends Vue {
   detailedSegments: DetailedSegment[] = [];
 
   globalState: Store = store.state;
+
+  get widthValue() {
+    return this.globalState.savedSettings.pageWidth === undefined ? 3 : this.globalState.savedSettings.pageWidth;
+  }
 
   get panelSize() {
     return (12 - (2 * this.panelOffset));
@@ -140,11 +149,6 @@ export default class IndexPage extends Vue {
     );
   }
 
-  @Watch('widthValue')
-  panelWidthStore() {
-    localStorage.setItem('widthValue', JSON.stringify(this.widthValue));
-  }
-
   @Watch('fileInput')
   splitFileSet(newFileInputVal: File) {
     newFileInputVal.text().then(t => this.splitFile = t);
@@ -179,14 +183,19 @@ export default class IndexPage extends Vue {
     offload(OffloadWorkerOperation.UPDATE_STORE_DATA, newVal);
   }
 
+  @Watch('globalState.savedSettings', {deep: true})
+  onSavedSettingsUpdate(newVal: SavedSettings) {
+    localStorage.setItem('savedSettings', JSON.stringify(newVal));
+  }
+
   @Watch('parsedSplits.Run.AutoSplitterSettings', {deep: true})
   onAutoSplitterSettingsUpdate(newVal: AutoSplitterSettings) {
     store.state.autoSplitterSettings = newVal;
   }
 
-  @Watch('parsedSplits', {deep: true})
-  onSplitFileLoad(newVal: SplitFile) {
-    offload(OffloadWorkerOperation.GET_PB, newVal.Run.AttemptHistory).then(PB => store.state.PB = PB);
+  @Watch('parsedSplits.Run.AttemptHistory', {deep: true})
+  onSplitFileLoad(newVal: AttemptHistory) {
+    offload(OffloadWorkerOperation.GET_PB, newVal).then(PB => store.state.PB = PB);
   }
 
   created() {
@@ -209,12 +218,20 @@ export default class IndexPage extends Vue {
       this.confirmCallback = null;
     });
 
-    const savedWidthValue = localStorage.getItem('widthValue');
-    if (savedWidthValue) {
-      this.widthValue = JSON.parse(savedWidthValue);
-    } else {
-      this.widthValue = window.innerWidth > 1400 ? 0 : 1;
-    }
+    this.globalState.savedSettings = JSON.parse(localStorage.getItem('savedSettings') || '{}');
+
+    const defaultSettings: SavedSettings = {
+      attemptAnalysisMergeSubsplits: false,
+      pageWidth: window.innerWidth > 1400 ? 0 : 1,
+      graphYAxisToZero: false,
+      graphCurrentAttemptHline: false,
+      graphMedianAttemptHline: false,
+    };
+
+    Object.keys(defaultSettings).forEach(key => {
+      if (this.globalState.savedSettings[key] === undefined)
+        this.globalState.savedSettings[key] = defaultSettings[key];
+    })
   }
 }
 </script>
@@ -257,5 +274,18 @@ footer {
 .logo-small {
   height: 8rem;
   max-height: 30vh;
+}
+
+@for $i from 1 through 2 {
+  .floating-buttons-holder > :nth-child(#{$i}) {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + (#{$i} - 1) * 5rem);
+    transition: all 500ms;
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 0.5rem black);
+  }
 }
 </style>

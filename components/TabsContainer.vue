@@ -4,18 +4,6 @@
       <b-tab title="Summary" active>
         <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
-        <collapsible-card id="OptionsCard" title="General settings">
-          <loading-switch v-if="globalState.hasGameTime" v-model="globalState.useRealTime" class="mb-2">
-            Use real time instead of game time
-          </loading-switch>
-          <h6 class="mt-4">Size of info panels</h6>
-          <b-row>
-            <b-col cols="12" xl="8" offset-xl="2">
-              <vue-slider @change="e => $emit('updateWidth', e)" :value="pageWidth" :min="0" :max="3" lazy adsorb/>
-            </b-col>
-          </b-row>
-        </collapsible-card>
-
         <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
       </b-tab>
 
@@ -61,9 +49,6 @@ export default class TabsContainer extends Vue {
 
   @Prop()
   parsedSplits!: SplitFile;
-
-  @Prop()
-  pageWidth!: number;
 
   get runAttempts(): Attempt[] {
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;

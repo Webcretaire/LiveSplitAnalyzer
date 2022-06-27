@@ -41,9 +41,9 @@
         GitHub</a>.
     </footer>
 
-    <div class="floating-buttons-holder">
+    <div class="floating-buttons-holder" v-if="parsedSplits">
       <global-settings />
-      <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits" />
+      <download-splits :parsed-splits="parsedSplits" />
     </div>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>

@@ -67,14 +67,9 @@ import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {DetailedSegment}             from '~/util/splitProcessing';
 import {Vue, Component, Watch}       from 'nuxt-property-decorator';
-import VueSlider                     from 'vue-slider-component';
 import LoadingModal                  from '~/components/modals/LoadingModal.vue';
 
-const DownloadSplits = () => import('~/components/floating_buttons/DownloadSplits.vue');
-const GlobalSettings = () => import('~/components/floating_buttons/GlobalSettings.vue');
-const ConfirmModal   = () => import('~/components/modals/ConfirmModal.vue');
-
-@Component({components: {LoadingModal, ConfirmModal, DownloadSplits, GlobalSettings, VueSlider}})
+@Component
 export default class IndexPage extends Vue {
   $refs!: {
     loadingModal: LoadingModal

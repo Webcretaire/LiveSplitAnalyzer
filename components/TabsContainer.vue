@@ -32,11 +32,10 @@ import {
   SplitFile
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import VueSlider              from 'vue-slider-component';
 import store                  from '~/util/store';
 import {DetailedSegment}      from '~/util/splitProcessing';
 
-@Component({components: {VueSlider}})
+@Component
 export default class TabsContainer extends Vue {
   graphYAxisToZero: boolean = false;
 

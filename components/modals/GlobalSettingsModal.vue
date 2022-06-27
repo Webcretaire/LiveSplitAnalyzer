@@ -17,11 +17,10 @@
 <script lang="ts">
 import {Component, mixins} from 'nuxt-property-decorator';
 import BaseModal           from '~/components/modals/BaseModal.vue';
-import LoadingSwitch       from '~/components/LoadingSwitch.vue';
 import store               from '~/util/store';
 import VueSlider           from 'vue-slider-component';
 
-@Component({components:{LoadingSwitch, VueSlider}})
+@Component({components:{VueSlider}})
 export default class GlobalSettingsModal extends mixins(BaseModal) {
   modalRef: string = 'GlobalSettingsModal';
 

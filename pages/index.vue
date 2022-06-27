@@ -145,8 +145,8 @@ export default class IndexPage extends Vue {
   }
 
   @Watch('fileInput')
-  splitFileSet(newFileInputVal: File) {
-    newFileInputVal.text().then(t => this.splitFile = t);
+  splitFileSet(newFileInputVal: File | null) {
+    newFileInputVal?.text().then(t => this.splitFile = t);
   }
 
   @Watch('splitFile')

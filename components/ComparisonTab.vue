@@ -14,6 +14,6 @@ import {Segment}              from '~/util/splits';
 export default class ComparisonTab extends Vue {
   @Prop()
   segments!: Segment[];
-};
+}
 </script>
 

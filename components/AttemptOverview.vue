@@ -25,7 +25,6 @@ import {Attempt, Segment, selectTime} from '~/util/splits';
 // @ts-ignore
 import {Plotly}                       from 'vue-plotly';
 import {DetailedSegment}              from '~/util/splitProcessing';
-import store                          from '~/util/store';
 
 @Component({components: {Plotly}})
 export default class AttemptOverview extends Vue {

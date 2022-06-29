@@ -217,7 +217,7 @@ export default class IndexPage extends Vue {
       this.confirmCallback = null;
     });
 
-    Object.assign(this.globalState.savedSettings, JSON.parse(localStorage.getItem('savedSettings') || '{}'));
+    this.globalState.savedSettings = JSON.parse(localStorage.getItem('savedSettings') || '{}');
 
     const defaultSettings: SavedSettings = {
       attemptAnalysisMergeSubsplits: false,

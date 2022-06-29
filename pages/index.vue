@@ -43,7 +43,7 @@
 
     <div class="floating-buttons-holder">
       <global-settings v-if="parsedSplits"/>
-      <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits" />
+      <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
     </div>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
@@ -132,6 +132,14 @@ export default class IndexPage extends Vue {
   }
 
   getSplitsFromID() {
+    this.fileInput = null;
+
+    if (this.splitsID !== this.$route.query.splitsio) {
+      const qp = new URLSearchParams();
+      qp.set('splitsio', this.splitsID);
+      history.replaceState(null, '', `?${qp}`);
+    }
+
     const splitsURL = `https://splits.io/${this.splitsID}/export/livesplit?blank=0`;
     withLoad(() =>
       fetch(splitsURL)
@@ -139,10 +147,10 @@ export default class IndexPage extends Vue {
         .then(fileString => this.splitFile = fileString)
         .catch(() => {
           this.$bvToast.toast(`${this.splitsID} is not a valid ID`, {
-              title: 'Invalid ID',
-              autoHideDelay: 5000,
-              appendToast: false,
-              variant: 'danger'
+            title: 'Invalid ID',
+            autoHideDelay: 5000,
+            appendToast: false,
+            variant: 'danger'
           });
         })
     );
@@ -150,7 +158,12 @@ export default class IndexPage extends Vue {
 
   @Watch('fileInput')
   splitFileSet(newFileInputVal: File | null) {
-    newFileInputVal?.text().then(t => this.splitFile = t);
+    newFileInputVal?.text().then(t => {
+      this.splitsID = '';
+      history.replaceState(null, '', '#');
+
+      this.splitFile = t;
+    });
   }
 
   @Watch('splitFile')
@@ -160,15 +173,15 @@ export default class IndexPage extends Vue {
       store.state.hasGameTime = newVal.includes('<GameTime>');
 
       return offload(OffloadWorkerOperation.XML_PARSE_TEXT, newVal)
-      .then((parsedSplits: SplitFile) => {
-        store.state.useRealTime = !store.state.hasGameTime;
-        this.parsedSplits       = parsedSplits;
+        .then((parsedSplits: SplitFile) => {
+          store.state.useRealTime = !store.state.hasGameTime;
+          this.parsedSplits       = parsedSplits;
 
-        if (this.$matomo)
-          this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
+          if (this.$matomo)
+            this.$matomo.trackEvent('SplitFile', 'SplitFile load', parsedSplits.Run.GameName);
 
-        splitFileIsModified(false);
-      })
+          splitFileIsModified(false);
+        });
     });
   }
 
@@ -225,13 +238,22 @@ export default class IndexPage extends Vue {
       pageHue: 230,
       graphYAxisToZero: false,
       graphCurrentAttemptHline: false,
-      graphMedianAttemptHline: false,
+      graphMedianAttemptHline: false
     };
 
     Object.keys(defaultSettings).forEach(key => {
       if (this.globalState.savedSettings[key] === undefined)
         Vue.set(this.globalState.savedSettings, key, defaultSettings[key]);
-    })
+    });
+  }
+
+  mounted() {
+    const queryParam = this.$route.query.splitsio;
+
+    if (queryParam && typeof queryParam === 'string') {
+      this.splitsID = queryParam;
+      this.getSplitsFromID();
+    }
   }
 }
 </script>

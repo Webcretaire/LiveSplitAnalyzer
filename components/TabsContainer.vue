@@ -60,5 +60,9 @@ export default class TabsContainer extends Vue {
 <style lang="scss" scoped>
 .main-card {
   background-color: transparent;
+
+  .main-tabs {
+    background-color: hsla(var(--page-hue), 75%, 45%, 0.2);
+  }
 }
 </style>

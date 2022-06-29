@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center">
+  <div class="text-center" id="index-wrapper" :style="indexWrapperStyle">
     <main>
       <b-img :class="logoClasses" :src="logoSrc" alt="LiveSplitAnalyzer logo"/>
       <h1 class="mb-3">{{ pageTitle }}</h1>
@@ -41,9 +41,9 @@
         GitHub</a>.
     </footer>
 
-    <div class="floating-buttons-holder" v-if="parsedSplits">
-      <global-settings />
-      <download-splits :parsed-splits="parsedSplits" />
+    <div class="floating-buttons-holder">
+      <global-settings v-if="parsedSplits"/>
+      <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits" />
     </div>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
@@ -125,6 +125,10 @@ export default class IndexPage extends Vue {
 
   get pageTitle() {
     return this.isPopFileLoaded ? '💙' : 'LiveSplit Analyzer';
+  }
+
+  get indexWrapperStyle() {
+    return {'--page-hue': this.globalState.savedSettings.pageHue || 0};
   }
 
   getSplitsFromID() {
@@ -213,11 +217,12 @@ export default class IndexPage extends Vue {
       this.confirmCallback = null;
     });
 
-    this.globalState.savedSettings = JSON.parse(localStorage.getItem('savedSettings') || '{}');
+    Object.assign(this.globalState.savedSettings, JSON.parse(localStorage.getItem('savedSettings') || '{}'));
 
     const defaultSettings: SavedSettings = {
       attemptAnalysisMergeSubsplits: false,
       pageWidth: window.innerWidth > 1400 ? 0 : 1,
+      pageHue: 230,
       graphYAxisToZero: false,
       graphCurrentAttemptHline: false,
       graphMedianAttemptHline: false,
@@ -225,13 +230,18 @@ export default class IndexPage extends Vue {
 
     Object.keys(defaultSettings).forEach(key => {
       if (this.globalState.savedSettings[key] === undefined)
-        this.globalState.savedSettings[key] = defaultSettings[key];
+        Vue.set(this.globalState.savedSettings, key, defaultSettings[key]);
     })
   }
 }
 </script>
 
 <style scoped lang="scss">
+#index-wrapper {
+  background-color: hsl(var(--page-hue), 30%, 10%);
+  box-shadow: inset 0 0 8rem 1rem black;
+}
+
 main {
   min-height: calc(100vh - 3.5rem);
 }

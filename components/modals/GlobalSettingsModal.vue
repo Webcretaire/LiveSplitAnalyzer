@@ -10,6 +10,11 @@
           <vue-slider v-model="globalState.savedSettings.pageWidth" :min="0" :max="3" lazy adsorb/>
         </b-col>
       </b-row>
+      <h6 class="mt-4">
+        Page hue 
+        <span v-if="globalState.savedSettings.pageHue">({{ globalState.savedSettings.pageHue }})</span>
+      </h6>
+      <hue-picker class="hue-picker" v-model="globalState.savedSettings.pageHue"/>
     </div>
   </b-modal>
 </template>
@@ -27,3 +32,11 @@ export default class GlobalSettingsModal extends mixins(BaseModal) {
   globalState = store.state;
 }
 </script>
+
+<style lang="scss" scoped>
+.hue-picker {
+  margin: auto;
+  max-width: 20vh;
+  max-height: 20vh;
+}
+</style>

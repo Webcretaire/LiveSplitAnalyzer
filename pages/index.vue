@@ -211,7 +211,12 @@ export default class IndexPage extends Vue {
   }
 
   created() {
-    GlobalEventEmitter.$on('startLoading', (callback: () => any) => this.$refs.loadingModal.runCallback(callback));
+    GlobalEventEmitter.$on('startLoading', (callback: () => any) => {
+      if (this.$refs.loadingModal)
+        this.$refs.loadingModal.runCallback(callback);
+      else
+        callback();
+    });
     GlobalEventEmitter.$on('openModal', (modal: string, args: Record<string, any> = {}) => {
       withLoad(() => new Promise<void>(resolve => {
         this.modalArgs         = args;

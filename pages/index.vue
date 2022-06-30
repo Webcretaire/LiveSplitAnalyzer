@@ -238,7 +238,8 @@ export default class IndexPage extends Vue {
       pageHue: 230,
       graphYAxisToZero: false,
       graphCurrentAttemptHline: false,
-      graphMedianAttemptHline: false
+      graphMedianAttemptHline: false,
+      cumulateSplits: false
     };
 
     Object.keys(defaultSettings).forEach(key => {

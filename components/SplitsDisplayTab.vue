@@ -32,7 +32,7 @@
                        :graphYAxisToZero="savedSettings.graphYAxisToZero"
                        :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
                        :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
-                       :cumulateSplits="cumulateSplits"
+                       :cumulateSplits="savedSettings.cumulateSplits"
                        :currentAttemptNumber="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        :parsed-splits="parsedSplits"
@@ -50,14 +50,6 @@ import SubsplitsDisplay               from './SubsplitsDisplay.vue';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
-  graphCurrentAttemptHline: boolean = false;
-
-  graphMedianAttemptHline: boolean = false;
-
-  graphYAxisToZero: boolean = false;
-
-  cumulateSplits: boolean = false;
-
   currentAttemptNumber: number = 1;
 
   globalState = store.state;

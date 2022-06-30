@@ -40,6 +40,7 @@
                          :cumulateSplits="cumulateSplits"
                          :currentAttemptNumber="currentAttemptNumber"
                          :segments-holder="segmentsHolder"
+                         :parsed-splits="parsedSplits"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
         </b-collapse>
       </div>
@@ -54,6 +55,7 @@
                      :currentAttemptNumber="currentAttemptNumber"
                      :cumulateSplits="cumulateSplits"
                      :segments-holder="segmentsHolder"
+                     :parsed-splits="parsedSplits"
                      class="mb-3"/>
     </div>
   </div>

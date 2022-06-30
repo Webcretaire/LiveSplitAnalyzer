@@ -8,6 +8,7 @@ export interface SavedSettings {
   graphCurrentAttemptHline?: boolean,
   graphMedianAttemptHline?: boolean,
   pageHue?: number,
+  cumulateSplits?: boolean,
   [key: string]: any // Won't be used in practice, but we need it to assign default values in a very dynamic way (index.vue)
 }
 

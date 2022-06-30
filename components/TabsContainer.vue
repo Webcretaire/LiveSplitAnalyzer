@@ -33,14 +33,11 @@ import {
   SplitFile
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import store                  from '~/util/store';
 import {DetailedSegment}      from '~/util/splitProcessing';
 
 @Component
 export default class TabsContainer extends Vue {
   graphYAxisToZero: boolean = false;
-
-  globalState = store.state;
 
   filterRuns: boolean = false;
 

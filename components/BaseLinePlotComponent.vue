@@ -33,7 +33,7 @@ export default class BaseLinePlotComponent extends Vue {
   splitIndex!: number;
 
   @Prop()
-  parsedSplits!: SplitFile
+  parsedSplits!: SplitFile;
 
   collapseVisible: boolean = false;
 

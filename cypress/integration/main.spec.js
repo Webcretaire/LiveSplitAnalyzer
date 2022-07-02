@@ -92,4 +92,21 @@ describe('Main page', () => {
         'Myla'
       ]);
   });
+
+  it('Switch can be made between game time and real time', () => {
+    // Open second tab
+    cy.get('a.nav-link[aria-posinset="2"').click();
+
+    cy.get('.floating-button').first().click();
+
+    cy.get('#AttemptOverviewTimeCard').within(() => { // Game time should be displayed
+      cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (18m38.83s total)');
+    });
+
+    cy.get('.modal-body .custom-control-label').first().click();
+
+    cy.get('#AttemptOverviewTimeCard').within(() => { // Real time should be displayed
+      cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (21m31.58s total)');
+    });
+  });
 });

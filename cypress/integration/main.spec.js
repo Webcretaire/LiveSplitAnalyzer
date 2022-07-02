@@ -1,5 +1,11 @@
 /// <reference types="cypress" />
 
+const BASE_URL = 'http://localhost:3000/LiveSplitAnalyzer';
+
+const SPLITSIO_ID_ALL_SKILLS = '9axe';
+
+const SPLITSIO_ID_POP = '8x1g';
+
 const openCard = () => {
   cy.get('button').first().click();
 };
@@ -8,7 +14,7 @@ const cleanText = text => text.replaceAll(/\s*\n\s*/g, ' ').trim();
 
 describe('Main page', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000/LiveSplitAnalyzer');
+    cy.visit(BASE_URL);
     cy.get('input.custom-file-input').attachFile('hkmeme_myla.lss');
   });
 
@@ -108,5 +114,20 @@ describe('Main page', () => {
     cy.get('#AttemptOverviewTimeCard').within(() => { // Real time should be displayed
       cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (21m31.58s total)');
     });
+  });
+
+  it('Loading splits from splits.io works', () => {
+    // Load file using form
+    cy.get('input[type=text]').type(SPLITSIO_ID_ALL_SKILLS);
+    cy.get('.input-group-append button').click();
+    cy.get('#RunOverviewCard h4.card-title').first().should('have.text', 'Hollow Knight - All Skills');
+    cy.get('img.logo').should('have.attr', 'src') 
+      .then(src => expect(src.includes('schy')).to.be.false);
+
+    // Load file from URL
+    cy.visit(`${BASE_URL}?splitsio=${SPLITSIO_ID_POP}`);
+    cy.get('#RunOverviewCard h4.card-title').first().should('have.text', 'Hollow Knight - Path of Pain');
+    cy.get('img.logo').should('have.attr', 'src') 
+      .then(src => expect(src.includes('schy')).to.be.true);
   });
 });

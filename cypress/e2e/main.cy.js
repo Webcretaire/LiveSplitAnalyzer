@@ -121,13 +121,13 @@ describe('Main page', () => {
     cy.get('input[type=text]').type(SPLITSIO_ID_ALL_SKILLS);
     cy.get('.input-group-append button').click();
     cy.get('#RunOverviewCard h4.card-title').first().should('have.text', 'Hollow Knight - All Skills');
-    cy.get('img.logo').should('have.attr', 'src') 
+    cy.get('img.logo').should('have.attr', 'src')
       .then(src => expect(src.includes('schy')).to.be.false);
 
     // Load file from URL
     cy.visit(`${BASE_URL}?splitsio=${SPLITSIO_ID_POP}`);
     cy.get('#RunOverviewCard h4.card-title').first().should('have.text', 'Hollow Knight - Path of Pain');
-    cy.get('img.logo').should('have.attr', 'src') 
+    cy.get('img.logo').should('have.attr', 'src')
       .then(src => expect(src.includes('schy')).to.be.true);
   });
 });

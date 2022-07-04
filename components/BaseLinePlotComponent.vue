@@ -1,13 +1,19 @@
 <script lang="ts">
-import {Component, Prop, Vue, Watch}                             from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime}                          from '~/util/splits';
-import {formatTime, stringTimeToSeconds}                         from '~/util/durations';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR} from '~/util/plot';
-import {XYCoordinates}                                           from '~/util/util';
-import store                                                     from '~/util/store';
-import {offload}                                                 from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                  from '~/util/offloadworkerTypes';
-import {DetailedSegment}                                         from '~/util/splitProcessing';
+import {
+  GOLD_COLOR,
+  LINE_COLOR,
+  CUR_ATTEMPT_COLOR,
+  MEDIAN_COLOR,
+  yTicksFromSecondsValues
+}                                        from '~/util/plot';
+import {Component, Prop, Vue, Watch}     from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime}  from '~/util/splits';
+import {formatTime, stringTimeToSeconds} from '~/util/durations';
+import {XYCoordinates}                   from '~/util/util';
+import store                             from '~/util/store';
+import {offload}                         from '~/util/offloadWorker';
+import {OffloadWorkerOperation}          from '~/util/offloadworkerTypes';
+import {DetailedSegment}                 from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -51,14 +57,20 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
   updateLayout() {
+    const numberTimes = this.timesSeconds.filter(t => typeof t === 'number') as number[];
+
+    const ticks = yTicksFromSecondsValues(numberTimes);
+
     const l: any = {
       title: 'Time history',
       xaxis: {
         title: `Finished number (${this.timesWithPositiveIds.length} total)`
       },
       yaxis: {
-        title: 'Time (seconds)',
-        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
+        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative',
+        tickmode: 'array',
+        ticktext: ticks.tickTexts,
+        tickvals: ticks.tickVals
       },
       annotations: [
         {

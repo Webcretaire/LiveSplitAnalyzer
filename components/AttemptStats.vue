@@ -37,8 +37,8 @@ import {
   stringTimeToSeconds
 }                             from '~/util/durations';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import {Attempt, selectTime}  from '~/util/splits';
-import {LINE_COLOR}           from '~/util/plot';
+import {Attempt, selectTime}                 from '~/util/splits';
+import {LINE_COLOR, yTicksFromSecondsValues} from '~/util/plot';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}               from 'vue-plotly';
@@ -62,14 +62,18 @@ export default class AttemptStats extends Vue {
    * be an arrow function otherwise we get `_vm.layout is not a function`
    */
   layout = () => {
+    const ticks = yTicksFromSecondsValues(this.numberVals);
+
     return {
       title: 'Attempt history',
       xaxis: {
         title: `Finished runs`
       },
       yaxis: {
-        title: 'Time (seconds)',
-        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
+        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative',
+        tickmode: 'array',
+        ticktext: ticks.tickTexts,
+        tickvals: ticks.tickVals
       }
     };
   };
@@ -84,24 +88,26 @@ export default class AttemptStats extends Vue {
     });
   }
 
+  get numberVals() {
+    return this.finishedAttempts.map(
+      attempt => stringTimeToSeconds(selectTime(attempt) || '')
+    );
+  }
+
   get plot_data() {
     const ids: number[] = this.showResets
       ? this.finishedAttempts.map(attempt => attempt['@_id'])
       : Array.from({length: this.finishedAttempts.length}, (v, k) => k);
 
-    const number_val: number[] = this.finishedAttempts.map(
-      attempt => stringTimeToSeconds(selectTime(attempt) || '')
-    );
-
-    const text_val: string[] = this.finishedAttempts.map(
+    const textVals: string[] = this.finishedAttempts.map(
       attempt => `#${attempt['@_id']}: ${formatTime(selectTime(attempt) || '')}`
     );
 
     return [
       {
         x: ids,
-        y: number_val,
-        text: text_val,
+        y: this.numberVals,
+        text: textVals,
         type: 'scatter',
         hoverinfo: 'text',
         mode: 'lines+markers',

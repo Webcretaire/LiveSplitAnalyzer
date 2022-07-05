@@ -13,9 +13,14 @@ export interface PlotTicksData {
   tickVals: number[]
 }
 
-export const yTicksFromSecondsValues = (numberTimes: number[], graphYAxisToZero = false): PlotTicksData => {
+export interface XYRange {
+  x: number[],
+  y: number[]
+}
+
+export const yTicksFromSecondsValues = (numberTimes: number[]): PlotTicksData => {
   const max = Math.max(...numberTimes);
-  const min = graphYAxisToZero ? 0 : Math.min(...numberTimes);
+  const min = Math.min(...numberTimes);
 
   const tickTexts = [];
   const tickVals  = [];

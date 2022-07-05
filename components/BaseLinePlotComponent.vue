@@ -4,7 +4,7 @@ import {
   LINE_COLOR,
   CUR_ATTEMPT_COLOR,
   MEDIAN_COLOR,
-  yTicksFromSecondsValues
+  yTicksFromSecondsValues, XYRange
 }                                        from '~/util/plot';
 import {Component, Prop, Vue, Watch}     from 'nuxt-property-decorator';
 import {SegmentHistoryTime, selectTime}  from '~/util/splits';
@@ -19,9 +19,6 @@ import {DetailedSegment}                 from '~/util/splitProcessing';
 export default class BaseLinePlotComponent extends Vue {
   @Prop()
   split!: DetailedSegment;
-
-  @Prop({default: false})
-  graphYAxisToZero!: boolean;
 
   @Prop({default: false})
   graphCurrentAttemptHline!: boolean;
@@ -43,6 +40,8 @@ export default class BaseLinePlotComponent extends Vue {
 
   gold: XYCoordinates = {x: 0, y: 0};
 
+  plotlyCurrentView: XYRange | null = null;
+
   get useRealTime() {
     return store.state.useRealTime;
   }
@@ -53,11 +52,11 @@ export default class BaseLinePlotComponent extends Vue {
    */
   @Watch('gold')
   @Watch('timesWithPositiveIds')
-  @Watch('graphYAxisToZero')
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
+  @Watch('plotlyCurrentView')
   updateLayout() {
-    const numberTimes = this.timesSeconds.filter(t => typeof t === 'number') as number[];
+    const numberTimes = this.plotlyCurrentView?.y || this.timesSeconds.filter(t => typeof t === 'number') as number[];
 
     const ticks = yTicksFromSecondsValues(numberTimes);
 
@@ -67,7 +66,7 @@ export default class BaseLinePlotComponent extends Vue {
         title: `Finished number (${this.timesWithPositiveIds.length} total)`
       },
       yaxis: {
-        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative',
+        rangemode: 'nonnegative',
         tickmode: 'array',
         ticktext: ticks.tickTexts,
         tickvals: ticks.tickVals
@@ -89,6 +88,11 @@ export default class BaseLinePlotComponent extends Vue {
         }
       ]
     };
+
+    if (this.plotlyCurrentView) {
+      l.xaxis.range = this.plotlyCurrentView.x;
+      l.yaxis.range = this.plotlyCurrentView.y;
+    }
 
     l.shapes = [];
 
@@ -231,6 +235,20 @@ export default class BaseLinePlotComponent extends Vue {
         }
       }
     ];
+  }
+
+  onPlotRelayout(event: Record<string, number>) {
+    if (event['xaxis.autorange'] && event['yaxis.autorange']) {
+      this.plotlyCurrentView = null;
+      return;
+    }
+
+    if (event['yaxis.range[0]'] && event['yaxis.range[1]'] && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+      this.plotlyCurrentView = {
+        x: [event['xaxis.range[0]'], event['xaxis.range[1]']],
+        y: [event['yaxis.range[0]'], event['yaxis.range[1]']]
+      };
+    }
   }
 
   formatTime = formatTime;

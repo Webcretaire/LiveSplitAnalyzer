@@ -5,9 +5,6 @@
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
-      <loading-switch v-model="savedSettings.graphYAxisToZero" class="mt-2 mb-2">
-        Graphs' Y axis starts at zero
-      </loading-switch>
       <loading-switch v-model="savedSettings.graphCurrentAttemptHline" class="mb-2">
         Display current attempt's times as a horizontal line
       </loading-switch>
@@ -26,7 +23,6 @@
                        :key="`split-${split.Index}-${split.Name}`"
                        ref="splitAccess"
                        :splitIndex="split.Index"
-                       :graphYAxisToZero="savedSettings.graphYAxisToZero"
                        :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
                        :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
                        :currentAttemptNumber="currentAttemptNumber"
@@ -45,12 +41,6 @@ import SubsplitsDisplay              from './SubsplitsDisplay.vue';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
-  graphCurrentAttemptHline: boolean = false;
-
-  graphMedianAttemptHline: boolean = false;
-
-  graphYAxisToZero: boolean = false;
-
   currentAttemptNumber: number = 1;
 
   globalState = store.state;

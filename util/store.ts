@@ -4,7 +4,6 @@ import Vue                             from 'vue';
 export interface SavedSettings {
   pageWidth?: number,
   attemptAnalysisMergeSubsplits?: boolean,
-  graphYAxisToZero?: boolean,
   graphCurrentAttemptHline?: boolean,
   graphMedianAttemptHline?: boolean,
   pageHue?: number,

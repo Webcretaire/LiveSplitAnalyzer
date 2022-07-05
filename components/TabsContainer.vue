@@ -4,7 +4,7 @@
       <b-tab title="Summary" active>
         <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
-        <attempt-stats :attempts="runAttempts" :graphYAxisToZero="graphYAxisToZero"/>
+        <attempt-stats :attempts="runAttempts"/>
       </b-tab>
 
       <b-tab title="Attempt analysis">
@@ -37,10 +37,6 @@ import {DetailedSegment}      from '~/util/splitProcessing';
 
 @Component
 export default class TabsContainer extends Vue {
-  graphYAxisToZero: boolean = false;
-
-  globalState = store.state;
-
   filterRuns: boolean = false;
 
   @Prop()

@@ -26,7 +26,7 @@
       {{ finishedAttempts.length }} finished runs in the range
       [ {{ timeFormat(lowerBoundFilter) }} ; {{ timeFormat(higherBoundFilter) }} ]
     </p>
-    <Plotly :data="plot_data" :layout="layout()" :display-mode-bar="true"/>
+    <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true" @relayout="onPlotRelayout"/>
   </collapsible-card>
 </template>
 
@@ -35,21 +35,18 @@ import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds
-}                             from '~/util/durations';
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import {Attempt, selectTime}                 from '~/util/splits';
-import {LINE_COLOR, yTicksFromSecondsValues} from '~/util/plot';
+}                                                     from '~/util/durations';
+import {Component, Prop, Vue, Watch}                  from 'nuxt-property-decorator';
+import {Attempt, selectTime}                          from '~/util/splits';
+import {LINE_COLOR, XYRange, yTicksFromSecondsValues} from '~/util/plot';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}               from 'vue-plotly';
+import {Plotly}                                       from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class AttemptStats extends Vue {
   @Prop()
   attempts!: Attempt[];
-
-  @Prop({default: false})
-  graphYAxisToZero!: boolean;
 
   showResets: boolean = true;
 
@@ -57,25 +54,38 @@ export default class AttemptStats extends Vue {
 
   higherBoundFilter: number = 999999999;
 
+  plotlyCurrentView: XYRange | null = null;
+
+  layout: any = {};
+
   /**
    * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
    * be an arrow function otherwise we get `_vm.layout is not a function`
    */
-  layout = () => {
-    const ticks = yTicksFromSecondsValues(this.numberVals);
+  @Watch('numberVals')
+  @Watch('plotlyCurrentView')
+  updateLayout() {
+    const ticks = yTicksFromSecondsValues(this.plotlyCurrentView?.y || this.numberVals);
 
-    return {
+    const l: any = {
       title: 'Attempt history',
       xaxis: {
         title: `Finished runs`
       },
       yaxis: {
-        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative',
+        rangemode: 'nonnegative',
         tickmode: 'array',
         ticktext: ticks.tickTexts,
         tickvals: ticks.tickVals
       }
     };
+
+    if (this.plotlyCurrentView) {
+      l.xaxis.range = this.plotlyCurrentView.x;
+      l.yaxis.range = this.plotlyCurrentView.y;
+    }
+
+    this.layout = l;
   };
 
   get finishedAttempts() {
@@ -121,6 +131,20 @@ export default class AttemptStats extends Vue {
   }
 
   timeFormat = secondsToFormattedString;
+
+  onPlotRelayout(event: Record<string, number>) {
+    if (event['xaxis.autorange'] && event['yaxis.autorange']) {
+      this.plotlyCurrentView = null;
+      return;
+    }
+
+    if (event['yaxis.range[0]'] && event['yaxis.range[1]'] && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+      this.plotlyCurrentView = {
+        x: [event['xaxis.range[0]'], event['xaxis.range[1]']],
+        y: [event['yaxis.range[0]'], event['yaxis.range[1]']]
+      };
+    }
+  }
 
   mounted() {
     const attemptsTimes = this.attempts.map(

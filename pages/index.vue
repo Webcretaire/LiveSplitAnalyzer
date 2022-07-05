@@ -241,7 +241,6 @@ export default class IndexPage extends Vue {
       attemptAnalysisMergeSubsplits: false,
       pageWidth: window.innerWidth > 1400 ? 0 : 1,
       pageHue: 230,
-      graphYAxisToZero: false,
       graphCurrentAttemptHline: false,
       graphMedianAttemptHline: false
     };

@@ -25,11 +25,47 @@ export const yTicksFromSecondsValues = (numberTimes: number[]): PlotTicksData =>
   const tickTexts = [];
   const tickVals  = [];
 
-  const increment = (max - min) / 5;
+  const magneticValues = [
+    0.01,
+    0.02,
+    0.025,
+    0.05,
+    0.1,
+    0.2,
+    0.25,
+    0.5,
+    1,
+    2,
+    3,
+    5,
+    10,
+    15,
+    20,
+    30,
+    60,
+    90,
+    2 * 60,
+    3 * 60,
+    4 * 60,
+    5 * 60,
+    10 * 60,
+    15 * 60,
+    30 * 60,
+    60 * 60
+  ];
+
+  let increment = (max - min) / 10;
+  for (let magneticValue of magneticValues) {
+    if (increment <= magneticValue) {
+      increment = magneticValue;
+      break;
+    }
+  }
+
   for (let i = 0; i <= max + 10 * increment; i += increment) {
-    const val = increment > 3 ? Math.floor(i) : i;
-    tickTexts.push(secondsToFormattedString(val));
-    tickVals.push(val);
+    i = parseFloat(i.toPrecision(8)); // Fix rounding errors
+    tickTexts.push(secondsToFormattedString(i));
+    tickVals.push(i);
   }
 
   return {

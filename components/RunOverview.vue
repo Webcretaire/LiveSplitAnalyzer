@@ -1,6 +1,6 @@
 <template>
   <collapsible-card id="RunOverviewCard" class="text-center" :title="run.GameName + ' - ' + run.CategoryName" starts-open>
-    <img :src="gameCover" class="mt-1 mb-3">
+    <img v-if="gameCover" :src="gameCover" :alt="run.GameName" class="mt-1 mb-3">
     <p>{{ run.AttemptCount }} attempts</p>
     <p class="m-0"><strong>Finished runs:</strong> {{ finishedRuns }}</p>
     <p class="m-0"><strong>Number of PBs:</strong> {{ PBs.length }}</p>

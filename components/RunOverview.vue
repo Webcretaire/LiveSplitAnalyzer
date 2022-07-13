@@ -51,7 +51,7 @@ export default class RunOverview extends Vue {
   @Watch('run.GameName', {immediate: true})
   coverSource() {
     const url = `https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(this.run.GameName)}`;
-    console.log('ejjhfhjej')
+
     fetch(url)
       .then(response => response.json())
       .then(data => this.gameCover = data.data[0].assets['cover-small'].uri);

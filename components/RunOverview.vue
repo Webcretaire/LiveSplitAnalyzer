@@ -1,5 +1,6 @@
 <template>
   <collapsible-card id="RunOverviewCard" class="text-center" :title="run.GameName + ' - ' + run.CategoryName" starts-open>
+    <img v-if="gameCover" :src="gameCover" :alt="run.GameName" class="icon mt-1 mb-3">
     <p>{{ run.AttemptCount }} attempts</p>
     <p class="m-0"><strong>Finished runs:</strong> {{ finishedRuns }}</p>
     <p class="m-0"><strong>Number of PBs:</strong> {{ PBs.length }}</p>
@@ -13,14 +14,17 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop} from 'nuxt-property-decorator';
-import {Run, selectTime}      from '~/util/splits';
-import {stringTimeToSeconds}  from '~/util/durations';
+import {Vue, Component, Prop, Watch} from 'nuxt-property-decorator';
+import {Run, selectTime}             from '~/util/splits';
+import {stringTimeToSeconds}         from '~/util/durations';
+import {extractPng}                  from '~/util/pngExtractor';
 
 @Component
 export default class RunOverview extends Vue {
   @Prop()
   run!: Run;
+
+  gameCover: string = '';
 
   get finishedRuns() {
     return this.run.AttemptHistory.Attempt.filter(a => selectTime(a)).length;
@@ -45,6 +49,42 @@ export default class RunOverview extends Vue {
     return this.run.Metadata.Variables?.Variable;
   }
 
+  @Watch('run.GameName', {immediate: true})
+  @Watch('run.GameIcon', {immediate: true})
+  coverSource() {
+    this.gameCover = "";
+
+    if (this.run.GameIcon) {
+      const rawCover = extractPng(this.run.GameIcon);
+      this.gameCover = rawCover ? `data:image/png;base64,${btoa(new Uint8Array(rawCover).reduce((data, byte) => data + String.fromCharCode(byte), ''))}` : '';
+    }
+
+    if (!this.gameCover) {
+      const url = `https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(this.run.GameName)}`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok)
+            throw Error();
+
+          return response.json();
+        })
+        .then(data => {
+          if (data.data.length == 0)
+            throw Error();
+
+          this.gameCover = data.data[0].assets['cover-small'].uri;
+        })
+        .catch(() => this.gameCover = "");
+    }
+  }
+
   visible: boolean = true;
 }
 </script>
+
+<style scoped lang="scss">
+.icon {
+  max-height: 20vh;
+  filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 1));
+}
+</style>

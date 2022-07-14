@@ -1,4 +1,4 @@
-export const extractPng = (base64data: string) => {
+export const extractPng = (base64data: string): Uint8Array|null => {
   const binaryData = atob(base64data);
 
   const len  = binaryData.length;
@@ -26,6 +26,7 @@ export const extractPng = (base64data: string) => {
     const b = data[i];
     if (b == PNG_SIGNATURE[signatureCurIdx]) {
       if (signatureCurIdx == 0) pngStart = i;
+
       if (signatureCurIdx == PNG_SIGNATURE.length - 1) {
         foundPngStart = true;
       } else {
@@ -38,10 +39,8 @@ export const extractPng = (base64data: string) => {
     if (foundPngStart) break;
   }
 
-  if (!foundPngStart) {
-    console.error('No PNG file in input data');
+  if (!foundPngStart)
     return null;
-  }
 
   for (; ;) {
     i += 4;
@@ -63,10 +62,9 @@ export const extractPng = (base64data: string) => {
     i += size; // Chunk data
     i += 4; // CRC
 
-    if (i > data.length) {
-      console.error('OOB');
+    if (i > data.length)
       return null;
-    }
+
     if (name == 'IEND') break;
   }
 

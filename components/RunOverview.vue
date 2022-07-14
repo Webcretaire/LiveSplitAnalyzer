@@ -17,7 +17,7 @@
 import {Vue, Component, Prop, Watch} from 'nuxt-property-decorator';
 import {Run, selectTime}             from '~/util/splits';
 import {stringTimeToSeconds}         from '~/util/durations';
-import {extractPng}                  from '~/util/pngExtractor';
+import {ImageExtractor}              from '~/util/imageExtractor';
 
 @Component
 export default class RunOverview extends Vue {
@@ -54,10 +54,8 @@ export default class RunOverview extends Vue {
   coverSource() {
     this.gameCover = "";
 
-    if (this.run.GameIcon) {
-      const rawCover = extractPng(this.run.GameIcon);
-      this.gameCover = rawCover ? `data:image/png;base64,${btoa(new Uint8Array(rawCover).reduce((data, byte) => data + String.fromCharCode(byte), ''))}` : '';
-    }
+    if (this.run.GameIcon)
+      this.gameCover = new ImageExtractor(this.run.GameIcon).imgSrc;
 
     if (!this.gameCover) {
       const url = `https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(this.run.GameName)}`;

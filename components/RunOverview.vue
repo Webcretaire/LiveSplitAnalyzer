@@ -64,13 +64,13 @@ export default class RunOverview extends Vue {
       fetch(url)
         .then(response => {
           if (!response.ok)
-            throw true;
+            throw Error();
 
           return response.json();
         })
         .then(data => {
           if (data.data.length == 0)
-            throw true;
+            throw Error();
 
           this.gameCover = data.data[0].assets['cover-small'].uri;
         })

@@ -50,7 +50,7 @@ export default class RunOverview extends Vue {
   }
 
   @Watch('run.GameName', {immediate: true})
-  @Watch('run.GameIcon', {immediate: true})
+  @Watch('run.GameIcon')
   coverSource() {
     this.gameCover = "";
 

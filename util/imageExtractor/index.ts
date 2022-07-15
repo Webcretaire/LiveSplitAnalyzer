@@ -1,15 +1,25 @@
 import {extractJpeg} from './jpegExtractor';
 import {extractPng}  from './pngExtractor';
+import {extractGif}  from './gifExtractor';
 
 export class ImageExtractor {
   base64Image: Uint8Array | null = null;
-  
+
   mimeType: string | null = null;
 
   constructor(base64data: string) {
-    if (this.base64Image = extractPng(base64data))
-      this.mimeType = 'image/png';
-    else if (this.base64Image = extractJpeg(base64data))
+    const binaryData = atob(base64data);
+
+    const len  = binaryData.length;
+    const data = new Uint8Array(len);
+    for (let j = 0; j < len; j++)
+      data[j] = binaryData.charCodeAt(j);
+
+    if (this.base64Image = extractPng(data))
+      this.mimeType = 'image/png';  
+    else if (this.base64Image = extractGif(data))
+      this.mimeType = 'image/gif';
+    else if (this.base64Image = extractJpeg(data))
       this.mimeType = 'image/jpeg';
   }
 

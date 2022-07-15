@@ -1,12 +1,4 @@
-export const extractPng = (base64data: string): Uint8Array|null => {
-  const binaryData = atob(base64data);
-
-  const len  = binaryData.length;
-  const data = new Uint8Array(len);
-  for (let j = 0; j < len; j++)
-    data[j] = binaryData.charCodeAt(j);
-
-
+export const extractPng = (data: Uint8Array): Uint8Array|null => {
   const PNG_SIGNATURE: Uint8Array = new Uint8Array([
     137,
     80,
@@ -27,11 +19,10 @@ export const extractPng = (base64data: string): Uint8Array|null => {
     if (b == PNG_SIGNATURE[signatureCurIdx]) {
       if (signatureCurIdx == 0) pngStart = i;
 
-      if (signatureCurIdx == PNG_SIGNATURE.length - 1) {
+      if (signatureCurIdx == PNG_SIGNATURE.length - 1)
         foundPngStart = true;
-      } else {
+      else
         signatureCurIdx++;
-      }
     } else {
       signatureCurIdx = 0;
     }

@@ -35,13 +35,18 @@ import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds
-}                                                     from '~/util/durations';
-import {Component, Prop, Vue, Watch}                  from 'nuxt-property-decorator';
-import {Attempt, selectTime}                          from '~/util/splits';
-import {LINE_COLOR, XYRange, yTicksFromSecondsValues} from '~/util/plot';
+}                                    from '~/util/durations';
+import {
+  LINE_COLOR,
+  GOLD_COLOR,
+  XYRange,
+  yTicksFromSecondsValues
+}                                    from '~/util/plot';
+import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
+import {Attempt, selectTime}         from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                                       from 'vue-plotly';
+import {Plotly}                      from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class AttemptStats extends Vue {
@@ -104,6 +109,23 @@ export default class AttemptStats extends Vue {
     );
   }
 
+  get PBs() {
+    if (!this.finishedAttempts.length) return [];
+
+    let currentPB = stringTimeToSeconds(selectTime(this.finishedAttempts[0]) || '0:0:0.0') + 1;
+
+    return this.finishedAttempts.map(
+      attempt => {
+        const time = stringTimeToSeconds(selectTime(attempt) || '')
+
+        if (time < currentPB)
+          currentPB = time;
+
+        return currentPB;
+      }
+    );
+  }
+
   get plot_data() {
     const ids: number[] = this.showResets
       ? this.finishedAttempts.map(attempt => attempt['@_id'])
@@ -113,14 +135,34 @@ export default class AttemptStats extends Vue {
       attempt => `#${attempt['@_id']}: ${formatTime(selectTime(attempt) || '')}`
     );
 
-    return [
-      {
+    const pbTextVals: string[] = this.finishedAttempts.map(
+      (attempt, i) => `#${attempt['@_id']}: ${secondsToFormattedString(this.PBs[i])}`
+    );
+
+    const commonOptions = {
         x: ids,
-        y: this.numberVals,
-        text: textVals,
         type: 'scatter',
         hoverinfo: 'text',
         mode: 'lines+markers',
+    }
+
+    return [
+      {
+        ...commonOptions,
+        y: this.PBs,
+        text: pbTextVals,
+        name: "PB",
+        line: {
+          shape: 'spline',
+          color: GOLD_COLOR,
+          width: 1
+        }
+      },
+      {
+        ...commonOptions,
+        y: this.numberVals,
+        text: textVals,
+        name: 'Attempt time',
         line: {
           shape: 'spline',
           color: LINE_COLOR,

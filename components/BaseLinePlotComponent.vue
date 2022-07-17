@@ -9,7 +9,6 @@ import {
 import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
 import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
 import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR}   from '~/util/plot';
 import {XYCoordinates}                                             from '~/util/util';
 import store                                                       from '~/util/store';
 import {offload}                                                   from '~/util/offloadWorker';

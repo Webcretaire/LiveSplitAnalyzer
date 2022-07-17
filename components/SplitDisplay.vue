@@ -28,7 +28,7 @@
 
     <b-collapse :id="collapseName" class="mt-1" v-model="collapseVisible">
       <b-card class="text-left">
-        <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true"/>
+        <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true" @relayout="onPlotRelayout"/>
       </b-card>
     </b-collapse>
   </div>

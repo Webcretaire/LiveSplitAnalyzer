@@ -20,7 +20,7 @@
 
       <b-collapse :id="collapseName" class="mt-1" v-model="collapseVisible">
         <b-card class="text-left">
-          <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true"/>
+          <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true" @relayout="onPlotRelayout"/>
         </b-card>
       </b-collapse>
 
@@ -34,7 +34,6 @@
                          :key="`split-${subsplit.Index}-${subsplit.Name}`"
                          ref="splitAccess"
                          :splitIndex="subsplit.Index"
-                         :graphYAxisToZero="graphYAxisToZero"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
                          :graphMedianAttemptHline="graphMedianAttemptHline"
                          :cumulateSplits="cumulateSplits"
@@ -49,7 +48,6 @@
       <split-display :split="split"
                      ref="splitAccess"
                      :splitIndex="split.Index"
-                     :graphYAxisToZero="graphYAxisToZero"
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
                      :graphMedianAttemptHline="graphMedianAttemptHline"
                      :currentAttemptNumber="currentAttemptNumber"

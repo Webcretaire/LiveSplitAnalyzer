@@ -1,5 +1,11 @@
 /// <reference types="cypress" />
 
+const BASE_URL = 'http://localhost:3000/LiveSplitAnalyzer/';
+
+const SPLITSIO_ID_ALL_SKILLS = '9axe';
+
+const SPLITSIO_ID_POP = '8x1g';
+
 const openCard = () => {
   cy.get('button').first().click();
 };
@@ -8,7 +14,7 @@ const cleanText = text => text.replaceAll(/\s*\n\s*/g, ' ').trim();
 
 describe('Main page', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000/LiveSplitAnalyzer');
+    cy.visit(BASE_URL);
     cy.get('input.custom-file-input').attachFile('hkmeme_myla.lss');
   });
 
@@ -91,5 +97,37 @@ describe('Main page', () => {
         'Crystal Heart (subsplit)',
         'Myla'
       ]);
+  });
+
+  it('Switch can be made between game time and real time', () => {
+    // Open second tab
+    cy.get('a.nav-link[aria-posinset="2"').click();
+
+    cy.get('.floating-button').first().click();
+
+    cy.get('#AttemptOverviewTimeCard').within(() => { // Game time should be displayed
+      cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (18m38.83s total)');
+    });
+
+    cy.get('.modal-body .custom-control-label').first().click();
+
+    cy.get('#AttemptOverviewTimeCard').within(() => { // Real time should be displayed
+      cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (21m31.58s total)');
+    });
+  });
+
+  it('Loading splits from splits.io works', () => {
+    // Load file using form
+    cy.get('input[type=text]').type(SPLITSIO_ID_ALL_SKILLS);
+    cy.get('.input-group-append button').click();
+    cy.get('#RunOverviewCard h4.card-title', {timeout: 10000}).first().should('have.text', 'Hollow Knight - All Skills');
+    cy.get('img.logo').should('have.attr', 'src')
+      .then(src => expect(src.includes('schy')).to.be.false);
+
+    // Load file from URL
+    cy.visit(`${BASE_URL}?splitsio=${SPLITSIO_ID_POP}`);
+    cy.get('#RunOverviewCard h4.card-title', {timeout: 10000}).first().should('have.text', 'Hollow Knight - Path of Pain');
+    cy.get('img.logo').should('have.attr', 'src')
+      .then(src => expect(src.includes('schy')).to.be.true);
   });
 });

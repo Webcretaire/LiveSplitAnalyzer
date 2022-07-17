@@ -1,21 +1,25 @@
 <script lang="ts">
-import {Component, Prop, Vue, Watch}                             from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime, SplitFile}               from '~/util/splits';
-import {formatTime, secondsToFormattedString, stringTimeToSeconds}                         from '~/util/durations';
-import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR} from '~/util/plot';
-import {XYCoordinates}                                           from '~/util/util';
-import store                                                     from '~/util/store';
-import {offload}                                                 from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                  from '~/util/offloadworkerTypes';
-import {DetailedSegment}                                         from '~/util/splitProcessing';
+import {
+  GOLD_COLOR,
+  LINE_COLOR,
+  CUR_ATTEMPT_COLOR,
+  MEDIAN_COLOR,
+  yTicksFromSecondsValues, XYRange
+}                                                                  from '~/util/plot';
+import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
+import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {GOLD_COLOR, LINE_COLOR, CUR_ATTEMPT_COLOR, MEDIAN_COLOR}   from '~/util/plot';
+import {XYCoordinates}                                             from '~/util/util';
+import store                                                       from '~/util/store';
+import {offload}                                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
+import {DetailedSegment}                                           from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
   @Prop()
   split!: DetailedSegment;
-
-  @Prop({default: false})
-  graphYAxisToZero!: boolean;
 
   @Prop({default: false})
   graphCurrentAttemptHline!: boolean;
@@ -43,6 +47,8 @@ export default class BaseLinePlotComponent extends Vue {
 
   gold: XYCoordinates = {x: 0, y: 0};
 
+  plotlyCurrentView: XYRange | null = null;
+
   get useRealTime() {
     return store.state.useRealTime;
   }
@@ -53,18 +59,24 @@ export default class BaseLinePlotComponent extends Vue {
    */
   @Watch('gold')
   @Watch('timesWithPositiveIds')
-  @Watch('graphYAxisToZero')
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
+  @Watch('plotlyCurrentView')
   updateLayout() {
+    const numberTimes = this.plotlyCurrentView?.y || this.timesSeconds.filter(t => typeof t === 'number') as number[];
+
+    const ticks = yTicksFromSecondsValues(numberTimes);
+
     const l: any = {
       title: 'Time history',
       xaxis: {
         title: `Finished number (${this.timesWithPositiveIds.length} total)`
       },
       yaxis: {
-        title: 'Time (seconds)',
-        rangemode: this.graphYAxisToZero ? 'tozero' : 'nonnegative'
+        rangemode: 'nonnegative',
+        tickmode: 'array',
+        ticktext: ticks.tickTexts,
+        tickvals: ticks.tickVals
       },
       annotations: [
         {
@@ -83,6 +95,11 @@ export default class BaseLinePlotComponent extends Vue {
         }
       ]
     };
+
+    if (this.plotlyCurrentView) {
+      l.xaxis.range = this.plotlyCurrentView.x;
+      l.yaxis.range = this.plotlyCurrentView.y;
+    }
 
     l.shapes = [];
 
@@ -253,6 +270,20 @@ export default class BaseLinePlotComponent extends Vue {
         }
       }
     ];
+  }
+
+  onPlotRelayout(event: Record<string, number>) {
+    if (event['xaxis.autorange'] && event['yaxis.autorange']) {
+      this.plotlyCurrentView = null;
+      return;
+    }
+
+    if (event['yaxis.range[0]'] && event['yaxis.range[1]'] && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+      this.plotlyCurrentView = {
+        x: [event['xaxis.range[0]'], event['xaxis.range[1]']],
+        y: [event['yaxis.range[0]'], event['yaxis.range[1]']]
+      };
+    }
   }
 
   formatTime = formatTime;

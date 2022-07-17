@@ -211,7 +211,12 @@ export default class IndexPage extends Vue {
   }
 
   created() {
-    GlobalEventEmitter.$on('startLoading', (callback: () => any) => this.$refs.loadingModal.runCallback(callback));
+    GlobalEventEmitter.$on('startLoading', (callback: () => any) => {
+      if (this.$refs.loadingModal)
+        this.$refs.loadingModal.runCallback(callback);
+      else
+        callback();
+    });
     GlobalEventEmitter.$on('openModal', (modal: string, args: Record<string, any> = {}) => {
       withLoad(() => new Promise<void>(resolve => {
         this.modalArgs         = args;
@@ -236,7 +241,6 @@ export default class IndexPage extends Vue {
       attemptAnalysisMergeSubsplits: false,
       pageWidth: window.innerWidth > 1400 ? 0 : 1,
       pageHue: 230,
-      graphYAxisToZero: false,
       graphCurrentAttemptHline: false,
       graphMedianAttemptHline: false,
       cumulateSplits: false

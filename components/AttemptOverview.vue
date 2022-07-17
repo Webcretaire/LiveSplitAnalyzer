@@ -38,9 +38,6 @@ export default class AttemptOverview extends Vue {
   detailedSegments!: DetailedSegment[];
 
   @Prop()
-  graphYAxisToZero!: boolean;
-
-  @Prop()
   isPb!: boolean;
 
   @Prop()

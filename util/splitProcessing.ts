@@ -12,7 +12,7 @@ import {
 import {asArray, XYCoordinates}                        from '~/util/util';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {xmlParser}                                     from '~/util/xml';
-import {extractPng}                                    from './pngExtractor';
+import {ImageExtractor}                                from './imageExtractor';
 import store                                           from './store';
 
 export interface DetailedSegment extends Segment {
@@ -166,10 +166,7 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
   let virtualSplitIndex                      = 0;
   let accumulateSubsplits: DetailedSegment[] = [];
   rawSplits.forEach((rawSplit: Segment, index: number) => {
-    const rawIcon = extractPng(rawSplit.Icon);
-    const icon    = rawIcon
-      ? `data:image/jpeg;base64,${btoa(new Uint8Array(rawIcon).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`
-      : '';
+    const icon = new ImageExtractor(rawSplit.Icon).imgSrc;
 
     // If current split is a subsplit, add it to the pile and go to next one
     if (rawSplit.Name.startsWith('-')) {

@@ -1,13 +1,13 @@
 import {
-  computePbFromAttemptHistory,
+  computePbFromAttemptHistory, cumulateAttemptTimesForAllSplits,
   deleteAttemptBeforeNumber,
   generateSplitDetail,
   goldCoordinatesFromSecondsArray,
   mergeSplitIntoNextOne,
+  moveTime,
   parseSplitFile,
-  segTimeArrayToSeconds,
-  moveTime
-}                                                     from '~/util/splitProcessing';
+  segTimeArrayToSeconds
+} from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import store                                          from '~/util/store';
 
@@ -52,6 +52,9 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT:
       out = moveTime(a[0], a[1], a[2]);
+      break;
+    case OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS:
+      out = cumulateAttemptTimesForAllSplits(a[0]);
       break;
   }
 

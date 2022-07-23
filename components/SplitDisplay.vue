@@ -10,7 +10,9 @@
             {{ split.Name }} <small v-if="split.IsSubsplit">(subsplit)</small>
           </h3>
           <p v-if="split.BestSegmentTime" class="m-0">
-            <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
+            <span class="mr-2">
+              <strong>Best {{ cumulateSplits ? 'pace' : 'time' }}: </strong> {{ bestTimeDisplay }}
+            </span>
             <b-dropdown text="Edit split" variant="outline-dark" lazy>
               <b-dropdown-item-button @click="fixGoldsModal" variant="dark">Fix fake golds</b-dropdown-item-button>
               <b-dropdown-item-button @click="moveTimeModal" variant="dark">Move time between splits

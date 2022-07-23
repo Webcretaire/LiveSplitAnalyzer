@@ -1,3 +1,5 @@
+import {cumulateAttemptTimesForAllSplits} from '~/util/splitProcessing';
+
 export enum OffloadWorkerOperation {
   PING,
   DELETE_ATTEMPT_BEFORE_NUMBER,
@@ -8,7 +10,8 @@ export enum OffloadWorkerOperation {
   UPDATE_STORE_DATA,
   GET_PB,
   GENERATE_SPLIT_DETAIL,
-  MOVE_TIME_TO_OTHER_SPLIT
+  MOVE_TIME_TO_OTHER_SPLIT,
+  CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS
 }
 
 export interface OffloadWorkerMessage {

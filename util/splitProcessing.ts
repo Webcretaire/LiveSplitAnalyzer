@@ -271,3 +271,37 @@ export const generateSplitDetail = (rawSplits: Segment[]) => {
 
   return out;
 };
+
+interface HistoryTimeToCumulate {
+  GameTime: number,
+  RealTime: number,
+}
+
+export const cumulateAttemptTimesForAllSplits = (segments: Segment[]) => {
+  const timesSoFar: Map<number, HistoryTimeToCumulate> = new Map;
+
+  return segments.map(segment => {
+    const individualTimes = (segment.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+
+    return individualTimes.map(split => {
+      const time = timesSoFar.get(split['@_id']) || {GameTime: 0, RealTime: 0};
+
+      if (split.GameTime)
+        time.GameTime += stringTimeToSeconds(split.GameTime);
+      if (split.RealTime)
+        time.RealTime += stringTimeToSeconds(split.RealTime || '0:0:0.0');
+
+      const finalOut: SegmentHistoryTime = {
+        '@_id': split['@_id']
+      };
+      if (time.GameTime)
+        finalOut.GameTime = secondsToLivesplitFormat(time.GameTime);
+      if (time.RealTime)
+        finalOut.RealTime = secondsToLivesplitFormat(time.RealTime);
+
+      timesSoFar.set(split['@_id'], time);
+
+      return finalOut;
+    });
+  });
+}

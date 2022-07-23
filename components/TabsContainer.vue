@@ -1,6 +1,6 @@
 <template>
   <b-card class="main-card" no-body>
-    <b-tabs class="main-tabs" card pills align="center">
+    <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
         <run-overview :run="parsedSplits.Run" class="mb-4"/>
 

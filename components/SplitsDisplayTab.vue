@@ -12,7 +12,7 @@
         Display median attempt's times as a horizontal line
       </loading-switch>
       <loading-switch v-model="savedSettings.cumulateSplits">
-        Show general pace instead of individual split times
+        Show pace so far instead of individual split times
       </loading-switch>
     </collapsible-card>
 
@@ -25,7 +25,6 @@
                        v-for="split in detailedSegments"
                        :key="`split-${split.Index}-${split.Name}`"
                        ref="splitAccess"
-                       :splitIndex="split.Index"
                        :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
                        :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
                        :cumulateSplits="savedSettings.cumulateSplits"

@@ -4,16 +4,21 @@ import {
   LINE_COLOR,
   CUR_ATTEMPT_COLOR,
   MEDIAN_COLOR,
-  yTicksFromSecondsValues, XYRange
-}                                                                  from '~/util/plot';
-import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
-import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
-import {XYCoordinates}                                             from '~/util/util';
-import store                                                       from '~/util/store';
-import {offload}                                                   from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
-import {DetailedSegment}                                           from '~/util/splitProcessing';
+  yTicksFromSecondsValues,
+  XYRange
+}                                                  from '~/util/plot';
+import {
+  formatTime,
+  secondsToLivesplitFormat,
+  stringTimeToSeconds
+}                                                  from '~/util/durations';
+import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime, SplitFile} from '~/util/splits';
+import {XYCoordinates}                             from '~/util/util';
+import store                                       from '~/util/store';
+import {offload}                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
+import {DetailedSegment}                           from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -33,9 +38,6 @@ export default class BaseLinePlotComponent extends Vue {
   currentAttemptNumber?: number;
 
   @Prop()
-  splitIndex!: number;
-
-  @Prop()
   parsedSplits!: SplitFile;
 
   collapseVisible: boolean = false;
@@ -47,6 +49,10 @@ export default class BaseLinePlotComponent extends Vue {
   gold: XYCoordinates = {x: 0, y: 0};
 
   plotlyCurrentView: XYRange | null = null;
+
+  get splitIndex() {
+    return this.split.Index;
+  }
 
   get useRealTime() {
     return store.state.useRealTime;
@@ -212,35 +218,35 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get timesWithPositiveIds(): SegmentHistoryTime[] {
-    if (this.cumulateSplits) {
-      const individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
-      const cumulatedTimes = individualTimes.map((split) => {
-        let toAccumulateReal = [];
-        let toAccumulateGame = [];
-        for (let i = 0; i < this.splitIndex; ++i) {
-          const iteratingSplitTime = this.parsedSplits.Run.Segments.Segment[i].SegmentHistory?.Time.find(s => s['@_id'] === split['@_id']);
-          toAccumulateReal.push(iteratingSplitTime?.RealTime);
-          toAccumulateGame.push(iteratingSplitTime?.GameTime);
+    const individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+
+    if (!this.cumulateSplits) return individualTimes;
+
+    const virtualCurrentSplitIndex = this.split.Subsplits.length
+      ? this.split.Subsplits[this.split.Subsplits.length - 1].Index
+      : this.split.Index;
+
+    return individualTimes.map(split => {
+      let outAccReal = 0;
+      let outAccGame = 0;
+      for (let i = 0; i <= virtualCurrentSplitIndex; ++i) {
+        const iteratingSplitTime = this.parsedSplits.Run.Segments.Segment[i].SegmentHistory?.Time.find(s => s['@_id'] === split['@_id']);
+        if (iteratingSplitTime) {
+          outAccGame += stringTimeToSeconds(iteratingSplitTime.GameTime || '0:0:0.0');
+          outAccReal += stringTimeToSeconds(iteratingSplitTime.RealTime || '0:0:0.0');
         }
+      }
 
-        let outAccReal = 0;
-        let outAccGame = 0;
-        toAccumulateReal.forEach(time => outAccReal += stringTimeToSeconds(time || "0:0:0.0"));
-        toAccumulateGame.forEach(time => outAccGame += stringTimeToSeconds(time || "0:0:0.0"));
+      const finalOut: SegmentHistoryTime = {
+        '@_id': split['@_id']
+      };
+      if (outAccReal)
+        finalOut.RealTime = secondsToLivesplitFormat(outAccReal);
+      if (outAccGame)
+        finalOut.GameTime = secondsToLivesplitFormat(outAccGame);
 
-        const finalOut: SegmentHistoryTime = {
-          '@_id': split['@_id'],
-          RealTime: secondsToFormattedString(outAccReal),
-          GameTime: secondsToFormattedString(outAccGame)
-        };
-
-        return finalOut;
-      });
-
-      return cumulatedTimes;
-    }
-
-    return (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+      return finalOut;
+    });
   }
 
   get plot_data() {

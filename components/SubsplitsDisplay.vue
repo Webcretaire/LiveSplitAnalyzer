@@ -33,7 +33,6 @@
                          v-for="(subsplit, i) in split.Subsplits"
                          :key="`split-${subsplit.Index}-${subsplit.Name}`"
                          ref="splitAccess"
-                         :splitIndex="subsplit.Index"
                          :graphCurrentAttemptHline="graphCurrentAttemptHline"
                          :graphMedianAttemptHline="graphMedianAttemptHline"
                          :cumulateSplits="cumulateSplits"
@@ -47,7 +46,6 @@
     <div v-else>
       <split-display :split="split"
                      ref="splitAccess"
-                     :splitIndex="split.Index"
                      :graphCurrentAttemptHline="graphCurrentAttemptHline"
                      :graphMedianAttemptHline="graphMedianAttemptHline"
                      :currentAttemptNumber="currentAttemptNumber"

@@ -1,5 +1,6 @@
 import {
-  computePbFromAttemptHistory, cumulateAttemptTimesForAllSplits,
+  computePbFromAttemptHistory,
+  cumulateAttemptTimesForAllSplits,
   deleteAttemptBeforeNumber,
   generateSplitDetail,
   goldCoordinatesFromSecondsArray,

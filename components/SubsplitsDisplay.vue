@@ -77,7 +77,7 @@ export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   segmentsHolder!: Segments;
 
   @Prop()
-  cumulateSplits: boolean = false;
+  cumulateSplits!: boolean;
 
   subsplitsVisible: boolean = true;
 

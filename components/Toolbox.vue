@@ -25,14 +25,22 @@
 </template>
 
 <script lang="ts">
-import {Attempt, Run, Segment, selectTime, SplitFile, splitFileIsModified, SplitTime} from '~/util/splits';
-import {secondsToLivesplitFormat, stringTimeToSeconds}                                from '~/util/durations';
-import {withLoad}                                                                     from '~/util/loading';
-import {Component, Prop, Vue}                                                         from 'nuxt-property-decorator';
-import {GlobalEventEmitter}                                                           from '~/util/globalEvents';
-import store                                                                          from '~/util/store';
-import {offload}                                                                      from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                                       from '~/util/offloadworkerTypes';
+import {
+  Attempt,
+  Run,
+  Segment,
+  selectTime,
+  SplitFile,
+  splitFileIsModified,
+  SplitTime
+}                                                      from '~/util/splits';
+import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
+import {withLoad}                                      from '~/util/loading';
+import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
+import {GlobalEventEmitter}                            from '~/util/globalEvents';
+import store                                           from '~/util/store';
+import {offload}                                       from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 
 @Component
 export default class Toolbox extends Vue {

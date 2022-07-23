@@ -1,5 +1,3 @@
-import {cumulateAttemptTimesForAllSplits} from '~/util/splitProcessing';
-
 export enum OffloadWorkerOperation {
   PING,
   DELETE_ATTEMPT_BEFORE_NUMBER,

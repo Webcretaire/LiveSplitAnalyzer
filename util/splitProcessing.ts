@@ -304,4 +304,4 @@ export const cumulateAttemptTimesForAllSplits = (segments: Segment[]) => {
       return finalOut;
     });
   });
-}
+};

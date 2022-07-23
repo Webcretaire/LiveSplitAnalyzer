@@ -42,15 +42,20 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch}                      from 'nuxt-property-decorator';
-import store                                              from '~/util/store';
-import {Attempt, SegmentHistoryTime, Segments, SplitFile} from '~/util/splits';
-import {DetailedSegment}                                  from '~/util/splitProcessing';
-import {asArray}                                          from '~/util/util';
-import SubsplitsDisplay                                   from './SubsplitsDisplay.vue';
-import {offload}                                          from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                           from '~/util/offloadworkerTypes';
-import {withLoad}                                         from '~/util/loading';
+import {
+  Attempt,
+  SegmentHistoryTime,
+  Segments,
+  SplitFile
+}                                    from '~/util/splits';
+import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
+import store                         from '~/util/store';
+import {DetailedSegment}             from '~/util/splitProcessing';
+import {asArray}                     from '~/util/util';
+import SubsplitsDisplay              from './SubsplitsDisplay.vue';
+import {offload}                     from '~/util/offloadWorker';
+import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
+import {withLoad}                    from '~/util/loading';
 
 @Component
 export default class SplitsDisplayTab extends Vue {

@@ -7,7 +7,7 @@ import {
   moveTime,
   parseSplitFile,
   segTimeArrayToSeconds
-} from '~/util/splitProcessing';
+}                                                     from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import store                                          from '~/util/store';
 

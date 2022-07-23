@@ -62,14 +62,14 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, mixins}   from 'nuxt-property-decorator';
-import {Segments}                  from '~/util/splits';
-import {asArray}                   from '~/util/util';
-import BaseLinePlotComponent       from '~/components/BaseLinePlotComponent.vue';
+import {Component, Prop, mixins} from 'nuxt-property-decorator';
+import {Segments}                from '~/util/splits';
+import {asArray}                 from '~/util/util';
+import BaseLinePlotComponent     from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                    from 'vue-plotly';
-import SplitDisplay                from './SplitDisplay.vue';
+import {Plotly}                  from 'vue-plotly';
+import SplitDisplay              from './SplitDisplay.vue';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
@@ -83,20 +83,20 @@ export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
 
   $refs!: {
     splitAccess: SplitDisplay | SplitDisplay[];
-  }
+  };
 
   foldSplit() {
     this.collapseVisible = false;
 
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SplitDisplay) => split.foldSplit());
+    splitAccess.forEach((split: SplitDisplay) => split.foldSplit());
   }
 
   unfoldSplit() {
     this.collapseVisible = true;
 
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SplitDisplay) => split.unfoldSplit());
+    splitAccess.forEach((split: SplitDisplay) => split.unfoldSplit());
   }
 }
 </script>

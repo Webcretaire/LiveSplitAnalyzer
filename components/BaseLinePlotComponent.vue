@@ -4,16 +4,17 @@ import {
   LINE_COLOR,
   CUR_ATTEMPT_COLOR,
   MEDIAN_COLOR,
-  yTicksFromSecondsValues, XYRange
-}                                        from '~/util/plot';
-import {Component, Prop, Vue, Watch}     from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime}  from '~/util/splits';
-import {formatTime, stringTimeToSeconds} from '~/util/durations';
-import {XYCoordinates}                   from '~/util/util';
-import store                             from '~/util/store';
-import {offload}                         from '~/util/offloadWorker';
-import {OffloadWorkerOperation}          from '~/util/offloadworkerTypes';
-import {DetailedSegment}                 from '~/util/splitProcessing';
+  yTicksFromSecondsValues,
+  XYRange
+}                                                                  from '~/util/plot';
+import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
+import {XYCoordinates}                                             from '~/util/util';
+import store                                                       from '~/util/store';
+import {offload}                                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
+import {DetailedSegment}                                           from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -26,11 +27,17 @@ export default class BaseLinePlotComponent extends Vue {
   @Prop({default: false})
   graphMedianAttemptHline!: boolean;
 
+  @Prop({default: false})
+  cumulateSplits!: boolean;
+
+  @Prop({default: () => []})
+  cumulatedSplitTimes!: SegmentHistoryTime[][];
+
   @Prop()
   currentAttemptNumber?: number;
 
   @Prop()
-  splitIndex!: number;
+  parsedSplits!: SplitFile;
 
   collapseVisible: boolean = false;
 
@@ -42,6 +49,10 @@ export default class BaseLinePlotComponent extends Vue {
 
   plotlyCurrentView: XYRange | null = null;
 
+  get splitIndex() {
+    return this.split.Index;
+  }
+
   get useRealTime() {
     return store.state.useRealTime;
   }
@@ -51,7 +62,7 @@ export default class BaseLinePlotComponent extends Vue {
    * change), and it needs to be an arrow function otherwise we get `_vm.layout is not a function`
    */
   @Watch('gold')
-  @Watch('timesWithPositiveIds')
+  @Watch('timesToPlot')
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
   @Watch('plotlyCurrentView')
@@ -63,7 +74,7 @@ export default class BaseLinePlotComponent extends Vue {
     const l: any = {
       title: 'Time history',
       xaxis: {
-        title: `Finished number (${this.timesWithPositiveIds.length} total)`
+        title: `Finished number (${this.timesToPlot.length} total)`
       },
       yaxis: {
         rangemode: 'nonnegative',
@@ -138,7 +149,9 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get bestTimeDisplay() {
-    return formatTime(selectTime(this.split.BestSegmentTime) || '');
+    return this.cumulateSplits
+      ? secondsToFormattedString(this.gold.y)
+      : formatTime(selectTime(this.split.BestSegmentTime) || '');
   }
 
   @Watch('timesSeconds', {immediate: true})
@@ -147,7 +160,7 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get currentAttempt(): SegmentHistoryTime | undefined {
-    return this.timesWithPositiveIds.find(t => t['@_id'] === this.currentAttemptNumber);
+    return this.timesToPlot.find(t => t['@_id'] === this.currentAttemptNumber);
   }
 
   get medianAttempt() {
@@ -168,7 +181,7 @@ export default class BaseLinePlotComponent extends Vue {
     });
   }
 
-  @Watch('timesWithPositiveIds', {immediate: true})
+  @Watch('timesToPlot', {immediate: true})
   updateTimesSeconds(newVal: SegmentHistoryTime[]) {
     offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, newVal).then(r => this.timesSeconds = r);
   }
@@ -176,7 +189,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('useRealTime')
   updateTimesAfterUseRealTimeChange() {
     this.$nextTick(() => {
-      offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, this.timesWithPositiveIds)
+      offload(OffloadWorkerOperation.SEG_TIME_ARRAY_TO_SECONDS, this.timesToPlot)
         .then(r => this.timesSeconds = r);
     });
   }
@@ -187,9 +200,9 @@ export default class BaseLinePlotComponent extends Vue {
 
   get markerColors() {
     let out = [];
-    for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
-      if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(CUR_ATTEMPT_COLOR);
-      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(MEDIAN_COLOR);
+    for (let i = 0; i < this.timesToPlot.length; ++i) {
+      if (this.timesToPlot[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(CUR_ATTEMPT_COLOR);
+      else if (this.timesToPlot[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(MEDIAN_COLOR);
       else out.push(this.goldsMap[i] ? GOLD_COLOR : LINE_COLOR);
     }
     return out;
@@ -197,20 +210,28 @@ export default class BaseLinePlotComponent extends Vue {
 
   get markerSizes() {
     let out = [];
-    for (let i = 0; i < this.timesWithPositiveIds.length; ++i) {
-      if (this.timesWithPositiveIds[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
-      else if (this.timesWithPositiveIds[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
+    for (let i = 0; i < this.timesToPlot.length; ++i) {
+      if (this.timesToPlot[i]['@_id'] == this.currentAttempt?.['@_id']) out.push(6);
+      else if (this.timesToPlot[i]['@_id'] == this.medianAttempt?.['@_id']) out.push(6);
       else out.push(this.goldsMap[i] ? 5 : 3);
     }
     return out;
   }
 
-  get timesWithPositiveIds(): SegmentHistoryTime[] {
-    return (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+  get timesToPlot(): SegmentHistoryTime[] {
+    const individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+
+    if (!this.cumulateSplits) return individualTimes;
+
+    const virtualCurrentSplitIndex = this.split.Subsplits.length
+      ? this.split.Subsplits[this.split.Subsplits.length - 1].Index
+      : this.split.Index;
+
+    return this.cumulatedSplitTimes[virtualCurrentSplitIndex] || [];
   }
 
   get plot_data() {
-    const text_val = this.timesWithPositiveIds.map((t) => {
+    const text_val = this.timesToPlot.map((t) => {
       const time = selectTime(t);
       if (!time) return '';
       return `${formatTime(time)} (attempt ${t['@_id']})`;
@@ -218,7 +239,7 @@ export default class BaseLinePlotComponent extends Vue {
 
     return [
       {
-        x: Array.from({length: this.timesWithPositiveIds.length}, (v, k) => k),
+        x: Array.from({length: this.timesToPlot.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
         type: 'scatter',

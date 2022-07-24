@@ -9,7 +9,9 @@
           <div class="mt-auto mb-auto">
             <h3>{{ split.Name }}</h3>
             <p v-if="split.BestSegmentTime" class="m-0">
-              <span class="mr-2"><strong>Best time:</strong> {{ bestTimeDisplay }}</span>
+              <span class="mr-2">
+                <strong>Best {{ cumulateSplits ? 'pace' : 'time' }}:</strong> {{ bestTimeDisplay }}
+              </span>
             </p>
             <b-button class="toggle-collapse" v-b-toggle="collapseName" variant="outline-dark" pill>
               <font-awesome-icon icon="chevron-left" :rotation="collapseVisible ? 270 : null"/>
@@ -33,11 +35,13 @@
                          v-for="(subsplit, i) in split.Subsplits"
                          :key="`split-${subsplit.Index}-${subsplit.Name}`"
                          ref="splitAccess"
-                         :splitIndex="subsplit.Index"
-                         :graphCurrentAttemptHline="graphCurrentAttemptHline"
-                         :graphMedianAttemptHline="graphMedianAttemptHline"
-                         :currentAttemptNumber="currentAttemptNumber"
+                         :graph-current-attempt-hline="graphCurrentAttemptHline"
+                         :graph-median-attempt-hline="graphMedianAttemptHline"
+                         :cumulate-splits="cumulateSplits"
+                         :cumulated-split-times="cumulatedSplitTimes"
+                         :current-attempt-number="currentAttemptNumber"
                          :segments-holder="segmentsHolder"
+                         :parsed-splits="parsedSplits"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
         </b-collapse>
       </div>
@@ -45,49 +49,54 @@
     <div v-else>
       <split-display :split="split"
                      ref="splitAccess"
-                     :splitIndex="split.Index"
-                     :graphCurrentAttemptHline="graphCurrentAttemptHline"
-                     :graphMedianAttemptHline="graphMedianAttemptHline"
-                     :currentAttemptNumber="currentAttemptNumber"
+                     :graph-current-attempt-hline="graphCurrentAttemptHline"
+                     :graph-median-attempt-hline="graphMedianAttemptHline"
+                     :current-attempt-number="currentAttemptNumber"
+                     :cumulate-splits="cumulateSplits"
+                     :cumulated-split-times="cumulatedSplitTimes"
                      :segments-holder="segmentsHolder"
+                     :parsed-splits="parsedSplits"
                      class="mb-3"/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, mixins}   from 'nuxt-property-decorator';
-import {Segments}                  from '~/util/splits';
-import {asArray}                   from '~/util/util';
-import BaseLinePlotComponent       from '~/components/BaseLinePlotComponent.vue';
+import {Component, Prop, mixins} from 'nuxt-property-decorator';
+import {Segments}                from '~/util/splits';
+import {asArray}                 from '~/util/util';
+import BaseLinePlotComponent     from '~/components/BaseLinePlotComponent.vue';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                    from 'vue-plotly';
-import SplitDisplay                from './SplitDisplay.vue';
+import {Plotly}                  from 'vue-plotly';
+import SplitDisplay              from './SplitDisplay.vue';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
   @Prop()
   segmentsHolder!: Segments;
 
+  @Prop()
+  cumulateSplits!: boolean;
+
   subsplitsVisible: boolean = true;
 
   $refs!: {
     splitAccess: SplitDisplay | SplitDisplay[];
-  }
+  };
 
   foldSplit() {
     this.collapseVisible = false;
 
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SplitDisplay) => split.foldSplit());
+    splitAccess.forEach((split: SplitDisplay) => split.foldSplit());
   }
 
   unfoldSplit() {
     this.collapseVisible = true;
 
     const splitAccess = asArray(this.$refs.splitAccess);
-    splitAccess.forEach((split : SplitDisplay) => split.unfoldSplit());
+    splitAccess.forEach((split: SplitDisplay) => split.unfoldSplit());
   }
 }
 </script>

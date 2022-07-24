@@ -1,6 +1,6 @@
 <template>
   <b-card class="main-card" no-body>
-    <b-tabs class="main-tabs" card pills align="center">
+    <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
         <run-overview :run="parsedSplits.Run" class="mb-4"/>
 
@@ -19,7 +19,8 @@
       <b-tab title="Splits analysis">
         <splits-display-tab :detailed-segments="detailedSegments"
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
-                            :segments-holder="parsedSplits.Run.Segments"/>
+                            :segments-holder="parsedSplits.Run.Segments"
+                            :parsed-splits="parsedSplits"/>
       </b-tab>
     </b-tabs>
   </b-card>
@@ -32,7 +33,6 @@ import {
   SplitFile
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import store                  from '~/util/store';
 import {DetailedSegment}      from '~/util/splitProcessing';
 
 @Component

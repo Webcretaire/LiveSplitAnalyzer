@@ -3,12 +3,12 @@ import {
   cumulateAttemptTimesForAllSplits,
   deleteAttemptBeforeNumber,
   generateSplitDetail,
-  goldCoordinatesFromSecondsArray,
+  goldCoordinatesFromSecondsArray, lastSplitNameReachedByAttempt,
   mergeSplitIntoNextOne,
   moveTime,
   parseSplitFile,
   segTimeArrayToSeconds
-}                                                     from '~/util/splitProcessing';
+} from '~/util/splitProcessing';
 import {OffloadWorkerMessage, OffloadWorkerOperation} from '~/util/offloadworkerTypes';
 import store                                          from '~/util/store';
 
@@ -56,6 +56,9 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       break;
     case OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS:
       out = cumulateAttemptTimesForAllSplits(a[0]);
+      break;
+    case OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT:
+      out = lastSplitNameReachedByAttempt(a[0], a[1]);
       break;
   }
 

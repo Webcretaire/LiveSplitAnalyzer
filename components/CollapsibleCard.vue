@@ -4,21 +4,18 @@
       <font-awesome-icon icon="chevron-left" :rotation="visible ? 270 : null"/>
     </b-button>
     <b-collapse v-model="visible" :id="id">
-      <div v-if="visible || !lazy">
-        <slot/>
-      </div>
+      <slot v-if="visible || !lazy"/>
     </b-collapse>
   </b-card>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Prop} from 'nuxt-property-decorator';
+import {Vue, Component, Prop, Watch} from 'nuxt-property-decorator';
 
 @Component
 export default class CollapsibleCard extends Vue {
-  visible: boolean = false;
-
-  id: string = 'collapse-xxxx';
+  @Prop()
+  value!: boolean;
 
   @Prop()
   title!: string;
@@ -29,8 +26,22 @@ export default class CollapsibleCard extends Vue {
   @Prop({default: true})
   lazy!: boolean;
 
+  visible: boolean = false;
+
+  id: string = 'collapse-xxxx';
+
   created() {
     this.visible = this.startsOpen;
+  }
+
+  @Watch('visible')
+  onVisibleUpdate(newVal: boolean) {
+    this.$emit('input', newVal);
+  }
+
+  @Watch('value', {immediate: true})
+  onValueUpdate(newVal: boolean) {
+    this.visible = newVal;
   }
 
   mounted() {

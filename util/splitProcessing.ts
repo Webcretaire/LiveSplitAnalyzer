@@ -305,3 +305,19 @@ export const cumulateAttemptTimesForAllSplits = (segments: Segment[]) => {
     });
   });
 };
+
+export const lastSplitNameReachedByAttempt = (segments: Segment[], attempts: Attempt[]) => {
+  segments.reverse();
+
+  return attempts.map(attempt => {
+    let prevSegmentName = 'Finished';
+    for (let segment of segments) {
+      if (segment.SegmentHistory?.Time.find(time => time['@_id'] === attempt['@_id']))
+        return prevSegmentName;
+
+      prevSegmentName = segment.Name;
+    }
+
+    return segments[segments.length - 1]?.Name || 'Undefined';
+  });
+};

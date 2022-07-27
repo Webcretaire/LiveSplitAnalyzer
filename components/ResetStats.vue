@@ -1,7 +1,7 @@
 <template>
   <div>
-    <Plotly :data="plotDataResets" :display-mode-bar="true"/>
-    <Plotly :data="plotDataAttempts" :display-mode-bar="true"/>
+    <Plotly :data="plotDataResets" :display-mode-bar="true" :layout="layoutResets"/>
+    <Plotly :data="plotDataAttempts" :display-mode-bar="true" :layout="layoutAttempts"/>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ import {Attempt, Segment}            from '@/util/splits';
 import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
-import { LINE_COLOR } from '~/util/plot';
+import {GOLD_COLOR, LINE_COLOR}      from '~/util/plot';
 
 @Component({components: {Plotly}})
 export default class ResetStats extends Vue {
@@ -28,13 +28,30 @@ export default class ResetStats extends Vue {
 
   numberOfCompletedSplitsByAttempt: number[] = [];
 
+  layoutResets = {
+    xaxis: {
+      tickangle: -45,
+      automargin: true
+    }, yaxis: {
+      title: 'Reset number'
+    }
+  };
+
+  layoutAttempts = {
+    xaxis: {
+      title: 'Attempt number'
+    }, yaxis: {
+      title: 'Last split'
+    }
+  };
+
   @Watch('attempts', {immediate: true})
   @Watch('segments')
   updateLastsplitByAttempt() {
     withLoad(() =>
       offload(OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT, this.segments, this.attempts)
         .then(r => {
-          this.lastSplitByAttempt = r;
+          this.lastSplitByAttempt               = r;
           this.numberOfCompletedSplitsByAttempt = r.map((name: string) => this.splitLabels.indexOf(name));
         })
     );
@@ -51,7 +68,10 @@ export default class ResetStats extends Vue {
         x: this.splitLabels,
         title: 'Resets',
         hoverinfo: 'label+percent',
-        type: 'bar'
+        type: 'bar',
+        marker: {
+          color: [...Array.from({length: this.splitLabels.length - 1}, () => LINE_COLOR), GOLD_COLOR]
+        }
       }
     ];
   }
@@ -61,14 +81,11 @@ export default class ResetStats extends Vue {
       {
         y: this.numberOfCompletedSplitsByAttempt,
         x: this.attempts.map(attempt => attempt['@_id']),
+        text: this.numberOfCompletedSplitsByAttempt.map(v => this.splitLabels[v]),
         title: 'Resets',
-        type: 'scatter',
-        hoverinfo: 'y',
-        mode: 'lines',
-        line: {
-          // shape: 'spline',
-          color: LINE_COLOR,
-          width: 1
+        type: 'bar',
+        marker: {
+          color: this.numberOfCompletedSplitsByAttempt.map(val => val == this.splitLabels.length - 1 ? GOLD_COLOR : LINE_COLOR)
         }
       }
     ];

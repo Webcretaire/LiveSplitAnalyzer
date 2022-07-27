@@ -90,6 +90,6 @@ export default class ResetStats extends Vue {
       }
     ];
   }
-};
+}
 </script>
 

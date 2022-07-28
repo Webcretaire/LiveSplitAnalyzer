@@ -20,6 +20,11 @@
                       :is-pb="isPb"
                       :display-labels="displayLabels"
                       :merge-subsplits="savedSettings.attemptAnalysisMergeSubsplits"/>
+
+
+    <collapsible-card id="ResetStatsCard" class="text-center" title="Reset stats" lazy v-model="resetStatsOpen">
+      <reset-stats v-if="resetStatsOpen" :segments="segments" :attempts="attempts"/>
+    </collapsible-card>
   </div>
 </template>
 
@@ -42,6 +47,8 @@ export default class AttemptAnalysisTab extends Vue {
 
   @Prop()
   parsedSplits!: SplitFile;
+
+  resetStatsOpen: boolean = false;
 
   currentAttemptNumber: number = 1;
 

@@ -11,6 +11,14 @@
       <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
+      <loading-switch v-model="savedSettings.cumulateSplits">
+        Show pace so far instead of individual split times
+        <span v-b-tooltip.hover
+              title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient"
+              class="help-question text-warning">
+        <font-awesome-icon icon="warning" class="warning-icon"/>
+      </span>
+      </loading-switch>
     </collapsible-card>
 
     <div class="mb-2 text-left">
@@ -22,22 +30,32 @@
                        v-for="split in detailedSegments"
                        :key="`split-${split.Index}-${split.Name}`"
                        ref="splitAccess"
-                       :splitIndex="split.Index"
-                       :graphCurrentAttemptHline="savedSettings.graphCurrentAttemptHline"
-                       :graphMedianAttemptHline="savedSettings.graphMedianAttemptHline"
-                       :currentAttemptNumber="currentAttemptNumber"
+                       :graph-current-attempt-hline="savedSettings.graphCurrentAttemptHline"
+                       :graph-median-attempt-hline="savedSettings.graphMedianAttemptHline"
+                       :cumulate-splits="savedSettings.cumulateSplits"
+                       :cumulated-split-times="cumulatedSplitTimes"
+                       :current-attempt-number="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
+                       :parsed-splits="parsedSplits"
                        class="mb-3"/>
   </div>
 </template>
 
 <script lang="ts">
+import {
+  Attempt,
+  SegmentHistoryTime,
+  Segments,
+  SplitFile
+}                                    from '~/util/splits';
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 import store                         from '~/util/store';
-import {Attempt, Segments}           from '~/util/splits';
 import {DetailedSegment}             from '~/util/splitProcessing';
 import {asArray}                     from '~/util/util';
 import SubsplitsDisplay              from './SubsplitsDisplay.vue';
+import {offload}                     from '~/util/offloadWorker';
+import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
+import {withLoad}                    from '~/util/loading';
 
 @Component
 export default class SplitsDisplayTab extends Vue {
@@ -55,6 +73,11 @@ export default class SplitsDisplayTab extends Vue {
 
   @Prop()
   segmentsHolder!: Segments;
+
+  @Prop()
+  parsedSplits!: SplitFile;
+
+  cumulatedSplitTimes: SegmentHistoryTime[][] = [];
 
   get PB() {
     return this.globalState.PB;
@@ -79,5 +102,21 @@ export default class SplitsDisplayTab extends Vue {
     if (newVal)
       this.currentAttemptNumber = newVal?.['@_id'];
   }
+
+  @Watch('savedSettings.cumulateSplits', {immediate: true})
+  @Watch('segmentsHolder.Segment', {deep: true})
+  updateCumulatedSplitTimes() {
+    if (!this.savedSettings.cumulateSplits) return;
+
+    withLoad(() => offload(OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS, this.segmentsHolder.Segment)
+      .then(r => this.cumulatedSplitTimes = r));
+  }
 }
 </script>
+
+<style scoped lang="scss">
+.warning-icon {
+  font-size: 1rem;
+  padding-bottom: 0.2rem;
+}
+</style>

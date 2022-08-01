@@ -1,24 +1,49 @@
 <template>
-  <b-button v-b-tooltip.hover.left="'Filter runs'" pill size="lg" variant="light" @click="filterRuns"
+  <b-button v-b-tooltip.hover.left="tooltip" pill size="lg" :variant="variant" @click="filterRuns"
             class="float-button">
     <font-awesome-icon icon="filter"/>
   </b-button>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'nuxt-property-decorator';
-import {SplitFile}            from '~/util/splits';
-import {GlobalEventEmitter}   from '~/util/globalEvents';
-import store                  from '~/util/store';
+import {Component, Prop, Vue}     from 'nuxt-property-decorator';
+import {SplitFile}                from '~/util/splits';
+import {GlobalEventEmitter}       from '~/util/globalEvents';
+import {secondsToFormattedString} from '~/util/durations';
+import store, {Filter}            from '~/util/store';
 
 @Component
 export default class FilterRuns extends Vue {
   @Prop()
   parsedSplits!: SplitFile;
 
+  filters: Filter[] = store.state.filters;
+
+  get filtersActive() {
+    let selectionComplete = true;
+    this.filters.forEach(filter => {
+      if (!filter.type || !filter.timeMin || !filter.timeMax)
+        selectionComplete = false;
+    });
+
+    return selectionComplete && store.state.filters.length != 0;
+  }
+
   get variant() {
-    const filtersActive = (store.state.filters.length != 0);
-    return filtersActive ? "success" : "light";
+    return this.filtersActive ? "success" : "light";
+  }
+
+  get tooltip() {
+    if (!this.filtersActive)
+      return "Filter runs";
+
+    let filterDescription = "Active filters:"
+    this.filters.forEach(filter => {
+      if (filter.timeMin && filter.timeMax) // i don't think these can be undefined at this point, but we need this to satisfy typescript
+        filterDescription += ` ${filter.type}, between ${secondsToFormattedString(filter.timeMin)} and ${secondsToFormattedString(filter.timeMax)};`;
+    });
+
+    return filterDescription;
   }
 
   filterRuns() {

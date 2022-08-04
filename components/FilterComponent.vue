@@ -30,6 +30,7 @@
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'nuxt-property-decorator';
 import {SplitFile}                   from '~/util/splits';
+import {stringTimeToSeconds}         from '~/util/durations';
 import store, {Filter}               from '~/util/store';
 import Multiselect                   from 'vue-multiselect';
 
@@ -40,6 +41,8 @@ export default class FilterComponent extends Vue {
 
   @Prop()
   parsedSplits!: SplitFile;
+
+  useRealTime: boolean = store.state.useRealTime;
 
   globalFilters: Filter[] = store.state.filters;
 
@@ -52,6 +55,52 @@ export default class FilterComponent extends Vue {
     return options;
   }
 
+  get filterList() {
+    let filteredAttempts: number[] = [];
+    const type = this.filterData.type;
+    const timeMin = this.filterData!.timeMin;
+    const timeMax = this.filterData.timeMax;
+
+    if (type == "Global") {
+      const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+
+      attempts.forEach(attempt => {
+        const attemptTime = this.useRealTime ? attempt.RealTime : attempt.GameTime;
+
+        if (attemptTime != undefined && timeMin != undefined && timeMax != undefined) {
+          const secondsAttemptTime = stringTimeToSeconds(attemptTime);
+
+          if (secondsAttemptTime > timeMin && secondsAttemptTime < timeMax) {
+            filteredAttempts.push(attempt['@_id']);
+          }
+        }
+      });
+    } else if (type == "" || (timeMin == timeMax)) {
+      const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+
+      attempts.forEach(attempt => filteredAttempts.push(attempt['@_id']));
+    }
+    else {
+      const splitTimes = this.parsedSplits.Run.Segments.Segment.find(segment => segment.Name == type)?.SegmentHistory?.Time;
+
+      if (splitTimes) {
+        splitTimes.forEach(splitTime => {
+          const chosenSplitTime = this.useRealTime ? splitTime.RealTime : splitTime.GameTime;
+
+          if (chosenSplitTime != undefined && timeMin != undefined && timeMax != undefined) {
+            const secondsSplitTime = stringTimeToSeconds(chosenSplitTime);
+
+            if (secondsSplitTime > timeMin && secondsSplitTime < timeMax) {
+              filteredAttempts.push(splitTime['@_id']);
+            }
+          }
+        });
+      }
+    }
+
+    return filteredAttempts;
+  }
+
   clearFilter() {
     this.filterData.type = "";
     this.filterData.timeMin = 0;
@@ -62,9 +111,15 @@ export default class FilterComponent extends Vue {
   @Watch('filterData.timeMin')
   @Watch('filterData.timeMax')
   updateFilters() {
+    if (this.filterData.timeMin && this.filterData.timeMax){
+      if (this.filterData.timeMin > this.filterData.timeMax) {
+        [this.filterData.timeMin, this.filterData.timeMax] = [this.filterData.timeMax, this.filterData.timeMin];
+      }
+    }
+
     if (this.globalFilters.length == this.filterIndex - 1)
       this.globalFilters.push(this.filterData);
-
+    console.log(this.filterList);
     this.globalFilters[this.filterIndex - 1] = this.filterData;
   }
 

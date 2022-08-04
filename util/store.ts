@@ -1,6 +1,5 @@
 import {Attempt, AutoSplitterSettings} from '~/util/splits';
 import Vue                             from 'vue';
-import { filter } from 'cypress/types/bluebird';
 
 export interface SavedSettings {
   pageWidth?: number,
@@ -25,7 +24,8 @@ export interface Store {
   splitFileIsModified: boolean,
   PB: Attempt | null,
   autoSplitterSettings: AutoSplitterSettings | null,
-  filters: Filter[]
+  filters: Filter[],
+  filterList: number[]
 }
 
 const state = Vue.observable({
@@ -35,7 +35,8 @@ const state = Vue.observable({
   splitFileIsModified: false,
   PB: null,
   autoSplitterSettings: null,
-  filters: []
+  filters: [],
+  filterList: []
 } as Store);
 
 export default {

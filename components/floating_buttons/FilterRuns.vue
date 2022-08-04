@@ -22,7 +22,7 @@ export default class FilterRuns extends Vue {
   get filtersActive() {
     let selectionComplete = true;
     this.filters.forEach(filter => {
-      if (!filter.type || !filter.timeMin || !filter.timeMax)
+      if (!filter.type || (filter.timeMin == filter.timeMax))
         selectionComplete = false;
     });
 

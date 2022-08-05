@@ -23,19 +23,19 @@ export default class FilterModal extends mixins(BaseModal) {
 
   filters: Filter[] = store.state.filters;
 
-  @Watch('filters', {deep: true})
+  @Watch('filters') 
   mashFilters() {
     if (this.filters.length == 1) {
       if (this.filters[0].attempts)
-        store.state.filterList = this.filters[0].attempts;
+        store.state.filteredAttempts = this.filters[0].attempts;
     } else if (this.filters.length > 1) {
       let allLists: number[][] = [];
       this.filters.forEach(filter => {
         if (filter.attempts)
           allLists.push(filter.attempts)
       });
-      store.state.filterList = allLists.reduce((p, c) => p.filter(e => c.includes(e)));
-      console.log(store.state.filterList);
+
+      store.state.filteredAttempts = allLists.reduce((p, c) => p.filter(e => c.includes(e)));
     }
   }
 }

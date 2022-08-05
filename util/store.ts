@@ -27,7 +27,7 @@ export interface Store {
   PB: Attempt | null,
   autoSplitterSettings: AutoSplitterSettings | null,
   filters: Filter[],
-  filterList: number[]
+  filteredAttempts: number[]
 }
 
 const state = Vue.observable({
@@ -38,7 +38,7 @@ const state = Vue.observable({
   PB: null,
   autoSplitterSettings: null,
   filters: [],
-  filterList: []
+  filteredAttempts: []
 } as Store);
 
 export default {

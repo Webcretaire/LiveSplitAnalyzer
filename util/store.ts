@@ -14,7 +14,9 @@ export interface SavedSettings {
 export interface Filter {
   type?: string,
   timeMin?: number,
-  timeMax?: number
+  timeMax?: number,
+  active?: boolean,
+  attempts?: number[]
 }
 
 export interface Store {

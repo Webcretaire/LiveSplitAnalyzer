@@ -20,13 +20,7 @@ export default class FilterRuns extends Vue {
   filters: Filter[] = store.state.filters;
 
   get filtersActive() {
-    let selectionComplete = true;
-    this.filters.forEach(filter => {
-      if (!filter.type || (filter.timeMin == filter.timeMax))
-        selectionComplete = false;
-    });
-
-    return selectionComplete && store.state.filters.length != 0;
+    return store.state.filters.length != 0;
   }
 
   get variant() {
@@ -39,7 +33,7 @@ export default class FilterRuns extends Vue {
 
     let filterDescription = "Active filters:"
     this.filters.forEach(filter => {
-      if (filter.timeMin && filter.timeMax) // i don't think these can be undefined at this point, but we need this to satisfy typescript
+      if (filter.timeMin != undefined && filter.timeMax != undefined) // i don't think these can be undefined at this point, but we need this to satisfy typescript
         filterDescription += ` ${filter.type}, between ${secondsToFormattedString(filter.timeMin)} and ${secondsToFormattedString(filter.timeMax)};`;
     });
 

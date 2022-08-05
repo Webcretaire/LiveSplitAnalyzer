@@ -15,6 +15,7 @@ import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
 import {GOLD_COLOR, LINE_COLOR}      from '~/util/plot';
+import {SegmentNameIndex}            from '~/util/splitProcessing';
 
 @Component({components: {Plotly}})
 export default class ResetStats extends Vue {
@@ -24,9 +25,7 @@ export default class ResetStats extends Vue {
   @Prop()
   segments!: Segment[];
 
-  lastSplitByAttempt: string[] = [];
-
-  numberOfCompletedSplitsByAttempt: number[] = [];
+  lastSplitByAttempt: SegmentNameIndex[] = [];
 
   layoutResets = {
     xaxis: {
@@ -41,7 +40,7 @@ export default class ResetStats extends Vue {
     xaxis: {
       title: 'Attempt number'
     }, yaxis: {
-      title: 'Last split'
+      title: 'Reset in split'
     }
   };
 
@@ -50,21 +49,18 @@ export default class ResetStats extends Vue {
   updateLastsplitByAttempt() {
     withLoad(() =>
       offload(OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT, this.segments, this.attempts)
-        .then(r => {
-          this.lastSplitByAttempt               = r;
-          this.numberOfCompletedSplitsByAttempt = r.map((name: string) => this.splitLabels.indexOf(name));
-        })
+        .then(r => this.lastSplitByAttempt = r)
     );
   }
 
   get splitLabels() {
-    return [...this.segments.map(segment => segment.Name), 'Finished'];
+    return [...this.segments.map(({Name}, i) => `${i + 1}: ${Name}`), 'Finished'];
   }
 
   get plotDataResets() {
     return [
       {
-        y: [...this.segments.map(({Name}) => Name), 'Finished'].map(segment => this.lastSplitByAttempt.filter(name => name === segment).length),
+        y: [...this.segments.map(({Name}) => Name), 'Finished'].map((name, i) => this.lastSplitByAttempt.filter(({index}) => index === i).length),
         x: this.splitLabels,
         title: 'Resets',
         hoverinfo: 'label+percent',
@@ -79,13 +75,13 @@ export default class ResetStats extends Vue {
   get plotDataAttempts() {
     return [
       {
-        y: this.numberOfCompletedSplitsByAttempt,
+        y: this.lastSplitByAttempt.map(({index}) => index),
         x: this.attempts.map(attempt => attempt['@_id']),
-        text: this.numberOfCompletedSplitsByAttempt.map(v => this.splitLabels[v]),
-        title: 'Resets',
+        text: this.lastSplitByAttempt.map(({index}) => this.splitLabels[index]),
+        hoverinfo: 'text',
         type: 'bar',
         marker: {
-          color: this.numberOfCompletedSplitsByAttempt.map(val => val == this.splitLabels.length - 1 ? GOLD_COLOR : LINE_COLOR)
+          color: this.lastSplitByAttempt.map(({index}) => index == this.splitLabels.length - 1 ? GOLD_COLOR : LINE_COLOR)
         }
       }
     ];

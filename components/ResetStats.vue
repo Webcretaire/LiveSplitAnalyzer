@@ -40,7 +40,7 @@ export default class ResetStats extends Vue {
     xaxis: {
       title: 'Attempt number'
     }, yaxis: {
-      title: 'Reset in split'
+      title: 'Finished splits'
     }
   };
 
@@ -77,11 +77,15 @@ export default class ResetStats extends Vue {
       {
         y: this.lastSplitByAttempt.map(({index}) => index),
         x: this.attempts.map(attempt => attempt['@_id']),
-        text: this.lastSplitByAttempt.map(({index}) => this.splitLabels[index]),
+        text: this.lastSplitByAttempt.map(
+          ({name, index}) => index === this.splitLabels.length - 1 ? 'Finished' : `Reset in ${name} (${index + 1})`
+        ),
         hoverinfo: 'text',
         type: 'bar',
         marker: {
-          color: this.lastSplitByAttempt.map(({index}) => index == this.splitLabels.length - 1 ? GOLD_COLOR : LINE_COLOR)
+          color: this.lastSplitByAttempt.map(
+            ({index}) => index === this.splitLabels.length - 1 ? GOLD_COLOR : LINE_COLOR
+          )
         }
       }
     ];

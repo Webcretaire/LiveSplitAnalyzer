@@ -165,12 +165,12 @@ export default class AttemptDetailCard extends Vue {
     max-height: 5rem;
     width: auto;
     height: auto;
-    opacity: 100%;
+    opacity: 1;
   }
 
   .attempt-icon-reset {
     filter: grayscale(100%) drop-shadow(0 0 0.5rem rgba(0, 0, 0, 1));
-    opacity: 80%;
+    opacity: 0.8;
   }
 
   .attempt-icon-PB {

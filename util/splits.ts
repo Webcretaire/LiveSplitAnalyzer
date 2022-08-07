@@ -14,7 +14,7 @@ export interface OptionalRealAndGameTime {
 
 export interface Attempt extends OptionalRealAndGameTime {
   '@_id': number;
-  '@_started': number;
+  '@_started': string;
   '@_isStartedSynced': string;
   '@_ended': string;
   '@_isEndedSynced': string;

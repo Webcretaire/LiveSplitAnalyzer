@@ -110,14 +110,12 @@ export default class AttemptStats extends Vue {
   }
 
   get PBs() {
-    if (!this.finishedAttempts.length) return [];
+    if (!this.numberVals.length) return [];
 
-    let currentPB = stringTimeToSeconds(selectTime(this.finishedAttempts[0]) || '0:0:0.0') + 1;
+    let currentPB = this.numberVals[0] + 1;
 
-    return this.finishedAttempts.map(
-      attempt => {
-        const time = stringTimeToSeconds(selectTime(attempt) || '')
-
+    return this.numberVals.map(
+      time => {
         if (time < currentPB)
           currentPB = time;
 
@@ -144,7 +142,7 @@ export default class AttemptStats extends Vue {
         type: 'scatter',
         hoverinfo: 'text',
         mode: 'lines+markers',
-    }
+    };
 
     return [
       {

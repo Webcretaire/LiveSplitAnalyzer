@@ -2,7 +2,7 @@
   <b-card class="main-card" no-body>
     <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
-        <run-overview :run="parsedSplits.Run" class="mb-4"/>
+        <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
 
         <attempt-stats :attempts="runAttempts"/>
       </b-tab>
@@ -21,6 +21,9 @@
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                             :segments-holder="parsedSplits.Run.Segments"
                             :parsed-splits="parsedSplits"/>
+      </b-tab>
+      <b-tab title="Attempts detail">
+        <attempt-detail-tab :parsed-splits="parsedSplits" :game-cover="gameCover"/>
       </b-tab>
     </b-tabs>
   </b-card>
@@ -44,6 +47,9 @@ export default class TabsContainer extends Vue {
 
   @Prop()
   parsedSplits!: SplitFile;
+
+  @Prop()
+  gameCover!: string;
 
   get runAttempts(): Attempt[] {
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;

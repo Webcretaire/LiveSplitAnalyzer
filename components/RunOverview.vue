@@ -24,7 +24,8 @@ export default class RunOverview extends Vue {
   @Prop()
   run!: Run;
 
-  gameCover: string = '';
+  @Prop()
+  gameCover!: string;
 
   get finishedRuns() {
     return this.run.AttemptHistory.Attempt.filter(a => selectTime(a)).length;
@@ -47,33 +48,6 @@ export default class RunOverview extends Vue {
 
   get runMetadata() {
     return this.run.Metadata.Variables?.Variable;
-  }
-
-  @Watch('run.GameName', {immediate: true})
-  @Watch('run.GameIcon')
-  coverSource() {
-    this.gameCover = "";
-
-    if (this.run.GameIcon)
-      this.gameCover = new ImageExtractor(this.run.GameIcon).imgSrc;
-
-    if (!this.gameCover) {
-      const url = `https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(this.run.GameName)}`;
-      fetch(url)
-        .then(response => {
-          if (!response.ok)
-            throw Error();
-
-          return response.json();
-        })
-        .then(data => {
-          if (data.data.length == 0)
-            throw Error();
-
-          this.gameCover = data.data[0].assets['cover-small'].uri;
-        })
-        .catch(() => this.gameCover = "");
-    }
   }
 
   visible: boolean = true;

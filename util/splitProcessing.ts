@@ -15,6 +15,11 @@ import {xmlParser}                                     from '~/util/xml';
 import {ImageExtractor}                                from './imageExtractor';
 import store                                           from './store';
 
+export interface SegmentNameIndex {
+  name: string,
+  index: number
+}
+
 export interface DetailedSegment extends Segment {
   Subsplits: DetailedSegment[],
   Index: number, // Index in the original raw SplitFile
@@ -306,18 +311,18 @@ export const cumulateAttemptTimesForAllSplits = (segments: Segment[]) => {
   });
 };
 
-export const lastSplitNameReachedByAttempt = (segments: Segment[], attempts: Attempt[]) => {
+export const lastSplitNameReachedByAttempt = (segments: Segment[], attempts: Attempt[]): SegmentNameIndex[] => {
   segments.reverse();
 
   return attempts.map(attempt => {
-    let prevSegmentName = 'Finished';
+    let prevSegment: SegmentNameIndex = {name: 'Finished', index: segments.length};
     for (let segment of segments) {
       if (segment.SegmentHistory?.Time.find(time => time['@_id'] === attempt['@_id']))
-        return prevSegmentName;
+        return prevSegment;
 
-      prevSegmentName = segment.Name;
+      prevSegment = {name: segment.Name, index: prevSegment.index - 1};
     }
 
-    return segments[segments.length - 1]?.Name || 'Undefined';
+    return {name: segments[segments.length - 1]?.Name || 'Undefined', index: 0};
   });
 };

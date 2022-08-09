@@ -24,7 +24,10 @@
                 </b-input-group-append>
               </b-input-group>
             </b-form>
-            <tabs-container v-if="parsedSplits" :parsed-splits="parsedSplits" :detailed-segments="detailedSegments"/>
+            <tabs-container v-if="parsedSplits"
+                            :parsed-splits="parsedSplits"
+                            :detailed-segments="detailedSegments"
+                            :game-cover="gameCover"/>
           </div>
         </b-col>
       </b-row>
@@ -69,6 +72,7 @@ import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {DetailedSegment}             from '~/util/splitProcessing';
 import {Vue, Component, Watch}       from 'nuxt-property-decorator';
 import LoadingModal                  from '~/components/modals/LoadingModal.vue';
+import {ImageExtractor}              from '~/util/imageExtractor';
 
 @Component
 export default class IndexPage extends Vue {
@@ -95,6 +99,8 @@ export default class IndexPage extends Vue {
   detailedSegments: DetailedSegment[] = [];
 
   globalState: Store = store.state;
+
+  gameCover: string = '';
 
   get widthValue() {
     return this.globalState.savedSettings.pageWidth === undefined ? 3 : this.globalState.savedSettings.pageWidth;
@@ -130,6 +136,35 @@ export default class IndexPage extends Vue {
 
   get indexWrapperStyle() {
     return {'--page-hue': this.globalState.savedSettings.pageHue || 0};
+  }
+
+  @Watch('parsedSplits.Run.GameName')
+  @Watch('parsedSplits.Run.GameIcon')
+  coverSource() {
+    if (!this.parsedSplits) return;
+
+    this.gameCover = '';
+
+    if (this.parsedSplits.Run.GameIcon)
+      this.gameCover = new ImageExtractor(this.parsedSplits.Run.GameIcon).imgSrc;
+
+    if (!this.gameCover) {
+      const url = `https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(this.parsedSplits.Run.GameName)}`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok)
+            throw Error();
+
+          return response.json();
+        })
+        .then(data => {
+          if (data.data.length == 0)
+            throw Error();
+
+          this.gameCover = data.data[0].assets['cover-small'].uri;
+        })
+        .catch(() => this.gameCover = '');
+    }
   }
 
   getSplitsFromID() {

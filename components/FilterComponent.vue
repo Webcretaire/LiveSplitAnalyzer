@@ -43,7 +43,7 @@
 
 <script lang="ts">
 import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
-import {SplitFile, Attempt, selectTime}                from '~/util/splits';
+import {SplitFile, selectTime}                         from '~/util/splits';
 import {stringTimeToSeconds, secondsToFormattedString} from '~/util/durations';
 import {Filter}                                        from '~/util/filter';
 import store                                           from '~/util/store';

@@ -1,4 +1,5 @@
 import {Attempt, AutoSplitterSettings} from '~/util/splits';
+import {Filter}                        from '~/util/filter';
 import Vue                             from 'vue';
 
 export interface SavedSettings {
@@ -9,14 +10,6 @@ export interface SavedSettings {
   pageHue?: number,
   cumulateSplits?: boolean,
   [key: string]: any // Won't be used in practice, but we need it to assign default values in a very dynamic way (index.vue)
-}
-
-export interface Filter {
-  type?: string,
-  timeMin?: number,
-  timeMax?: number,
-  active?: boolean,
-  attempts?: number[]
 }
 
 export interface Store {

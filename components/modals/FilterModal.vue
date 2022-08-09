@@ -11,7 +11,8 @@
 <script lang="ts">
 import {SplitFile}                      from '~/util/splits';
 import {Component, Watch, Prop, mixins} from 'nuxt-property-decorator';
-import store, {Filter}                  from '~/util/store';
+import {Filter}                         from '~/util/filter';
+import store                            from '~/util/store';
 import BaseModal                        from '~/components/modals/BaseModal.vue';
 
 @Component
@@ -25,18 +26,9 @@ export default class FilterModal extends mixins(BaseModal) {
 
   @Watch('filters') 
   mashFilters() {
-    if (this.filters.length == 1) {
-      if (this.filters[0].attempts)
-        store.state.filteredAttempts = this.filters[0].attempts;
-    } else if (this.filters.length > 1) {
-      let allLists: number[][] = [];
-      this.filters.forEach(filter => {
-        if (filter.attempts)
-          allLists.push(filter.attempts)
-      });
-
-      store.state.filteredAttempts = allLists.reduce((p, c) => p.filter(e => c.includes(e)));
-    }
+    let attempts = this.parsedSplits.Run.AttemptHistory.Attempt.map(attempt => attempt['@_id']);
+    this.filters.forEach(filter => attempts = attempts.filter(attempt => filter.attempts?.includes(attempt)));
+    store.state.filteredAttempts = attempts;
   }
 }
 </script>

@@ -10,7 +10,8 @@ import {Component, Prop, Vue}     from 'nuxt-property-decorator';
 import {SplitFile}                from '~/util/splits';
 import {GlobalEventEmitter}       from '~/util/globalEvents';
 import {secondsToFormattedString} from '~/util/durations';
-import store, {Filter}            from '~/util/store';
+import {Filter}                   from '~/util/filter';
+import store                      from '~/util/store';
 
 @Component
 export default class FilterRuns extends Vue {
@@ -33,8 +34,8 @@ export default class FilterRuns extends Vue {
 
     let filterDescription = "Active filters:"
     this.filters.forEach(filter => {
-      if (filter.timeMin != undefined && filter.timeMax != undefined) // i don't think these can be undefined at this point, but we need this to satisfy typescript
-        filterDescription += ` ${filter.type}, between ${secondsToFormattedString(filter.timeMin)} and ${secondsToFormattedString(filter.timeMax)};`;
+      if (filter.timeMin != undefined && filter.timeMax != undefined && filter.details != undefined) // i don't think these can be undefined at this point, but we need this to satisfy typescript
+        filterDescription += ` ${filter.details.label}, between ${secondsToFormattedString(filter.timeMin)} and ${secondsToFormattedString(filter.timeMax)};`;
     });
 
     return filterDescription;

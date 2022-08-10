@@ -46,10 +46,17 @@ export default class AttemptSelector extends Vue {
   }
 
   get runAttempts(): Attempt[] {
-    if (this.filterRuns)
-      return this.attempts.filter(a => selectTime(a));
-    else
-      return this.attempts;
+    if (store.state.filteredAttempts.length) {
+        if (this.filterRuns)
+          return this.attempts.filter(a => selectTime(a) && store.state.filteredAttempts.includes(a['@_id']));
+        else
+          return this.attempts.filter(a => store.state.filteredAttempts.includes(a['@_id']));
+    } else {
+        if (this.filterRuns)
+          return this.attempts.filter(a => selectTime(a));
+        else
+          return this.attempts;
+    }
   }
 
   get latestAttemptNumber(): number {

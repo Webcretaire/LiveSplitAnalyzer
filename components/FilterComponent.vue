@@ -23,9 +23,11 @@
           <time-selector v-model="filterData.timeMax"/>
         </b-col>
       </b-row>
-      <b-button @click="activateFilter" variant="success" :disabled="filterData.details.index == -2 || (filterData.timeMin == filterData.timeMax)" class="mt-2">
-        Activate filter
-      </b-button>
+      <div v-b-tooltip.hover :title="allowActivate">
+        <b-button @click="activateFilter" variant="success" class="mt-2" :disabled="allowActivate != ''">
+          Activate filter
+        </b-button>
+      </div>
     </div>
     <div v-else>
       <b-row>
@@ -63,11 +65,37 @@ export default class FilterComponent extends Vue {
 
   filterData: Filter = {details: {label: "", index: -2}, timeMin: 0, timeMax: 0, active: false, attempts: []};
 
- get filterLabels() {
+  get filterLabels() {
     let options = [{index: -1, label: "Global"}];
     this.parsedSplits.Run.Segments.Segment.forEach((split, index) => options.push({index: index, label: split.Name}));
 
     return options;
+  }
+
+  get allowActivate() {
+    if (this.filterData.details?.index == -2 || this.filterData.details?.index == undefined)
+      return "You need to select a split.";
+
+    if (this.filterData.timeMin == this.filterData.timeMax)
+      return "You need to select a time range.";
+
+    if (this.filterList.length == 0)
+      return "No matching runs.";
+
+    return "";
+  }
+
+  get filterList() {
+    const index = this.filterData.details?.index;
+    if (index != undefined) {
+      if (index == -1) {
+        return this.filterListGlobal();
+      } else if (index > -1) {
+        return this.filterListSplits(index);
+      }
+    }
+
+    return [];
   }
 
   filterListGlobal() {
@@ -128,16 +156,7 @@ export default class FilterComponent extends Vue {
     }
 
     this.filterData.active = true;
-
-    const index = this.filterData.details?.index;
-    if (index != undefined) {
-      if (index == -1) {
-        this.filterData.attempts = this.filterListGlobal();
-      } else if (index > -1) {
-        this.filterData.attempts = this.filterListSplits(index);
-      }
-    }
-
+    this.filterData.attempts = this.filterList;
     this.globalFilters.push(this.filterData);
   }
 

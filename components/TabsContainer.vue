@@ -2,7 +2,7 @@
   <b-card class="main-card" no-body>
     <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
-        <div v-if="parsedSplits.Run.HasAttempts">
+        <div v-if="attemptsExist">
           <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
 
           <attempt-stats :attempts="runAttempts"/>
@@ -13,7 +13,7 @@
       </b-tab>
 
       <b-tab title="Attempt analysis">
-        <attempt-analysis-tab v-if="parsedSplits.Run.HasAttempts"
+        <attempt-analysis-tab v-if="attemptsExist"
                               :detailed-segments="detailedSegments"
                               :segments="parsedSplits.Run.Segments.Segment"
                               :attempts="parsedSplits.Run.AttemptHistory.Attempt"
@@ -26,7 +26,7 @@
         <comparison-tab :segments="parsedSplits.Run.Segments.Segment"/>
       </b-tab>
       <b-tab title="Splits analysis">
-        <splits-display-tab v-if="parsedSplits.Run.HasAttempts"
+        <splits-display-tab v-if="attemptsExist"
                             :detailed-segments="detailedSegments"
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                             :segments-holder="parsedSplits.Run.Segments"
@@ -36,7 +36,7 @@
         </div>
       </b-tab>
       <b-tab title="Attempts detail">
-        <attempt-detail-tab v-if="parsedSplits.Run.HasAttempts" :parsed-splits="parsedSplits" :game-cover="gameCover"/>
+        <attempt-detail-tab v-if="attemptsExist" :parsed-splits="parsedSplits" :game-cover="gameCover"/>
         <div v-else>
           <p>No attempts available</p>
         </div>
@@ -71,6 +71,11 @@ export default class TabsContainer extends Vue {
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
 
     return this.filterRuns ? attempts.filter(a => selectTime(a)) : attempts;
+  }
+
+  get attemptsExist() {
+    // AttemptHistory is an empty string in cases where it doesn't exist so we check that it exists and isn't an empty string
+    return this.parsedSplits.Run.AttemptHistory && typeof(this.parsedSplits.Run.AttemptHistory) !== "string";
   }
 }
 </script>

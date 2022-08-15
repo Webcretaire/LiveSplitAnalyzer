@@ -98,7 +98,6 @@ export interface Run {
   'Offset': string;
   'AttemptCount': number;
   'AttemptHistory': AttemptHistory;
-  'HasAttempts': boolean;
   'Segments': Segments;
   'AutoSplitterSettings': AutoSplitterSettings;
   '@_version': string;

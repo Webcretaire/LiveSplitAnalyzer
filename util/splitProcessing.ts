@@ -153,13 +153,10 @@ export const parseSplitFile = (fileContent: string): SplitFile => {
   // Make sure all properties that can be an array or an object are an array
   if (out.Run.Metadata.Variables)
     out.Run.Metadata.Variables.Variable = asArray(out.Run.Metadata.Variables.Variable);
-  if (out.Run.AttemptHistory) {
-    out.Run.HasAttempts = true;
+  if (out.Run.AttemptHistory)
     out.Run.AttemptHistory.Attempt = asArray(out.Run.AttemptHistory.Attempt);
-  } else {
-    out.Run.HasAttempts = false;
+  else
     out.Run.Segments.Segment       = asArray(out.Run.Segments.Segment);
-  }
   out.Run.Segments.Segment.forEach((val, i, arr) => {
     if (val.SegmentHistory)
       arr[i].SegmentHistory!.Time = asArray(val.SegmentHistory.Time);

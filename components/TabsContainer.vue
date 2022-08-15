@@ -2,28 +2,44 @@
   <b-card class="main-card" no-body>
     <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
-        <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
+        <div v-if="parsedSplits.Run.HasAttempts">
+          <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
 
-        <attempt-stats :attempts="runAttempts"/>
+          <attempt-stats :attempts="runAttempts"/>
+        </div>
+        <div v-else>
+          <p>No attempts available</p>
+        </div>
       </b-tab>
 
       <b-tab title="Attempt analysis">
-        <attempt-analysis-tab :detailed-segments="detailedSegments"
+        <attempt-analysis-tab v-if="parsedSplits.Run.HasAttempts"
+                              :detailed-segments="detailedSegments"
                               :segments="parsedSplits.Run.Segments.Segment"
                               :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                               :parsed-splits="parsedSplits"/>
+        <div v-else>
+          <p>No attempts available</p>
+        </div>
       </b-tab>
       <b-tab title="Comparisons">
         <comparison-tab :segments="parsedSplits.Run.Segments.Segment"/>
       </b-tab>
       <b-tab title="Splits analysis">
-        <splits-display-tab :detailed-segments="detailedSegments"
+        <splits-display-tab v-if="parsedSplits.Run.HasAttempts"
+                            :detailed-segments="detailedSegments"
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
                             :segments-holder="parsedSplits.Run.Segments"
                             :parsed-splits="parsedSplits"/>
+        <div v-else>
+          <p>No attempts available</p>
+        </div>
       </b-tab>
       <b-tab title="Attempts detail">
-        <attempt-detail-tab :parsed-splits="parsedSplits" :game-cover="gameCover"/>
+        <attempt-detail-tab v-if="parsedSplits.Run.HasAttempts" :parsed-splits="parsedSplits" :game-cover="gameCover"/>
+        <div v-else>
+          <p>No attempts available</p>
+        </div>
       </b-tab>
     </b-tabs>
   </b-card>

@@ -74,8 +74,7 @@ export default class TabsContainer extends Vue {
   }
 
   get attemptsExist() {
-    // AttemptHistory is an empty string in cases where it doesn't exist so we check that it exists and isn't an empty string
-    return this.parsedSplits.Run.AttemptHistory && typeof(this.parsedSplits.Run.AttemptHistory) !== "string";
+    return !!this.parsedSplits.Run.AttemptHistory;
   }
 }
 </script>

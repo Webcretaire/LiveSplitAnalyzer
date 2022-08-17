@@ -1,6 +1,6 @@
 <template>
   <b-button v-b-tooltip.hover.left="tooltip" pill size="lg" :variant="variant" @click="filterRuns"
-            class="float-button">
+            class="float-button" :disabled="!parsedSplits.Run.AttemptHistory">
     <font-awesome-icon icon="filter"/>
   </b-button>
 </template>

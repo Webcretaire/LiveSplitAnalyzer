@@ -79,9 +79,6 @@ export default class FilterComponent extends Vue {
     if (this.filterData.timeMin == this.filterData.timeMax)
       return "You need to select a time range.";
 
-    if (this.filterList.length == 0)
-      return "No matching runs.";
-
     return "";
   }
 

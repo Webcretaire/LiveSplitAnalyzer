@@ -53,6 +53,7 @@ import {
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import {DetailedSegment}      from '~/util/splitProcessing';
+import store                  from '~/util/store';
 
 @Component
 export default class TabsContainer extends Vue {
@@ -74,6 +75,9 @@ export default class TabsContainer extends Vue {
   }
 
   get attemptsExist() {
+    if (store.state.filters.length)
+      return this.parsedSplits.Run.AttemptHistory && store.state.filteredAttempts.length;
+
     return !!this.parsedSplits.Run.AttemptHistory;
   }
 }

@@ -2,7 +2,7 @@
   <b-card class="main-card" no-body>
     <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
-        <div v-if="attemptsExist">
+        <div v-if="parsedSplits.Run.AttemptHistory">
           <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
 
           <attempt-stats :attempts="runAttempts"/>

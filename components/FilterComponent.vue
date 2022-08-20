@@ -44,12 +44,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
-import {SplitFile, selectTime}                         from '~/util/splits';
-import {stringTimeToSeconds, secondsToFormattedString} from '~/util/durations';
-import {Filter}                                        from '~/util/filter';
-import store                                           from '~/util/store';
-import Multiselect                                     from 'vue-multiselect';
+import {Component, Prop, Vue}                           from 'nuxt-property-decorator';
+import {SplitFile, selectTime, OptionalRealAndGameTime, SegmentHistoryTime, Attempt} from '~/util/splits';
+import {stringTimeToSeconds, secondsToFormattedString}  from '~/util/durations';
+import {Filter, Global, placeholderIndex}               from '~/util/filter';
+import store                                            from '~/util/store';
+import Multiselect                                      from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
 export default class FilterComponent extends Vue {
@@ -63,17 +63,17 @@ export default class FilterComponent extends Vue {
 
   globalFilters: Filter[] = store.state.filters;
 
-  filterData: Filter = {details: {label: "", index: -2}, timeMin: 0, timeMax: 0, active: false, attempts: []};
+  filterData: Filter = {details: {label: "", index: placeholderIndex}, timeMin: 0, timeMax: 0, active: false, attempts: []};
 
   get filterLabels() {
-    let options = [{index: -1, label: "Global"}];
+    const options = [{index: Global, label: "Global"}];
     this.parsedSplits.Run.Segments.Segment.forEach((split, index) => options.push({index: index, label: split.Name}));
 
     return options;
   }
 
   get allowActivate() {
-    if (this.filterData.details?.index == -2 || this.filterData.details?.index == undefined)
+    if (this.filterData.details?.index == placeholderIndex || this.filterData.details?.index == undefined)
       return "You need to select a split.";
 
     if (this.filterData.timeMin == this.filterData.timeMax)
@@ -82,60 +82,36 @@ export default class FilterComponent extends Vue {
     return "";
   }
 
-  get filterList() {
+  get filterListSelect() {
     const index = this.filterData.details?.index;
-    if (index != undefined) {
-      if (index == -1) {
-        return this.filterListGlobal();
-      } else if (index > -1) {
-        return this.filterListSplits(index);
-      }
+    const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+    if (index == undefined) 
+      return [];
+    if (index == Global) {
+      return this.filterList(attempts);
+    } else if (index > Global) {
+      const splitTimes = this.parsedSplits.Run.Segments.Segment[index].SegmentHistory?.Time;
+      if (splitTimes)
+        return this.filterList(splitTimes);
     }
-
-    return [];
   }
 
-  filterListGlobal() {
-    let filteredAttempts: number[] = [];
-    const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+  filterList(toFilter: SegmentHistoryTime[] | Attempt[]) {
+    const filteredAttempts: number[] = [];
     const timeMin = this.filterData.timeMin;
     const timeMax = this.filterData.timeMax;
 
-    attempts.forEach(attempt => {
-      const attemptTime = selectTime(attempt);
+    toFilter.forEach(run => {
+      const time = selectTime(run);
 
-      if (attemptTime != undefined && timeMin != undefined && timeMax != undefined) {
-        const secondsAttemptTime = stringTimeToSeconds(attemptTime);
+      if (time != undefined && timeMin != undefined && timeMax != undefined) {
+        const secondsTime = stringTimeToSeconds(time);
 
-        if (secondsAttemptTime > timeMin && secondsAttemptTime < timeMax && attempt['@_id'] > 0) {
-          filteredAttempts.push(attempt['@_id']);
+        if (secondsTime > timeMin && secondsTime < timeMax && run['@_id'] > 0) {
+          filteredAttempts.push(run['@_id']);
         }
       }
     });
-
-    return filteredAttempts;
-  }
-
-  filterListSplits(index: number) {
-    let filteredAttempts: number[] = [];
-    const timeMin = this.filterData.timeMin;
-    const timeMax = this.filterData.timeMax;
-
-    const splitTimes = this.parsedSplits.Run.Segments.Segment[index].SegmentHistory?.Time;
-
-    if (splitTimes) {
-      splitTimes.forEach(splitTime => {
-        const chosenSplitTime = selectTime(splitTime);
-
-        if (chosenSplitTime != undefined && timeMin != undefined && timeMax != undefined) {
-          const secondsSplitTime = stringTimeToSeconds(chosenSplitTime);
-
-          if (secondsSplitTime > timeMin && secondsSplitTime < timeMax && splitTime['@_id'] > 0) {
-              filteredAttempts.push(splitTime['@_id']);
-          }
-        }
-      });
-    }
 
     return filteredAttempts;
   }
@@ -153,12 +129,12 @@ export default class FilterComponent extends Vue {
     }
 
     this.filterData.active = true;
-    this.filterData.attempts = this.filterList;
+    this.filterData.attempts = this.filterListSelect;
     this.globalFilters.push(this.filterData);
   }
 
   deleteFilter() {
-    this.filterData = {details: {label: "", index: -2}, timeMin: 0, timeMax: 0, active: false};
+    this.filterData = {details: {label: "", index: placeholderIndex}, timeMin: 0, timeMax: 0, active: false};
     this.globalFilters.splice(this.filterIndex - 1, 1);
   }
 

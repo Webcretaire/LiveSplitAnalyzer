@@ -48,14 +48,14 @@ export default class AttemptSelector extends Vue {
   get runAttempts(): Attempt[] {
     if (store.state.filters.length) {
         if (this.filterRuns)
-          return this.attempts.filter(a => selectTime(a) && store.state.filteredAttempts.includes(a['@_id']));
+          return this.attempts.filter(a => selectTime(a) && store.state.filteredAttempts.includes(a['@_id'])); // complete runs that fit the active filters
         else
-          return this.attempts.filter(a => store.state.filteredAttempts.includes(a['@_id']));
+          return this.attempts.filter(a => store.state.filteredAttempts.includes(a['@_id'])); // complete/incomplete runs that fit the active filters
     } else {
         if (this.filterRuns)
-          return this.attempts.filter(a => selectTime(a));
+          return this.attempts.filter(a => selectTime(a)); // complete runs
         else
-          return this.attempts;
+          return this.attempts; // all runs
     }
   }
 

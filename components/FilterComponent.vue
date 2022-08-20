@@ -44,12 +44,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue}                           from 'nuxt-property-decorator';
-import {SplitFile, selectTime, OptionalRealAndGameTime, SegmentHistoryTime, Attempt} from '~/util/splits';
-import {stringTimeToSeconds, secondsToFormattedString}  from '~/util/durations';
-import {Filter, Global, placeholderIndex}               from '~/util/filter';
-import store                                            from '~/util/store';
-import Multiselect                                      from 'vue-multiselect';
+import {Component, Prop, Vue}                               from 'nuxt-property-decorator';
+import {SplitFile, selectTime, SegmentHistoryTime, Attempt} from '~/util/splits';
+import {stringTimeToSeconds, secondsToFormattedString}      from '~/util/durations';
+import {Filter, Global, placeholderIndex}                   from '~/util/filter';
+import store                                                from '~/util/store';
+import Multiselect                                          from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
 export default class FilterComponent extends Vue {

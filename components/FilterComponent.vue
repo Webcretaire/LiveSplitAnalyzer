@@ -47,7 +47,7 @@
 import {Component, Prop, Vue}                               from 'nuxt-property-decorator';
 import {SplitFile, selectTime, SegmentHistoryTime, Attempt} from '~/util/splits';
 import {stringTimeToSeconds, secondsToFormattedString}      from '~/util/durations';
-import {Filter, Global, placeholderIndex}                   from '~/util/filter';
+import {Filter, FILTER_GLOBAL, FILTER_DEFAULT_INDEX}        from '~/util/filter';
 import store                                                from '~/util/store';
 import Multiselect                                          from 'vue-multiselect';
 
@@ -63,17 +63,17 @@ export default class FilterComponent extends Vue {
 
   globalFilters: Filter[] = store.state.filters;
 
-  filterData: Filter = {details: {label: "", index: placeholderIndex}, timeMin: 0, timeMax: 0, active: false, attempts: []};
+  filterData: Filter = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, active: false, attempts: []};
 
   get filterLabels() {
-    const options = [{index: Global, label: "Global"}];
+    const options = [{index: FILTER_GLOBAL, label: "Global"}];
     this.parsedSplits.Run.Segments.Segment.forEach((split, index) => options.push({index: index, label: split.Name}));
 
     return options;
   }
 
   get allowActivate() {
-    if (this.filterData.details?.index == placeholderIndex || this.filterData.details?.index == undefined)
+    if (this.filterData.details?.index == FILTER_DEFAULT_INDEX || this.filterData.details?.index == undefined)
       return "You need to select a split.";
 
     if (this.filterData.timeMin == this.filterData.timeMax)
@@ -87,9 +87,9 @@ export default class FilterComponent extends Vue {
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
     if (index == undefined) 
       return [];
-    if (index == Global) {
+    if (index == FILTER_GLOBAL) {
       return this.filterList(attempts);
-    } else if (index > Global) {
+    } else if (index > FILTER_GLOBAL) {
       const splitTimes = this.parsedSplits.Run.Segments.Segment[index].SegmentHistory?.Time;
       if (splitTimes)
         return this.filterList(splitTimes);
@@ -134,7 +134,7 @@ export default class FilterComponent extends Vue {
   }
 
   deleteFilter() {
-    this.filterData = {details: {label: "", index: placeholderIndex}, timeMin: 0, timeMax: 0, active: false};
+    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, active: false};
     this.globalFilters.splice(this.filterIndex - 1, 1);
   }
 

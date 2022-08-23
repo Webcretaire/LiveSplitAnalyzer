@@ -219,7 +219,11 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get timesToPlot(): SegmentHistoryTime[] {
-    const individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
+    let individualTimes;
+    if (store.state.filters.length)
+      individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0 && store.state.filteredAttempts.includes(t['@_id']));
+    else
+      individualTimes = (this.split.SegmentHistory?.Time || []).filter(t => t['@_id'] > 0);
 
     if (!this.cumulateSplits) return individualTimes;
 

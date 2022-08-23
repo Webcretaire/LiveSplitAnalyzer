@@ -1,6 +1,6 @@
 <template>
   <b-modal :ref="modalRef" title="Filter runs" class="text-center" @hidden="destroyModal" hide-footer centered
-           size="lg">
+           size="xl">
     <filter-component :filterIndex="filterIndex"
                       v-for="filterIndex in filters.length + 1"
                       :key="`filter-${filterIndex}`"

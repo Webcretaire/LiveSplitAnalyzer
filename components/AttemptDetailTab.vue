@@ -23,6 +23,7 @@ import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {SegmentNameIndex}            from '~/util/splitProcessing';
 import {stringTimeToSeconds}         from '~/util/durations';
+import {Filter}                      from '~/util/filter';
 import store                         from '~/util/store';
 
 @Component
@@ -39,13 +40,13 @@ export default class AttemptDetailTab extends Vue {
 
   scrollTimeout: boolean = false;
 
-  filters: number = store.state.filters.length;
+  filters: Filter[] = store.state.filters;
 
   filteredAttempts: number[] = store.state.filteredAttempts;
 
   get attemptsLatestToOldest() {
     let attempts;
-    if (this.filters)
+    if (this.filters.length)
       attempts = [...this.parsedSplits.Run.AttemptHistory.Attempt].filter(a => this.filteredAttempts.includes(a['@_id']));
     else
       attempts = [...this.parsedSplits.Run.AttemptHistory.Attempt];
@@ -55,6 +56,7 @@ export default class AttemptDetailTab extends Vue {
 
   @Watch('attemptsLatestToOldest', {immediate: true})
   updateLastsplitByAttempt() {
+    console.log("lol");
     withLoad(() =>
       offload(
         OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT,
@@ -95,7 +97,7 @@ export default class AttemptDetailTab extends Vue {
   }
 
   get maxAttempts() {
-    if (this.filters)
+    if (this.filters.length)
       return this.filteredAttempts.length;
 
     return this.parsedSplits.Run.AttemptHistory.Attempt.length;

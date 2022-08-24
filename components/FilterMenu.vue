@@ -40,7 +40,7 @@ import store                                                from '~/util/store';
 import Multiselect                                          from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
-export default class FilterComponent extends Vue {
+export default class FilterMenu extends Vue {
   @Prop()
   parsedSplits!: SplitFile;
 

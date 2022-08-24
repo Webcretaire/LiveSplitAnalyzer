@@ -18,7 +18,7 @@ import {secondsToFormattedString}     from '~/util/durations';
 import {Filter, FILTER_DEFAULT_INDEX} from '~/util/filter';
 import store                          from '~/util/store';
 @Component
-export default class FilterDescription extends Vue {
+export default class ActiveFilter extends Vue {
   @Prop()
   filterIndex!: number;
 

@@ -56,7 +56,6 @@ export default class AttemptDetailTab extends Vue {
 
   @Watch('attemptsLatestToOldest', {immediate: true})
   updateLastsplitByAttempt() {
-    console.log("lol");
     withLoad(() =>
       offload(
         OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT,

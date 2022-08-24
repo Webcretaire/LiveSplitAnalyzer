@@ -1,43 +1,31 @@
 <template>
   <div class="text-center">
-    <div v-if="!filterData.active">
-      <b-row class="mb-3">
-        <b-col cols="3" class="mt-2">
-          Only display runs with a
-        </b-col>
-        <b-col cols="7">
-          <multiselect v-model="filterData.details" :options="filterLabels" track-by="index" label="label"/>
-        </b-col>
-        <b-col cols="2" class="mt-2">
-          time between
-        </b-col>
-      </b-row>
-      <b-row class="mt-3">
-        <b-col cols="5">
-          <time-selector v-model="filterData.timeMin"/>
-        </b-col>
-        <b-col cols="2" class="mt-2">
-          and
-        </b-col>
-        <b-col cols="5">
-          <time-selector v-model="filterData.timeMax"/>
-        </b-col>
-      </b-row>
-      <div v-b-tooltip.hover :title="allowActivate">
-        <b-button @click="activateFilter" variant="success" class="mt-2" :disabled="allowActivate != ''">
-          Activate filter
-        </b-button>
-      </div>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col cols="9" class="mt-auto">
-          <h5>{{ filterDescription }}</h5>
-        </b-col>
-        <b-col cols="3">
-          <b-button @click="deleteFilter" variant="danger" class="mt-2">Delete filter</b-button>
-        </b-col>
-      </b-row>
+    <b-row class="mb-3">
+      <b-col cols="3" class="mt-2">
+        Only display runs with a
+      </b-col>
+      <b-col cols="7">
+        <multiselect v-model="filterData.details" :options="filterLabels" track-by="index" label="label"/>
+      </b-col>
+      <b-col cols="2" class="mt-2">
+        time between
+      </b-col>
+    </b-row>
+    <b-row class="mt-3">
+      <b-col cols="5">
+        <time-selector v-model="filterData.timeMin"/>
+      </b-col>
+      <b-col cols="2" class="mt-2">
+        and
+      </b-col>
+      <b-col cols="5">
+        <time-selector v-model="filterData.timeMax"/>
+      </b-col>
+    </b-row>
+    <div v-b-tooltip.hover :title="allowActivate">
+      <b-button @click="activateFilter" variant="success" class="mt-2" :disabled="allowActivate != ''">
+        Activate filter
+      </b-button>
     </div>
     <hr>
   </div>
@@ -46,16 +34,13 @@
 <script lang="ts">
 import {Component, Prop, Vue}                               from 'nuxt-property-decorator';
 import {SplitFile, selectTime, SegmentHistoryTime, Attempt} from '~/util/splits';
-import {stringTimeToSeconds, secondsToFormattedString}      from '~/util/durations';
+import {stringTimeToSeconds}                                from '~/util/durations';
 import {Filter, FILTER_GLOBAL, FILTER_DEFAULT_INDEX}        from '~/util/filter';
 import store                                                from '~/util/store';
 import Multiselect                                          from 'vue-multiselect';
 
 @Component({components: {Multiselect}})
 export default class FilterComponent extends Vue {
-  @Prop()
-  filterIndex!: number;
-
   @Prop()
   parsedSplits!: SplitFile;
 
@@ -116,11 +101,6 @@ export default class FilterComponent extends Vue {
     return filteredAttempts;
   }
 
-  get filterDescription() {
-    if (this.filterData.timeMin != undefined && this.filterData.timeMax != undefined && this.filterData.details != undefined)
-      return `Active filter: ${this.filterData.details.label}, between ${secondsToFormattedString(this.filterData.timeMin)} and ${secondsToFormattedString(this.filterData.timeMax)}`;
-  }
-
   activateFilter() {
     if (this.filterData.timeMin && this.filterData.timeMax){
       if (this.filterData.timeMin > this.filterData.timeMax) {
@@ -131,17 +111,6 @@ export default class FilterComponent extends Vue {
     this.filterData.active = true;
     this.filterData.attempts = this.filterListSelect;
     this.globalFilters.push(this.filterData);
-  }
-
-  deleteFilter() {
-    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, active: false};
-    this.globalFilters.splice(this.filterIndex - 1, 1);
-  }
-
-  mounted() {
-    const storedFilterData = this.globalFilters[this.filterIndex - 1];
-    if (storedFilterData)
-      this.filterData = storedFilterData;
   }
 }
 </script>

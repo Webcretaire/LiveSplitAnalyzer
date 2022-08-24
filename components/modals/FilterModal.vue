@@ -1,10 +1,11 @@
 <template>
   <b-modal :ref="modalRef" title="Filter runs" class="text-center" @hidden="destroyModal" hide-footer centered
            size="xl">
-    <filter-component :filterIndex="filterIndex"
-                      v-for="filterIndex in filters.length + 1"
-                      :key="`filter-${filterIndex}`"
-                      :parsed-splits="parsedSplits"/>
+    <active-filter v-for="filterIndex in filters.length"
+                   :key="`activefilter-${filterIndex}`"
+                   :filter-index="filterIndex"
+                   :parsed-splits="parsedSplits"/>
+    <filter-menu   :parsed-splits="parsedSplits"/>
   </b-modal>
 </template>
 

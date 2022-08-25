@@ -27,12 +27,13 @@ export default class ActiveFilter extends Vue {
   globalFilters: Filter[] = store.state.filters;
 
   get displayText() {
-    if (this.filterData.timeMin != undefined && this.filterData.timeMax != undefined && this.filterData.details != undefined)
+    if (this.filterData.details)
       return `Active filter: ${this.filterData.details.label}, between ${secondsToFormattedString(this.filterData.timeMin)} and ${secondsToFormattedString(this.filterData.timeMax)}`;
+    else return "";
   }
 
   deleteFilter() {
-    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, active: false};
+    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
     this.globalFilters.splice(this.filterIndex - 1, 1);
   }
 }

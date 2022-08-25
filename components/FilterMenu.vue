@@ -13,13 +13,13 @@
     </b-row>
     <b-row class="mt-3">
       <b-col cols="5">
-        <time-selector v-model="filterData.timeMin"/>
+        <time-selector v-model.number="filterData.timeMin"/>
       </b-col>
       <b-col cols="2" class="mt-2">
         and
       </b-col>
       <b-col cols="5">
-        <time-selector v-model="filterData.timeMax"/>
+        <time-selector v-model.number="filterData.timeMax"/>
       </b-col>
     </b-row>
     <div v-b-tooltip.hover :title="allowActivate">
@@ -48,7 +48,7 @@ export default class FilterMenu extends Vue {
 
   globalFilters: Filter[] = store.state.filters;
 
-  filterData: Filter = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, active: false, attempts: []};
+  filterData: Filter = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
 
   get filterLabels() {
     const options = [{index: FILTER_GLOBAL, label: "Global"}];
@@ -79,6 +79,8 @@ export default class FilterMenu extends Vue {
       if (splitTimes)
         return this.filterList(splitTimes);
     }
+
+    return []; // so that this is never undefined
   }
 
   filterList(toFilter: SegmentHistoryTime[] | Attempt[]) {
@@ -89,7 +91,7 @@ export default class FilterMenu extends Vue {
     toFilter.forEach(run => {
       const time = selectTime(run);
 
-      if (time != undefined && timeMin != undefined && timeMax != undefined) {
+      if (time != undefined) {
         const secondsTime = stringTimeToSeconds(time);
 
         if (secondsTime > timeMin && secondsTime < timeMax && run['@_id'] > 0) {
@@ -102,15 +104,13 @@ export default class FilterMenu extends Vue {
   }
 
   activateFilter() {
-    if (this.filterData.timeMin && this.filterData.timeMax){
-      if (this.filterData.timeMin > this.filterData.timeMax) {
-        [this.filterData.timeMin, this.filterData.timeMax] = [this.filterData.timeMax, this.filterData.timeMin];
-      }
+    if (this.filterData.timeMin > this.filterData.timeMax) {
+      [this.filterData.timeMin, this.filterData.timeMax] = [this.filterData.timeMax, this.filterData.timeMin];
     }
 
-    this.filterData.active = true;
     this.filterData.attempts = this.filterListSelect;
     this.globalFilters.push(this.filterData);
+    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
   }
 }
 </script>

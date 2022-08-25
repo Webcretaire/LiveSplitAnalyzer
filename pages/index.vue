@@ -205,6 +205,9 @@ export default class IndexPage extends Vue {
   @Watch('splitFile')
   fileChange(newVal: string) {
     withLoad(() => {
+      this.globalState.filters = [];
+      this.globalState.filteredAttempts = [];
+
       // Not very elegant, but efficient and decently fast
       store.state.hasGameTime = newVal.includes('<GameTime>');
 

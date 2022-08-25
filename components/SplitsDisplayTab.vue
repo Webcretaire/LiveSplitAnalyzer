@@ -14,7 +14,7 @@
       <loading-switch v-model="savedSettings.cumulateSplits">
         Show pace so far instead of individual split times
         <span v-b-tooltip.hover
-              title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient"
+              title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient. Filters will also be disabled when this option is activated."
               class="help-question text-warning">
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>

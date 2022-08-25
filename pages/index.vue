@@ -47,6 +47,7 @@
     <div class="floating-buttons-holder">
       <global-settings v-if="parsedSplits"/>
       <download-splits v-if="parsedSplits" :parsed-splits="parsedSplits"/>
+      <filter-runs v-if="parsedSplits" :parsed-splits="parsedSplits"/>
     </div>
 
     <component v-if="componentInstance" :is="componentInstance" v-bind="modalArgs"/>
@@ -343,7 +344,7 @@ footer {
   max-height: 30vh;
 }
 
-@for $i from 1 through 2 {
+@for $i from 1 through 3 {
   .floating-buttons-holder > :nth-child(#{$i}) {
     position: fixed;
     right: 1rem;

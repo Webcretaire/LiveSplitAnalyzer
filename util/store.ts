@@ -1,4 +1,5 @@
 import {Attempt, AutoSplitterSettings} from '~/util/splits';
+import {Filter}                        from '~/util/filter';
 import Vue                             from 'vue';
 
 export interface SavedSettings {
@@ -17,7 +18,9 @@ export interface Store {
   useRealTime: boolean,
   splitFileIsModified: boolean,
   PB: Attempt | null,
-  autoSplitterSettings: AutoSplitterSettings | null
+  autoSplitterSettings: AutoSplitterSettings | null,
+  filters: Filter[],
+  filteredAttempts: number[]
 }
 
 const state = Vue.observable({
@@ -26,7 +29,9 @@ const state = Vue.observable({
   useRealTime: false,
   splitFileIsModified: false,
   PB: null,
-  autoSplitterSettings: null
+  autoSplitterSettings: null,
+  filters: [],
+  filteredAttempts: []
 } as Store);
 
 export default {

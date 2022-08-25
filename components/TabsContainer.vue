@@ -2,7 +2,7 @@
   <b-card class="main-card" no-body>
     <b-tabs class="main-tabs" card pills align="center" lazy>
       <b-tab title="Summary" active>
-        <div v-if="attemptsExist">
+        <div v-if="parsedSplits.Run.AttemptHistory">
           <run-overview :run="parsedSplits.Run" class="mb-4" :game-cover="gameCover"/>
 
           <attempt-stats :attempts="runAttempts"/>
@@ -53,6 +53,7 @@ import {
 }                             from '~/util/splits';
 import {Component, Prop, Vue} from 'nuxt-property-decorator';
 import {DetailedSegment}      from '~/util/splitProcessing';
+import store                  from '~/util/store';
 
 @Component
 export default class TabsContainer extends Vue {
@@ -74,6 +75,9 @@ export default class TabsContainer extends Vue {
   }
 
   get attemptsExist() {
+    if (store.state.filters.length)
+      return this.parsedSplits.Run.AttemptHistory && store.state.filteredAttempts.length;
+
     return !!this.parsedSplits.Run.AttemptHistory;
   }
 }

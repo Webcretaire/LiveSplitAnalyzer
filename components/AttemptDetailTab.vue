@@ -9,7 +9,7 @@
     <b-button variant="light"
               class="mb-3"
               @click="loadMore"
-              v-if="attemptsToRender !== parsedSplits.Run.AttemptHistory.Attempt.length - 1">
+              v-if="attemptsToRender !== maxAttempts">
       Load more
     </b-button>
   </div>
@@ -23,6 +23,8 @@ import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {SegmentNameIndex}            from '~/util/splitProcessing';
 import {stringTimeToSeconds}         from '~/util/durations';
+import {Filter}                      from '~/util/filter';
+import store                         from '~/util/store';
 
 @Component
 export default class AttemptDetailTab extends Vue {
@@ -38,8 +40,17 @@ export default class AttemptDetailTab extends Vue {
 
   scrollTimeout: boolean = false;
 
+  filters: Filter[] = store.state.filters;
+
+  filteredAttempts: number[] = store.state.filteredAttempts;
+
   get attemptsLatestToOldest() {
-    const attempts = [...this.parsedSplits.Run.AttemptHistory.Attempt];
+    let attempts;
+    if (this.filters.length)
+      attempts = [...this.parsedSplits.Run.AttemptHistory.Attempt].filter(a => this.filteredAttempts.includes(a['@_id']));
+    else
+      attempts = [...this.parsedSplits.Run.AttemptHistory.Attempt];
+
     return attempts.reverse().slice(0, this.attemptsToRender);
   }
 
@@ -84,6 +95,13 @@ export default class AttemptDetailTab extends Vue {
     ).reverse();
   }
 
+  get maxAttempts() {
+    if (this.filters.length)
+      return this.filteredAttempts.length;
+
+    return this.parsedSplits.Run.AttemptHistory.Attempt.length;
+  }
+
   handleScroll() {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - window.innerHeight / 10) {
       if (this.scrollTimeout) return;
@@ -97,13 +115,15 @@ export default class AttemptDetailTab extends Vue {
 
   loadMore() {
     this.attemptsToRender = Math.min(
-      this.parsedSplits.Run.AttemptHistory.Attempt.length - 1,
+      this.maxAttempts,
       this.attemptsToRender + 30
     );
   }
 
   created() {
     window.addEventListener('scroll', this.handleScroll);
+
+    this.attemptsToRender = Math.min(30, this.maxAttempts);
   }
 
   destroyed() {

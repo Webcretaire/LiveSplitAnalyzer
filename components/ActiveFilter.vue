@@ -8,7 +8,7 @@
         <b-button @click="deleteFilter" variant="danger" class="mt-2">Delete filter</b-button>
       </b-col>
     </b-row>
-    <hr>
+    <hr/>
   </div>
 </template>
 

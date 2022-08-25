@@ -14,7 +14,7 @@
       <loading-switch v-model="savedSettings.cumulateSplits">
         Show pace so far instead of individual split times
         <span v-b-tooltip.hover
-              title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient. Filters will also be disabled when this option is activated."
+              title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient."
               class="help-question text-warning">
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
@@ -105,10 +105,21 @@ export default class SplitsDisplayTab extends Vue {
 
   @Watch('savedSettings.cumulateSplits', {immediate: true})
   @Watch('segmentsHolder.Segment', {deep: true})
+  @Watch('globalState.filters', {deep: true})
+  @Watch('globalState.filteredAttempts', {deep: true})
   updateCumulatedSplitTimes() {
     if (!this.savedSettings.cumulateSplits) return;
 
-    withLoad(() => offload(OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS, this.segmentsHolder.Segment)
+    const consideredSegments = this.globalState.filters.length
+      ? this.segmentsHolder.Segment.map(segment => {
+        const out = {...segment};
+        if (out.SegmentHistory)
+          out.SegmentHistory = { Time: out.SegmentHistory.Time.filter(t => this.globalState.filteredAttempts.includes(t['@_id'])) };
+        return out;
+      })
+      : this.segmentsHolder.Segment;
+
+    withLoad(() => offload(OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS, consideredSegments)
       .then(r => this.cumulatedSplitTimes = r));
   }
 }

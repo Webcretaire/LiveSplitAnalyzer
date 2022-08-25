@@ -22,12 +22,11 @@
         <time-selector v-model.number="filterData.timeMax"/>
       </b-col>
     </b-row>
-    <div v-b-tooltip.hover :title="allowActivate">
-      <b-button @click="activateFilter" variant="success" class="mt-2" :disabled="allowActivate != ''">
-        Activate filter
+    <div v-b-tooltip.hover :title="formError">
+      <b-button @click="activateFilter" variant="success" class="mt-2" :disabled="formError !== ''">
+        Add filter
       </b-button>
     </div>
-    <hr>
   </div>
 </template>
 
@@ -44,33 +43,31 @@ export default class FilterMenu extends Vue {
   @Prop()
   parsedSplits!: SplitFile;
 
-  useRealTime: boolean = store.state.useRealTime;
-
   globalFilters: Filter[] = store.state.filters;
 
-  filterData: Filter = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
+  filterData: Filter = {details: {label: '', index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
 
   get filterLabels() {
-    const options = [{index: FILTER_GLOBAL, label: "Global"}];
+    const options = [{index: FILTER_GLOBAL, label: 'Global'}];
     this.parsedSplits.Run.Segments.Segment.forEach((split, index) => options.push({index: index, label: split.Name}));
 
     return options;
   }
 
-  get allowActivate() {
+  get formError() {
     if (this.filterData.details?.index == FILTER_DEFAULT_INDEX || this.filterData.details?.index == undefined)
-      return "You need to select a split.";
+      return 'You need to select a split.';
 
     if (this.filterData.timeMin == this.filterData.timeMax)
-      return "You need to select a time range.";
+      return 'You need to select a time range.';
 
-    return "";
+    return '';
   }
 
   get filterListSelect() {
-    const index = this.filterData.details?.index;
+    const index    = this.filterData.details?.index;
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
-    if (index == undefined) 
+    if (index == undefined)
       return [];
     if (index == FILTER_GLOBAL) {
       return this.filterList(attempts);
@@ -85,8 +82,8 @@ export default class FilterMenu extends Vue {
 
   filterList(toFilter: SegmentHistoryTime[] | Attempt[]) {
     const filteredAttempts: number[] = [];
-    const timeMin = this.filterData.timeMin;
-    const timeMax = this.filterData.timeMax;
+    const timeMin                    = this.filterData.timeMin;
+    const timeMax                    = this.filterData.timeMax;
 
     toFilter.forEach(run => {
       const time = selectTime(run);
@@ -110,7 +107,7 @@ export default class FilterMenu extends Vue {
 
     this.filterData.attempts = this.filterListSelect;
     this.globalFilters.push(this.filterData);
-    this.filterData = {details: {label: "", index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
+    this.filterData = {details: {label: '', index: FILTER_DEFAULT_INDEX}, timeMin: 0, timeMax: 0, attempts: []};
   }
 }
 </script>

@@ -16,6 +16,7 @@ import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
 import {GOLD_COLOR, LINE_COLOR}      from '~/util/plot';
 import {SegmentNameIndex}            from '~/util/splitProcessing';
+import store                         from '~/util/store';
 
 @Component({components: {Plotly}})
 export default class ResetStats extends Vue {
@@ -24,6 +25,8 @@ export default class ResetStats extends Vue {
 
   @Prop()
   segments!: Segment[];
+
+  globalState = store.state;
 
   lastSplitByAttempt: SegmentNameIndex[] = [];
 
@@ -46,9 +49,15 @@ export default class ResetStats extends Vue {
 
   @Watch('attempts', {immediate: true})
   @Watch('segments')
+  @Watch('globalState.filters', {deep: true})
+  @Watch('globalState.filteredAttempts', {deep: true})
   updateLastsplitByAttempt() {
+    const attempts = this.globalState.filters.length
+      ? this.attempts.filter(a => this.globalState.filteredAttempts.includes(a['@_id']))
+      : this.attempts;
+
     withLoad(() =>
-      offload(OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT, this.segments, this.attempts)
+      offload(OffloadWorkerOperation.LAST_SPLIT_NAME_REACHED_BY_ATTEMPT, this.segments, attempts)
         .then(r => this.lastSplitByAttempt = r)
     );
   }

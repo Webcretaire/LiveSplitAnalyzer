@@ -9,14 +9,15 @@
 import {Component, Prop, Vue, Watch} from 'nuxt-property-decorator';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
-import {Plotly}                      from 'vue-plotly';
-import {Attempt, Segment}            from '@/util/splits';
-import {offload}                     from '~/util/offloadWorker';
+import {Plotly}                       from 'vue-plotly';
+import {Attempt, Segment, selectTime} from '@/util/splits';
+import {offload}                      from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
 import {GOLD_COLOR, LINE_COLOR}      from '~/util/plot';
 import {SegmentNameIndex}            from '~/util/splitProcessing';
 import store                         from '~/util/store';
+import {formatTime}                  from '~/util/durations';
 
 @Component({components: {Plotly}})
 export default class ResetStats extends Vue {
@@ -87,7 +88,9 @@ export default class ResetStats extends Vue {
         y: this.lastSplitByAttempt.map(({index}) => index),
         x: this.attempts.map(attempt => attempt['@_id']),
         text: this.lastSplitByAttempt.map(
-          ({name, index}) => index === this.splitLabels.length - 1 ? 'Finished' : `Reset in ${name} (${index + 1})`
+          ({name, index}, attemptIdx) => index === this.splitLabels.length - 1
+            ? `Finished in ${formatTime(selectTime(this.attempts[attemptIdx]) || '0:0:0.0')}`
+            : `Reset in ${name} (${index + 1})`
         ),
         hoverinfo: 'text',
         type: 'bar',

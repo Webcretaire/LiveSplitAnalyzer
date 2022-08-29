@@ -26,7 +26,8 @@
       {{ finishedAttempts.length }} finished runs in the range
       [ {{ timeFormat(lowerBoundFilter) }} ; {{ timeFormat(higherBoundFilter) }} ]
     </p>
-    <Plotly :data="plot_data" :layout="layout" :display-mode-bar="true" @relayout="onPlotRelayout"/>
+    <Plotly ref="plotlyAttemptStats" :data="plot_data" :layout="layout" :display-mode-bar="true"
+            @relayout="onPlotRelayout" @restyle="onPlotRestyle"/>
   </collapsible-card>
 </template>
 
@@ -62,6 +63,10 @@ export default class AttemptStats extends Vue {
   plotlyCurrentView: XYRange | null = null;
 
   layout: any = {};
+
+  $refs!: {
+    plotlyAttemptStats: Plotly
+  };
 
   /**
    * For some reason this needs to be a function (a computed property will be cached and never change), and it needs to
@@ -138,10 +143,10 @@ export default class AttemptStats extends Vue {
     );
 
     const commonOptions = {
-        x: ids,
-        type: 'scatter',
-        hoverinfo: 'text',
-        mode: 'lines+markers',
+      x: ids,
+      type: 'scatter',
+      hoverinfo: 'text',
+      mode: 'lines+markers'
     };
 
     return [
@@ -149,7 +154,7 @@ export default class AttemptStats extends Vue {
         ...commonOptions,
         y: this.PBs,
         text: pbTextVals,
-        name: "PB",
+        name: 'PB',
         line: {
           shape: 'spline',
           color: GOLD_COLOR,
@@ -184,6 +189,18 @@ export default class AttemptStats extends Vue {
         y: [event['yaxis.range[0]'], event['yaxis.range[1]']]
       };
     }
+  }
+
+  /**
+   * When users toggle a line (this graph has 2) resize is not triggered but restyle is
+   */
+  onPlotRestyle() {
+    const layout = this.$refs.plotlyAttemptStats.layout;
+
+    this.plotlyCurrentView = {
+      x: [layout.xaxis.range[0], layout.xaxis.range[1]],
+      y: [layout.yaxis.range[0], layout.yaxis.range[1]]
+    };
   }
 
   mounted() {

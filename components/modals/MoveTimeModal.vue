@@ -96,19 +96,20 @@ export default class MoveTimeModal extends mixins(BaseModal) {
 
   chosenSplitFunction() {
     if (this.transferSplit.id === this.currentSplitIndex + 1)
-      this.doMoveTime(this.currentSplit, this.nextSplit);
+      this.doMoveTime(this.currentSplit, this.nextSplit, true);
 
     if (this.transferSplit.id === this.currentSplitIndex - 1)
-      this.doMoveTime(this.currentSplit, this.previousSplit);
+      this.doMoveTime(this.currentSplit, this.previousSplit, false);
   }
 
-  doMoveTime(currentSplit: Segment, otherSplit: Segment) {
+  doMoveTime(currentSplit: Segment, otherSplit: Segment, nextSplit: boolean) {
     withLoad(() =>
       offload(
         OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT,
         currentSplit,
         otherSplit,
-        this.transferTime
+        this.transferTime,
+        nextSplit
       ).then(modifiedSplits => {
         splitFileIsModified(true);
 

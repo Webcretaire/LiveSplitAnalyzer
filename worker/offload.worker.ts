@@ -53,7 +53,7 @@ const messageCallback = (e: MessageEvent<OffloadWorkerMessage>) => {
       out = generateSplitDetail(a[0]);
       break;
     case OffloadWorkerOperation.MOVE_TIME_TO_OTHER_SPLIT:
-      out = moveTime(a[0], a[1], a[2]);
+      out = moveTime(a[0], a[1], a[2], a[3]);
       break;
     case OffloadWorkerOperation.CUMULATE_ATTEMPT_TIMES_FOR_ALL_SPLITS:
       out = cumulateAttemptTimesForAllSplits(a[0]);

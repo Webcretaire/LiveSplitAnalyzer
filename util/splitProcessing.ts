@@ -37,7 +37,7 @@ const moveTransferTime = (chosenTime: OptionalRealAndGameTime, transferTime: num
   }
 };
 
-export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTime: number): Segment[] => {
+export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTime: number, nextSplit: boolean): Segment[] => {
   const currentSplitTimes       = currentSplit.SegmentHistory?.Time;
   const otherSplitTimes         = otherSplit.SegmentHistory?.Time;
   const currentSplitComparisons = currentSplit.SplitTimes.SplitTime;
@@ -50,10 +50,14 @@ export const moveTime = (currentSplit: Segment, otherSplit: Segment, transferTim
 
   otherSplitTimes?.forEach((attemptOtherSplit) => moveTransferTime(attemptOtherSplit, transferTime));
 
-  currentSplitComparisons.forEach((comparison) => moveTransferTime(comparison, -transferTime));
-
-  otherSplitComparisons?.forEach((comparison) => moveTransferTime(comparison, transferTime));
-
+  // only move aggregated pb time splitpoint at the middle split point.
+  // this keeps the aggregate length of the two splits the same.
+  if (nextSplit) {
+    currentSplitComparisons.forEach((comparison) => moveTransferTime(comparison, -transferTime));
+  } else {  
+    otherSplitComparisons?.forEach((comparison) => moveTransferTime(comparison, transferTime));
+  }
+  
   return [currentSplit, otherSplit];
 };
 

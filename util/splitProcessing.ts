@@ -13,7 +13,6 @@ import {asArray, XYCoordinates}                        from '~/util/util';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {xmlParser}                                     from '~/util/xml';
 import {ImageExtractor}                                from './imageExtractor';
-import store                                           from './store';
 
 export interface SegmentNameIndex {
   name: string,
@@ -27,11 +26,13 @@ export interface DetailedSegment extends Segment {
 }
 
 const moveTransferTime = (chosenTime: OptionalRealAndGameTime, transferTime: number) => {
-  const newRealTime   = stringTimeToSeconds(chosenTime.RealTime || '0:0:0.0') + transferTime;
-  chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
+  if (typeof chosenTime.RealTime === 'string') {
+    const newRealTime   = stringTimeToSeconds(chosenTime.RealTime) + transferTime;
+    chosenTime.RealTime = secondsToLivesplitFormat(newRealTime);
+  }
 
-  if (store.state.hasGameTime) {
-    const newGameTime   = stringTimeToSeconds(chosenTime?.GameTime || '0:0:0.0') + transferTime;
+  if (typeof chosenTime.GameTime === 'string') {
+    const newGameTime   = stringTimeToSeconds(chosenTime.GameTime) + transferTime;
     chosenTime.GameTime = secondsToLivesplitFormat(newGameTime);
   }
 };

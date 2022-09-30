@@ -39,7 +39,7 @@
       </a> with help from these
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer/graphs/contributors" class="text-white font-weight-bold"
          target="_blank">
-        awesome contributors</a>. Its source code is available on
+        awesome contributors</a>. Its <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white" target="_blank">source code</a> is available on
       <a href="https://github.com/Webcretaire/LiveSplitAnalyzer" class="text-white font-weight-bold" target="_blank">
         GitHub</a>.
     </footer>

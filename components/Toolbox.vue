@@ -10,8 +10,8 @@
         <font-awesome-icon icon="circle-question"/>
       </span>
     </p>
-    <p v-if="!correctCount">
-      <b-button variant="info" @click="fixAttemptCount">
+    <p>
+      <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
@@ -174,7 +174,18 @@ export default class Toolbox extends Vue {
   }
 
   fixAttemptCount() {
-    withLoad(() => this.parsedSplits.Run.AttemptCount = this.allRunAttempts.length);
+    const oldCount = this.parsedSplits.Run.AttemptCount;
+    withLoad(() => {
+      this.parsedSplits.Run.AttemptCount = this.allRunAttempts.length;
+      splitFileIsModified(true);
+    });
+
+    this.$bvToast.toast(`Count updated from ${oldCount} to ${this.allRunAttempts.length} attempts`, {
+      title: 'Attempt count fixed',
+      autoHideDelay: 5000,
+      appendToast: false,
+      variant: 'success'
+    });
   }
 
   deletePreviousRuns() {

@@ -10,6 +10,16 @@
         <font-awesome-icon icon="circle-question"/>
       </span>
     </p>
+    <p v-if="!correctCount">
+      <b-button variant="info" @click="fixAttemptCount">
+        <font-awesome-icon icon="screwdriver-wrench"/>
+        Fix Attempt Count
+      </b-button>
+      <span v-b-tooltip.hover title="Fixes attempt count in splitfile, if your current count doesn't match the actual number of attempts"
+            class="help-question">
+        <font-awesome-icon icon="circle-question"/>
+      </span>
+    </p>
     <p>
       <b-button variant="danger" @click="deletePreviousRuns">
         <font-awesome-icon icon="trash"/>
@@ -110,6 +120,10 @@ export default class Toolbox extends Vue {
     return currentPBattempt;
   }
 
+  get correctCount() {
+    return this.parsedSplits.Run.AttemptCount == this.allRunAttempts.length;
+  }
+
   fixPB() {
     withLoad(() => {
       splitFileIsModified(true);
@@ -157,6 +171,10 @@ export default class Toolbox extends Vue {
         variant: 'success'
       });
     });
+  }
+
+  fixAttemptCount() {
+    withLoad(() => this.parsedSplits.Run.AttemptCount = this.allRunAttempts.length);
   }
 
   deletePreviousRuns() {

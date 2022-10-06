@@ -244,7 +244,7 @@ export default class BaseLinePlotComponent extends Vue {
       if (attemptMatch) {
         const dateTime = attemptMatch['@_ended'].split(" ");
         const date = dateTime[0].split("/");
-        return `${date[2]}-${date[0]}-${date[1]}`;
+        return `${date[2]}-${date[0]}-${date[1]} ${dateTime[1]}`;
       }
     });
 
@@ -267,7 +267,7 @@ export default class BaseLinePlotComponent extends Vue {
 
     return [
       {
-        x: Array.from({length: this.timesToPlot.length}, (v, k) => k),
+        x: this.plotByDate ? dateList : Array.from({length: this.timesToPlot.length}, (v, k) => k), // this thing doesn't work
         y: this.timesSeconds,
         text: text_val,
         type: 'scatter',
@@ -278,7 +278,7 @@ export default class BaseLinePlotComponent extends Vue {
           size: this.markerSizes
         },
         line: {
-          shape: 'spline',
+          shape: this.plotByDate ? 'line' : 'spline',
           color: LINE_COLOR,
           width: 1
         }

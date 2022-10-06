@@ -11,13 +11,16 @@
       <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
-      <loading-switch v-model="savedSettings.cumulateSplits">
+      <loading-switch v-model="savedSettings.cumulateSplits" class="mb-2">
         Show pace so far instead of individual split times
         <span v-b-tooltip.hover
               title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient."
               class="help-question text-warning">
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
+      </loading-switch>
+      <loading-switch v-model="plotByDate">
+        Plot runs by date
       </loading-switch>
     </collapsible-card>
 
@@ -33,6 +36,7 @@
                        :graph-current-attempt-hline="savedSettings.graphCurrentAttemptHline"
                        :graph-median-attempt-hline="savedSettings.graphMedianAttemptHline"
                        :cumulate-splits="savedSettings.cumulateSplits"
+                       :plot-by-date="plotByDate"
                        :cumulated-split-times="cumulatedSplitTimes"
                        :current-attempt-number="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
@@ -78,6 +82,8 @@ export default class SplitsDisplayTab extends Vue {
   parsedSplits!: SplitFile;
 
   cumulatedSplitTimes: SegmentHistoryTime[][] = [];
+
+  plotByDate: boolean = false;
 
   get PB() {
     return this.globalState.PB;

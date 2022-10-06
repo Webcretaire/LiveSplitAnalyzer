@@ -30,6 +30,9 @@ export default class BaseLinePlotComponent extends Vue {
   @Prop({default: false})
   cumulateSplits!: boolean;
 
+  @Prop({default: false})
+  plotByDate!: boolean;
+
   @Prop({default: () => []})
   cumulatedSplitTimes!: SegmentHistoryTime[][];
 
@@ -235,9 +238,30 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get plot_data() {
+    const dateList = this.timesToPlot.map(t => { // this doesn't work yet
+      const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+      const attemptMatch = attempts.find(a => a['@_id'] === t['@_id']);
+      if (attemptMatch) {
+        const dateTime = attemptMatch['@_ended'].split(" ");
+        const date = dateTime[0].split("/");
+        return `${date[2]}-${date[0]}-${date[1]}`;
+      }
+    });
+
     const text_val = this.timesToPlot.map((t) => {
       const time = selectTime(t);
       if (!time) return '';
+
+      if (this.plotByDate) {
+        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const attemptMatch = attempts.find(a => a['@_id'] === t['@_id']);
+        if (attemptMatch) {
+          const dateTime = attemptMatch['@_ended'].split(" ");
+          const date = dateTime[0].split("/");
+          return `${formatTime(time)} (${date[2]}-${date[0]}-${date[1]} at ${dateTime[1]})`;
+        }
+      }
+
       return `${formatTime(time)} (attempt ${t['@_id']})`;
     });
 

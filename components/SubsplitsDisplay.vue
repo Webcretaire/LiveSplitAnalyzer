@@ -54,6 +54,7 @@
                      :current-attempt-number="currentAttemptNumber"
                      :cumulate-splits="cumulateSplits"
                      :cumulated-split-times="cumulatedSplitTimes"
+                     :plot-type="plotType"
                      :segments-holder="segmentsHolder"
                      :parsed-splits="parsedSplits"
                      class="mb-3"/>

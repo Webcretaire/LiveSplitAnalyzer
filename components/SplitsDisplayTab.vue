@@ -11,7 +11,7 @@
       <loading-switch v-model="savedSettings.graphMedianAttemptHline" class="mb-2">
         Display median attempt's times as a horizontal line
       </loading-switch>
-      <loading-switch v-model="savedSettings.cumulateSplits">
+      <loading-switch v-model="savedSettings.cumulateSplits" class="mb-2">
         Show pace so far instead of individual split times
         <span v-b-tooltip.hover
               title="For big splitfiles (lots of splits or attempts), this might slow down the page for a while, be patient."
@@ -19,6 +19,7 @@
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
       </loading-switch>
+      <multiselect v-model="plotType" :options="['heatmap', 'pie', 'bar', 'scatter', 'scattergl', 'image', 'contour', 'table']"/>
     </collapsible-card>
 
     <div class="mb-2 text-left">
@@ -34,6 +35,7 @@
                        :graph-median-attempt-hline="savedSettings.graphMedianAttemptHline"
                        :cumulate-splits="savedSettings.cumulateSplits"
                        :cumulated-split-times="cumulatedSplitTimes"
+                       :plot-type="plotType"
                        :current-attempt-number="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        :parsed-splits="parsedSplits"
@@ -56,14 +58,17 @@ import SubsplitsDisplay              from './SubsplitsDisplay.vue';
 import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
+import Multiselect                   from 'vue-multiselect';
 
-@Component
+@Component({components: {Multiselect}})
 export default class SplitsDisplayTab extends Vue {
   currentAttemptNumber: number = 1;
 
   globalState = store.state;
 
   savedSettings = store.state.savedSettings;
+
+  plotType: string = "spline";
 
   @Prop()
   attempts!: Attempt[];

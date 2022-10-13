@@ -33,8 +33,8 @@ export default class BaseLinePlotComponent extends Vue {
   @Prop({default: () => []})
   cumulatedSplitTimes!: SegmentHistoryTime[][];
 
-  @Prop()
-  plotType!: string;
+  @Prop({default: false})
+  barPlot!: boolean;
 
   @Prop()
   currentAttemptNumber?: number;
@@ -249,7 +249,7 @@ export default class BaseLinePlotComponent extends Vue {
         x: Array.from({length: this.timesToPlot.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
-        type: this.plotType,
+        type: this.barPlot ? "bar" : "scatter",
         hoverinfo: 'text',
         mode: 'lines+markers',
         marker: {

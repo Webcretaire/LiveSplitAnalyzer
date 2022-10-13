@@ -19,7 +19,9 @@
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
       </loading-switch>
-      <multiselect v-model="plotType" :options="['heatmap', 'pie', 'bar', 'scatter', 'scattergl', 'image', 'contour', 'table']"/>
+      <loading-switch v-model="barPlot">
+        Plot bar instead of line graphs
+      </loading-switch>
     </collapsible-card>
 
     <div class="mb-2 text-left">
@@ -35,7 +37,7 @@
                        :graph-median-attempt-hline="savedSettings.graphMedianAttemptHline"
                        :cumulate-splits="savedSettings.cumulateSplits"
                        :cumulated-split-times="cumulatedSplitTimes"
-                       :plot-type="plotType"
+                       :bar-plot="barPlot"
                        :current-attempt-number="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        :parsed-splits="parsedSplits"
@@ -68,7 +70,7 @@ export default class SplitsDisplayTab extends Vue {
 
   savedSettings = store.state.savedSettings;
 
-  plotType: string = "spline";
+  barPlot: boolean = false;
 
   @Prop()
   attempts!: Attempt[];

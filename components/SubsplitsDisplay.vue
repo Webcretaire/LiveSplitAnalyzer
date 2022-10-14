@@ -40,6 +40,7 @@
                          :cumulate-splits="cumulateSplits"
                          :cumulated-split-times="cumulatedSplitTimes"
                          :bar-plot="barPlot"
+                         :scatter-type="scatterType"
                          :current-attempt-number="currentAttemptNumber"
                          :segments-holder="segmentsHolder"
                          :parsed-splits="parsedSplits"
@@ -56,6 +57,7 @@
                      :cumulate-splits="cumulateSplits"
                      :cumulated-split-times="cumulatedSplitTimes"
                      :bar-plot="barPlot"
+                     :scatter-type="scatterType"
                      :segments-holder="segmentsHolder"
                      :parsed-splits="parsedSplits"
                      class="mb-3"/>

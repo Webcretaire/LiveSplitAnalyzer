@@ -37,6 +37,9 @@ export default class BaseLinePlotComponent extends Vue {
   barPlot!: boolean;
 
   @Prop()
+  scatterType!: string[];
+
+  @Prop()
   currentAttemptNumber?: number;
 
   @Prop()
@@ -251,7 +254,8 @@ export default class BaseLinePlotComponent extends Vue {
         text: text_val,
         type: this.barPlot ? "bar" : "scatter",
         hoverinfo: 'text',
-        mode: 'lines+markers',
+        mode: this.scatterType.join('+'),
+        dy: 180,
         marker: {
           color: this.markerColors,
           size: this.markerSizes

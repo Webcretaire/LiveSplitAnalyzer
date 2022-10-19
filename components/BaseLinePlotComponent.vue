@@ -71,6 +71,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('timesToPlot')
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
+  @Watch('barPlot')
   @Watch('plotlyCurrentView')
   updateLayout() {
     const numberTimes = this.plotlyCurrentView?.y || this.timesSeconds.filter(t => typeof t === 'number') as number[];
@@ -84,6 +85,7 @@ export default class BaseLinePlotComponent extends Vue {
       },
       yaxis: {
         rangemode: 'nonnegative',
+        range: [this.gold.y - 1, Math.max(...numberTimes) + 1],
         tickmode: 'array',
         ticktext: ticks.tickTexts,
         tickvals: ticks.tickVals
@@ -91,8 +93,9 @@ export default class BaseLinePlotComponent extends Vue {
       annotations: [
         {
           x: this.gold.x,
-          y: this.gold.y,
+          y: this.gold.y + (this.barPlot ? 0.3 : 0),
           text: 'Gold',
+          textangle: this.barPlot ? -90 : 0,
           font: {
             color: GOLD_COLOR
           },
@@ -101,7 +104,7 @@ export default class BaseLinePlotComponent extends Vue {
           arrowwidth: 2,
           arrowcolor: GOLD_COLOR,
           ax: 0,
-          ay: 30
+          ay: 30 * (this.barPlot ? -1 : 1)
         }
       ]
     };
@@ -255,7 +258,6 @@ export default class BaseLinePlotComponent extends Vue {
         type: this.barPlot ? "bar" : "scatter",
         hoverinfo: 'text',
         mode: this.scatterType.join('+'),
-        dy: 180,
         marker: {
           color: this.markerColors,
           size: this.markerSizes

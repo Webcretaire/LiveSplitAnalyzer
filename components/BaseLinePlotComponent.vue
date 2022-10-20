@@ -68,6 +68,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('timesToPlot')
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
+  @Watch('plotByDate')
   @Watch('plotlyCurrentView')
   updateLayout() {
     const numberTimes = this.plotlyCurrentView?.y || this.timesSeconds.filter(t => typeof t === 'number') as number[];
@@ -87,7 +88,7 @@ export default class BaseLinePlotComponent extends Vue {
       },
       annotations: [
         {
-          x: this.gold.x,
+          x: this.plotByDate ? this.goldDate : this.gold.x,
           y: this.gold.y,
           text: 'Gold',
           font: {
@@ -237,8 +238,17 @@ export default class BaseLinePlotComponent extends Vue {
     return this.cumulatedSplitTimes[virtualCurrentSplitIndex] || [];
   }
 
+  get goldDate() {
+    const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+    const dateTime = attempts.find(a => this.timesToPlot[this.gold.x]['@_id'] === a['@_id'])?.['@_ended'].split(" ");
+    if (dateTime) {
+      const date = dateTime[0].split("/");
+      return `${date[2]}-${date[0]}-${date[1]} ${dateTime[1]}`;
+    }
+  }
+
   get plot_data() {
-    const dateList = this.timesToPlot.map(t => { // this doesn't work yet
+    const dateList = this.timesToPlot.map(t => {
       const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
       const attemptMatch = attempts.find(a => a['@_id'] === t['@_id']);
       if (attemptMatch) {
@@ -267,7 +277,7 @@ export default class BaseLinePlotComponent extends Vue {
 
     return [
       {
-        x: this.plotByDate ? dateList : Array.from({length: this.timesToPlot.length}, (v, k) => k), // this thing doesn't work
+        x: this.plotByDate ? dateList : Array.from({length: this.timesToPlot.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
         type: 'scatter',

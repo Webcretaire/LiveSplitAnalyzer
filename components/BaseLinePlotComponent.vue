@@ -270,7 +270,7 @@ export default class BaseLinePlotComponent extends Vue {
         const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
         const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
         if (matchingAttempt) {
-          return `${formatDate(matchingAttempt['@_started'], true)} (attempt ${t['@_id']})`;
+          return `${formatTime(time)} (${formatDate(matchingAttempt['@_started'], true)})`;
         }
       }
 

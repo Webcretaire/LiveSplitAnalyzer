@@ -7,7 +7,12 @@ import {
   yTicksFromSecondsValues,
   XYRange
 }                                                                  from '~/util/plot';
-import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {
+  formatTime,
+  secondsToFormattedString,
+  stringTimeToSeconds,
+  formatDate
+}                                                                  from '~/util/durations';
 import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
 import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
 import {XYCoordinates}                                             from '~/util/util';
@@ -240,23 +245,22 @@ export default class BaseLinePlotComponent extends Vue {
 
   get goldDate() {
     const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
-    const dateTime = attempts.find(a => this.timesToPlot[this.gold.x]['@_id'] === a['@_id'])?.['@_ended'].split(" ");
-    if (dateTime) {
-      const date = dateTime[0].split("/");
-      return `${date[2]}-${date[0]}-${date[1]} ${dateTime[1]}`;
+    const matchingAttempt = attempts.find(a => this.timesToPlot[this.gold.x]['@_id'] === a['@_id']);
+    if (matchingAttempt) {
+      return formatDate(matchingAttempt['@_started'], false);
     }
   }
 
   get plot_data() {
-    const dateList = this.timesToPlot.map(t => {
-      const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
-      const attemptMatch = attempts.find(a => a['@_id'] === t['@_id']);
-      if (attemptMatch) {
-        const dateTime = attemptMatch['@_ended'].split(" ");
-        const date = dateTime[0].split("/");
-        return `${date[2]}-${date[0]}-${date[1]} ${dateTime[1]}`;
-      }
-    });
+    let dateList: (string | undefined)[] = [];
+    if (this.plotByDate) {
+      dateList = this.timesToPlot.map(t => {
+        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
+        if (matchingAttempt)
+          return formatDate(matchingAttempt['@_started'], false);
+      });
+    }
 
     const text_val = this.timesToPlot.map((t) => {
       const time = selectTime(t);
@@ -264,11 +268,9 @@ export default class BaseLinePlotComponent extends Vue {
 
       if (this.plotByDate) {
         const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
-        const attemptMatch = attempts.find(a => a['@_id'] === t['@_id']);
-        if (attemptMatch) {
-          const dateTime = attemptMatch['@_ended'].split(" ");
-          const date = dateTime[0].split("/");
-          return `${formatTime(time)} (${date[2]}-${date[0]}-${date[1]} at ${dateTime[1]})`;
+        const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
+        if (matchingAttempt) {
+          return `${formatDate(matchingAttempt['@_started'], true)} (attempt ${t['@_id']})`;
         }
       }
 

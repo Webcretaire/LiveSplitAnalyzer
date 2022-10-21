@@ -20,7 +20,7 @@
       </span>
       </loading-switch>
       <loading-switch v-model="plotByDate">
-        Plot runs by date
+        Plot attempts by date
       </loading-switch>
     </collapsible-card>
 

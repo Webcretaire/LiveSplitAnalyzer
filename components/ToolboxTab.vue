@@ -5,32 +5,24 @@
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Personal Best
       </b-button>
-      <span v-b-tooltip.hover title="Fix PB split time for each segment, if your PB comparison is currently broken"
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
+      <p>Fixes PB split time for each segment, if your PB comparison is currently broken.</p>
     </p>
+    <hr>
     <p>
       <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
-      <span v-b-tooltip.hover title="Fixes attempt count in splitfile, if your current count doesn't match the actual number of attempts"
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
+      <p>Fixes attempt count in splitfile, if your current count doesn't match the actual number of attempts.</p>
     </p>
+    <hr>
     <p>
       <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-button variant="danger" @click="deletePreviousRuns">
         <font-awesome-icon icon="trash"/>
         Delete all attempts before #{{ currentAttemptNumber }}
       </b-button>
-      <span v-b-tooltip.hover
-            title="Delete all attempts before the currently selected one in options (included). If your PB is in this range it will not be deleted."
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
+      <p>Delete all attempts before the currently selected above (included). If your PB is in this range it will not be deleted.</p>
     </p>
   </collapsible-card>
 </template>

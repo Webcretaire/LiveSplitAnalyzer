@@ -19,7 +19,7 @@
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
       </loading-switch>
-      <loading-switch v-model="plotByDate">
+      <loading-switch v-model="plotByDate" class="mb-2">
         Plot attempts by date
       </loading-switch>
       <loading-switch v-model="barPlot" class="mb-2">

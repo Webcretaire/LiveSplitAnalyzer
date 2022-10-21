@@ -69,3 +69,9 @@ export const secondsToLivesplitFormat = (time: number): string => {
 
   return out;
 };
+
+export const formatDate = (date: string, toDisplay: boolean): string => { // additional parameter to look nicer in cases where the date and time will be displayed
+  const dateTime = date.split(" ");
+  const splitDate = dateTime[0].split("/");
+  return `${splitDate[2]}-${splitDate[0]}-${splitDate[1]}${toDisplay ? " at " : " "}${dateTime[1]}`;
+}

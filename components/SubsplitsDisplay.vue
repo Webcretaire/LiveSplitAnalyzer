@@ -42,6 +42,7 @@
                          :bar-plot="barPlot"
                          :scatter-type="scatterType"
                          :current-attempt-number="currentAttemptNumber"
+                         :plot-by-date="plotByDate"
                          :segments-holder="segmentsHolder"
                          :parsed-splits="parsedSplits"
                          :class="i === split.Subsplits.length - 1 ? '' : 'mb-3'"/>
@@ -58,6 +59,7 @@
                      :cumulated-split-times="cumulatedSplitTimes"
                      :bar-plot="barPlot"
                      :scatter-type="scatterType"
+                     :plot-by-date="plotByDate"
                      :segments-holder="segmentsHolder"
                      :parsed-splits="parsedSplits"
                      class="mb-3"/>
@@ -82,6 +84,9 @@ export default class SubsplitsDisplay extends mixins(BaseLinePlotComponent) {
 
   @Prop()
   cumulateSplits!: boolean;
+
+  @Prop()
+  plotByDate!: boolean;
 
   subsplitsVisible: boolean = true;
 

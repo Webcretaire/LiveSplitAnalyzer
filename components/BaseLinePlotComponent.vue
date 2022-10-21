@@ -7,7 +7,12 @@ import {
   yTicksFromSecondsValues,
   XYRange
 }                                                                  from '~/util/plot';
-import {formatTime, secondsToFormattedString, stringTimeToSeconds} from '~/util/durations';
+import {
+  formatTime,
+  secondsToFormattedString,
+  stringTimeToSeconds,
+  formatDate
+}                                                                  from '~/util/durations';
 import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
 import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
 import {XYCoordinates}                                             from '~/util/util';
@@ -29,6 +34,9 @@ export default class BaseLinePlotComponent extends Vue {
 
   @Prop({default: false})
   cumulateSplits!: boolean;
+
+  @Prop({default: false})
+  plotByDate!: boolean;
 
   @Prop({default: () => []})
   cumulatedSplitTimes!: SegmentHistoryTime[][];
@@ -72,6 +80,7 @@ export default class BaseLinePlotComponent extends Vue {
   @Watch('graphCurrentAttemptHline')
   @Watch('graphMedianAttemptHline')
   @Watch('barPlot')
+  @Watch('plotByDate')
   @Watch('plotlyCurrentView')
   updateLayout() {
     const numberTimes = this.plotlyCurrentView?.y || this.timesSeconds.filter(t => typeof t === 'number') as number[];
@@ -92,7 +101,7 @@ export default class BaseLinePlotComponent extends Vue {
       },
       annotations: [
         {
-          x: this.gold.x,
+          x: this.plotByDate ? this.goldDate : this.gold.x,
           y: this.gold.y + (this.barPlot ? 0.3 : 0),
           text: 'Gold',
           textangle: this.barPlot ? -90 : 0,
@@ -243,16 +252,43 @@ export default class BaseLinePlotComponent extends Vue {
     return this.cumulatedSplitTimes[virtualCurrentSplitIndex] || [];
   }
 
+  get goldDate() {
+    const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+    const matchingAttempt = attempts.find(a => this.timesToPlot[this.gold.x]['@_id'] === a['@_id']);
+    if (matchingAttempt) {
+      return formatDate(matchingAttempt['@_started'], false);
+    }
+  }
+
   get plot_data() {
+    let dateList: (string | undefined)[] = [];
+    if (this.plotByDate) {
+      dateList = this.timesToPlot.map(t => {
+        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
+        if (matchingAttempt)
+          return formatDate(matchingAttempt['@_started'], false);
+      });
+    }
+
     const text_val = this.timesToPlot.map((t) => {
       const time = selectTime(t);
       if (!time) return '';
+
+      if (this.plotByDate) {
+        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
+        if (matchingAttempt) {
+          return `${formatTime(time)} (${formatDate(matchingAttempt['@_started'], true)})`;
+        }
+      }
+
       return `${formatTime(time)} (attempt ${t['@_id']})`;
     });
 
     return [
       {
-        x: Array.from({length: this.timesToPlot.length}, (v, k) => k),
+        x: this.plotByDate ? dateList : Array.from({length: this.timesToPlot.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
         type: this.barPlot ? "bar" : "scatter",
@@ -263,7 +299,7 @@ export default class BaseLinePlotComponent extends Vue {
           size: this.markerSizes
         },
         line: {
-          shape: 'spline',
+          shape: this.plotByDate ? 'line' : 'spline',
           color: LINE_COLOR,
           width: 1
         }

@@ -12,7 +12,6 @@
         Merge subsplits
       </loading-switch>
     </collapsible-card>
-    <toolbox :current-attempt-number="currentAttemptNumber" :parsed-splits="parsedSplits" class="mb-4"/>
 
     <attempt-overview :segments="segments"
                       :attempt="currentAttempt"

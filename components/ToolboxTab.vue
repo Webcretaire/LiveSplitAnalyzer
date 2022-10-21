@@ -21,6 +21,7 @@
       </span>
     </p>
     <p>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-button variant="danger" @click="deletePreviousRuns">
         <font-awesome-icon icon="trash"/>
         Delete all attempts before #{{ currentAttemptNumber }}
@@ -53,17 +54,19 @@ import {offload}                                       from '~/util/offloadWorke
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 
 @Component
-export default class Toolbox extends Vue {
+export default class ToolboxTab extends Vue {
   visible: boolean = false;
 
   @Prop()
-  currentAttemptNumber!: number;
-
-  @Prop()
   pb!: Attempt | null;
-
+  
   @Prop()
   parsedSplits!: SplitFile;
+
+  @Prop()
+  attempts!: Attempt[];
+
+  currentAttemptNumber: number = 1;
 
   get splits() {
     return this.parsedSplits.Run.Segments.Segment;

@@ -20,7 +20,7 @@
         <font-awesome-icon icon="trash"/>
         Delete all attempts up to #{{ currentAttemptNumber }}
       </b-button>
-      <p class="m-0">Delete all attempts up to and including the currently selected above. If your PB is in this range it will not be deleted.</p>
+      <p class="m-0">Delete all attempts up to and including the currently selected one above. If your PB is in this range it will not be deleted.</p>
     </collapsible-card>
   </div>
 </template>

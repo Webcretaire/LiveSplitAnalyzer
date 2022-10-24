@@ -5,7 +5,7 @@
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Personal Best
       </b-button>
-      <p>Fixes PB split time for each segment, if your PB comparison is currently broken.</p>
+      <p>Updates the split times for each segment on your Personal Best comparison if they don't match up with those on your actual PB attempt.</p>
     </p>
     <hr>
     <p>
@@ -13,16 +13,16 @@
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
-      <p>Fixes attempt count in splitfile, if your current count doesn't match the actual number of attempts.</p>
+      <p>Recounts attempts and rewrites the count stored in the splitfile if it's incorrect.</p>
     </p>
     <hr>
     <p>
       <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
       <b-button variant="danger" @click="deletePreviousRuns">
         <font-awesome-icon icon="trash"/>
-        Delete all attempts before #{{ currentAttemptNumber }}
+        Delete all attempts up to #{{ currentAttemptNumber }}
       </b-button>
-      <p>Delete all attempts before the currently selected above (included). If your PB is in this range it will not be deleted.</p>
+      <p>Delete all attempts up to and including the currently selected above. If your PB is in this range it will not be deleted.</p>
     </p>
   </collapsible-card>
 </template>
@@ -184,7 +184,7 @@ export default class ToolboxTab extends Vue {
   }
 
   deletePreviousRuns() {
-    GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
+    GlobalEventEmitter.$emit('openConfirm', `Delete all attempts up to and including #${this.currentAttemptNumber}?`, () => {
       withLoad(
         () => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,

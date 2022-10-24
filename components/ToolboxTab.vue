@@ -1,30 +1,28 @@
 <template>
-  <collapsible-card title="Toolbox (experimental)">
-    <p>
-      <b-button variant="info" @click="fixPB">
+  <div>
+    <collapsible-card title="Personal Best">
+      <b-button variant="info" @click="fixPB" class="mb-2">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Personal Best
       </b-button>
-      <p>Updates the split times for each segment on your Personal Best comparison if they don't match up with those on your actual PB attempt.</p>
-    </p>
-    <hr>
-    <p>
-      <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount">
+      <p class="m-0">Updates the split times for each segment on your Personal Best comparison if they don't match up with those on your actual PB attempt.</p>
+    </collapsible-card>
+    <collapsible-card title="Attempt Count">
+      <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount" class="mb-2">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
-      <p>Recounts attempts and rewrites the count stored in the splitfile if it's incorrect.</p>
-    </p>
-    <hr>
-    <p>
+      <p class="m-0">Counts attempts in your Attempt history, and rewrites the value stored in the splitfile if it's incorrect.</p>
+    </collapsible-card>
+    <collapsible-card title="Delete Attempts">
       <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
-      <b-button variant="danger" @click="deletePreviousRuns">
+      <b-button variant="danger" @click="deletePreviousRuns" class="mt-2 mb-2">
         <font-awesome-icon icon="trash"/>
         Delete all attempts up to #{{ currentAttemptNumber }}
       </b-button>
-      <p>Delete all attempts up to and including the currently selected above. If your PB is in this range it will not be deleted.</p>
-    </p>
-  </collapsible-card>
+      <p class="m-0">Delete all attempts up to and including the currently selected above. If your PB is in this range it will not be deleted.</p>
+    </collapsible-card>
+  </div>
 </template>
 
 <script lang="ts">

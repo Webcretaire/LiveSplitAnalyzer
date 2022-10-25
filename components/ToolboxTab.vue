@@ -15,7 +15,7 @@
       <p class="m-0">Counts attempts in your Attempt history, and rewrites the value stored in the splitfile if it's incorrect.</p>
     </collapsible-card>
     <collapsible-card title="Delete Attempts">
-      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts" :use-to-display="false"/>
       <b-button variant="danger" @click="deletePreviousRuns" class="mt-2 mb-2">
         <font-awesome-icon icon="trash"/>
         Delete all attempts up to #{{ currentAttemptNumber }}

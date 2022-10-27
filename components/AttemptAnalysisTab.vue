@@ -1,7 +1,7 @@
 <template>
   <div>
     <collapsible-card title="Options" :lazy="false">
-      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts"/>
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts" :use-to-display="true"/>
       <b-col cols="10" offset="1">
         <hr/>
       </b-col>
@@ -12,7 +12,6 @@
         Merge subsplits
       </loading-switch>
     </collapsible-card>
-    <toolbox :current-attempt-number="currentAttemptNumber" :parsed-splits="parsedSplits" class="mb-4"/>
 
     <attempt-overview :segments="segments"
                       :attempt="currentAttempt"

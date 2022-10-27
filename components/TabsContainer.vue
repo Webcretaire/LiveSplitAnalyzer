@@ -41,6 +41,9 @@
           <p>No attempts available</p>
         </div>
       </b-tab>
+      <b-tab title="Toolbox">
+        <toolbox-tab v-if="attemptsExist" :parsed-splits="parsedSplits" :attempts="runAttempts"/>
+      </b-tab>
     </b-tabs>
   </b-card>
 </template>

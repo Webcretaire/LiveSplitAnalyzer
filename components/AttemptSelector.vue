@@ -2,7 +2,7 @@
   <div class="mb-4">
     <div class="d-flex mt-4 mb-2">
       <b-form inline class="text-center m-auto">
-        <b-input-group prepend="Currently displayed run">
+        <b-input-group :prepend="`Currently ${useToDisplay ? 'displayed' : 'selected'} run`">
           <b-form-input type="number" v-model.number="internalValue" :max="latestAttemptNumber" min="1"
                         debounce="500"/>
         </b-input-group>
@@ -32,6 +32,9 @@ export default class AttemptSelector extends Vue {
 
   @Prop()
   attempts!: Attempt[];
+
+  @Prop()
+  useToDisplay!: boolean;
 
   internalValue: number = 1;
 

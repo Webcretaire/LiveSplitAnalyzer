@@ -1,37 +1,28 @@
 <template>
-  <collapsible-card title="Toolbox (experimental)">
-    <p>
-      <b-button variant="info" @click="fixPB">
+  <div>
+    <collapsible-card title="Personal Best">
+      <b-button variant="info" @click="fixPB" class="mb-2">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Personal Best
       </b-button>
-      <span v-b-tooltip.hover title="Fix PB split time for each segment, if your PB comparison is currently broken"
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
-    </p>
-    <p>
-      <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount">
+      <p class="m-0">Updates the split times for each segment on your Personal Best comparison if they don't match up with those on your actual PB attempt.</p>
+    </collapsible-card>
+    <collapsible-card title="Attempt Count">
+      <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount" class="mb-2">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
-      <span v-b-tooltip.hover title="Fixes attempt count in splitfile, if your current count doesn't match the actual number of attempts"
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
-    </p>
-    <p>
-      <b-button variant="danger" @click="deletePreviousRuns">
+      <p class="m-0">Counts attempts in your Attempt history, and rewrites the value stored in the splitfile if it's incorrect.</p>
+    </collapsible-card>
+    <collapsible-card title="Delete Attempts">
+      <attempt-selector v-model="currentAttemptNumber" :attempts="attempts" :use-to-display="false"/>
+      <b-button variant="danger" @click="deletePreviousRuns" class="mt-2 mb-2">
         <font-awesome-icon icon="trash"/>
-        Delete all attempts before #{{ currentAttemptNumber }}
+        Delete all attempts up to #{{ currentAttemptNumber }}
       </b-button>
-      <span v-b-tooltip.hover
-            title="Delete all attempts before the currently selected one in options (included). If your PB is in this range it will not be deleted."
-            class="help-question">
-        <font-awesome-icon icon="circle-question"/>
-      </span>
-    </p>
-  </collapsible-card>
+      <p class="m-0">Delete all attempts up to and including the currently selected one above. If your PB is in this range it will not be deleted.</p>
+    </collapsible-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -53,17 +44,19 @@ import {offload}                                       from '~/util/offloadWorke
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 
 @Component
-export default class Toolbox extends Vue {
+export default class ToolboxTab extends Vue {
   visible: boolean = false;
 
   @Prop()
-  currentAttemptNumber!: number;
-
-  @Prop()
   pb!: Attempt | null;
-
+  
   @Prop()
   parsedSplits!: SplitFile;
+
+  @Prop()
+  attempts!: Attempt[];
+
+  currentAttemptNumber: number = 1;
 
   get splits() {
     return this.parsedSplits.Run.Segments.Segment;
@@ -189,7 +182,7 @@ export default class Toolbox extends Vue {
   }
 
   deletePreviousRuns() {
-    GlobalEventEmitter.$emit('openConfirm', `Delete all attempts before #${this.currentAttemptNumber} included?`, () => {
+    GlobalEventEmitter.$emit('openConfirm', `Delete all attempts up to and including #${this.currentAttemptNumber}?`, () => {
       withLoad(
         () => offload(
           OffloadWorkerOperation.DELETE_ATTEMPT_BEFORE_NUMBER,

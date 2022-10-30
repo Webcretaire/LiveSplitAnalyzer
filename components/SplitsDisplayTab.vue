@@ -19,9 +19,18 @@
         <font-awesome-icon icon="warning" class="warning-icon"/>
       </span>
       </loading-switch>
-      <loading-switch v-model="plotByDate">
+      <loading-switch v-model="plotByDate" class="mb-2">
         Plot attempts by date
       </loading-switch>
+      <loading-switch v-model="barPlot" class="mb-2">
+        Plot bar instead of scatter graphs
+      </loading-switch>
+      <b-row v-if="!barPlot">
+        <b-col cols="4" class="mt-2">Make scatter plot with</b-col>
+        <b-col cols="8">
+          <multiselect v-model="scatterType" :options="['lines', 'markers', 'text']" multiple/>
+        </b-col>
+      </b-row>
     </collapsible-card>
 
     <div class="mb-2 text-left">
@@ -38,6 +47,8 @@
                        :cumulate-splits="savedSettings.cumulateSplits"
                        :plot-by-date="plotByDate"
                        :cumulated-split-times="cumulatedSplitTimes"
+                       :bar-plot="barPlot"
+                       :scatter-type="scatterType"
                        :current-attempt-number="currentAttemptNumber"
                        :segments-holder="segmentsHolder"
                        :parsed-splits="parsedSplits"
@@ -60,14 +71,19 @@ import SubsplitsDisplay              from './SubsplitsDisplay.vue';
 import {offload}                     from '~/util/offloadWorker';
 import {OffloadWorkerOperation}      from '~/util/offloadworkerTypes';
 import {withLoad}                    from '~/util/loading';
+import Multiselect                   from 'vue-multiselect';
 
-@Component
+@Component({components: {Multiselect}})
 export default class SplitsDisplayTab extends Vue {
   currentAttemptNumber: number = 1;
 
   globalState = store.state;
 
   savedSettings = store.state.savedSettings;
+
+  barPlot: boolean = false;
+
+  scatterType: string[] = ['lines', 'markers'];
 
   @Prop()
   attempts!: Attempt[];

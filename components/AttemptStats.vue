@@ -3,6 +3,12 @@
     <loading-switch v-model="showResets" class="mb-2">
       Include reset runs in X axis
     </loading-switch>
+    <b-row class="mb-2">
+      <b-col cols="4" class="mt-2">Make scatter plot with</b-col>
+      <b-col cols="8">
+        <multiselect v-model="scatterType" :options="['lines', 'markers', 'text']" multiple/>
+      </b-col>
+    </b-row>
     <p>
       Filter runs that are between these times:
     </p>
@@ -48,8 +54,9 @@ import {Attempt, selectTime}         from '~/util/splits';
 // Plotly doesn't seem to have TS types available anywhere so we need to ignore the errors
 // @ts-ignore
 import {Plotly}                      from 'vue-plotly';
+import Multiselect                   from 'vue-multiselect';
 
-@Component({components: {'Plotly': Plotly}})
+@Component({components: {'Plotly': Plotly, Multiselect}})
 export default class AttemptStats extends Vue {
   @Prop()
   attempts!: Attempt[];
@@ -61,6 +68,8 @@ export default class AttemptStats extends Vue {
   higherBoundFilter: number = 999999999;
 
   plotlyCurrentView: XYRange | null = null;
+
+  scatterType: string[] = ['lines', 'markers'];
 
   layout: any = {};
 
@@ -146,7 +155,7 @@ export default class AttemptStats extends Vue {
       x: ids,
       type: 'scatter',
       hoverinfo: 'text',
-      mode: 'lines+markers'
+      mode: this.scatterType.join('+')
     };
 
     return [

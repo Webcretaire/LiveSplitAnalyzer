@@ -38,8 +38,9 @@
           <multiselect v-model="extractEndSplit" :options="splitNames" track-by="index" label="label"/>
         </b-col>
       </b-row>
-      <div v-if="validSubset" class="mt-4" v-b-tooltip.hover :title="`The generated splitfile contains ${extractEndSplit.index - extractStartSplit.index} splits, from ${extractStartSplit.label} to ${extractEndSplit.label}`">
-        <b-button variant="success">
+      <div v-if="validSubset" class="mt-4" v-b-tooltip.hover 
+           :title="`The generated splitfile contains ${extractEndSplit.index - extractStartSplit.index} splits, from ${extractStartSplit.label} to ${extractEndSplit.label}`">
+        <b-button @click="downloadSplits" variant="success">
           <font-awesome-icon icon="floppy-disk"/>
           Download splitfile
         </b-button>
@@ -60,6 +61,7 @@ import {
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {withLoad}                                      from '~/util/loading';
+import {xmlBuilder}                                    from '~/util/xml';
 import {Component, Prop, Vue, Watch}                   from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
@@ -165,6 +167,15 @@ export default class ToolboxTab extends Vue {
     return true;
   }
 
+  get newSplits() {
+    let out: SplitFile = Object.create(this.parsedSplits);
+    if(this.validSubset) {
+      out.Run.Segments.Segment = out.Run.Segments.Segment.slice(this.extractStartSplit.index, this.extractEndSplit.index);
+    }
+
+    return out;
+  }
+
   fixPB() {
     withLoad(() => {
       splitFileIsModified(true);
@@ -244,6 +255,24 @@ export default class ToolboxTab extends Vue {
           this.parsedSplits.Run.AttemptCount = r.AttemptHistory.Attempt.length;
         })
       );
+    });
+  }
+
+  downloadSplits() {
+    withLoad(() => {
+      let element = document.createElement('a');
+      element.setAttribute('download', 'splits.lss');
+      element.setAttribute(
+        'href',
+        `data:binary/octet-stream,${encodeURIComponent(xmlBuilder.build(this.newSplits))}`
+      );
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
     });
   }
 

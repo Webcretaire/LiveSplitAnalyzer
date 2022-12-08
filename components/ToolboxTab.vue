@@ -22,6 +22,23 @@
       </b-button>
       <p class="m-0">Delete all attempts up to and including the currently selected one above. If your PB is in this range it will not be deleted.</p>
     </collapsible-card>
+    <collapsible-card title="Extract Splits">
+      <p class="m-0">Extract a subset of splits and download them into their own splitfile.</p>
+      <b-row class="mt-2">
+        <b-col class="mt-2" cols="3">
+          Separate splits from
+        </b-col>
+        <b-col cols="4">
+          <multiselect v-model="extractStartSplit" :options="splitNames" track-by="index" label="label"/>
+        </b-col>
+        <b-col class="mt-2" cols="1">
+          to
+        </b-col>
+        <b-col cols="4">
+          <multiselect v-model="extractEndSplit" :options="splitNames" track-by="index" label="label"/>
+        </b-col>
+      </b-row>
+    </collapsible-card>
   </div>
 </template>
 
@@ -42,8 +59,10 @@ import {GlobalEventEmitter}                            from '~/util/globalEvents
 import store                                           from '~/util/store';
 import {offload}                                       from '~/util/offloadWorker';
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
+import {FilterDetails}                                 from '~/util/filter';
+import Multiselect                                     from 'vue-multiselect';
 
-@Component
+@Component({components: {Multiselect}})
 export default class ToolboxTab extends Vue {
   visible: boolean = false;
 
@@ -58,8 +77,21 @@ export default class ToolboxTab extends Vue {
 
   currentAttemptNumber: number = 1;
 
+  extractStartSplit: number = 0;
+
+  extractEndSplit: number = 0;
+
   get splits() {
     return this.parsedSplits.Run.Segments.Segment;
+  }
+
+  get splitNames() {
+    const out: FilterDetails[] = [];
+    this.splits.forEach((split, index) => {
+      out.push({label: split.Name, index: index});
+    });
+
+    return out;
   }
 
   reconstructAttemptTime(id: number) {

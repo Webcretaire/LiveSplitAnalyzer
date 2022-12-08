@@ -280,8 +280,10 @@ export default class ToolboxTab extends Vue {
   @Watch('extractEndSplit')
   swapSplits() {
     if(this.extractStartSplit.index && this.extractEndSplit.index) {
-      if(this.extractStartSplit.index > this.extractEndSplit.index)
-        [this.extractStartSplit, this.extractEndSplit] = [this.extractEndSplit, this.extractStartSplit];
+      if(this.extractStartSplit.index != -1 &&  this.extractEndSplit.index != -1) {
+        if(this.extractStartSplit.index > this.extractEndSplit.index)
+          [this.extractStartSplit, this.extractEndSplit] = [this.extractEndSplit, this.extractStartSplit];
+      }
     }
   }
 }

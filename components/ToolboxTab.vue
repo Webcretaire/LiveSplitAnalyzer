@@ -24,7 +24,7 @@
     </collapsible-card>
     <collapsible-card title="Extract Splits">
       <p class="m-0">Extract a subset of splits and download them into their own splitfile.</p>
-      <b-row class="mt-2">
+      <b-row class="mt-4">
         <b-col class="mt-2" cols="3">
           Separate splits from
         </b-col>
@@ -38,6 +38,12 @@
           <multiselect v-model="extractEndSplit" :options="splitNames" track-by="index" label="label"/>
         </b-col>
       </b-row>
+      <div v-if="validSubset" class="mt-4" v-b-tooltip.hover :title="`The generated splitfile contains ${extractEndSplit.index - extractStartSplit.index} splits, from ${extractStartSplit.label} to ${extractEndSplit.label}`">
+        <b-button variant="success">
+          <font-awesome-icon icon="floppy-disk"/>
+          Download splitfile
+        </b-button>
+      </div>
     </collapsible-card>
   </div>
 </template>
@@ -54,7 +60,7 @@ import {
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {withLoad}                                      from '~/util/loading';
-import {Component, Prop, Vue}                          from 'nuxt-property-decorator';
+import {Component, Prop, Vue, Watch}                   from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
 import {offload}                                       from '~/util/offloadWorker';
@@ -77,9 +83,9 @@ export default class ToolboxTab extends Vue {
 
   currentAttemptNumber: number = 1;
 
-  extractStartSplit: number = 0;
+  extractStartSplit: FilterDetails = {label: '', index: -1};
 
-  extractEndSplit: number = 0;
+  extractEndSplit: FilterDetails = {label: '', index: -1};
 
   get splits() {
     return this.parsedSplits.Run.Segments.Segment;
@@ -147,6 +153,16 @@ export default class ToolboxTab extends Vue {
 
   get correctCount() {
     return this.parsedSplits.Run.AttemptCount == this.allRunAttempts.length;
+  }
+
+  get validSubset() {
+    if(!this.extractStartSplit?.label) return false;
+
+    if(!this.extractEndSplit?.label) return false;
+
+    if(this.extractStartSplit.index == this.extractEndSplit.index) return false;
+
+    return true;
   }
 
   fixPB() {
@@ -229,6 +245,15 @@ export default class ToolboxTab extends Vue {
         })
       );
     });
+  }
+
+  @Watch('extractStartSplit')
+  @Watch('extractEndSplit')
+  swapSplits() {
+    if(this.extractStartSplit.index && this.extractEndSplit.index) {
+      if(this.extractStartSplit.index > this.extractEndSplit.index)
+        [this.extractStartSplit, this.extractEndSplit] = [this.extractEndSplit, this.extractStartSplit];
+    }
   }
 }
 </script>

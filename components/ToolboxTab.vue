@@ -5,14 +5,19 @@
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Personal Best
       </b-button>
-      <p class="m-0">Updates the split times for each segment on your Personal Best comparison if they don't match up with those on your actual PB attempt.</p>
+      <p class="m-0">
+        Updates the split times for each segment on your Personal Best comparison if they don't match up with those on
+        your actual PB attempt.
+      </p>
     </collapsible-card>
     <collapsible-card title="Attempt Count">
       <b-button variant="info" :disabled="correctCount" @click="fixAttemptCount" class="mb-2">
         <font-awesome-icon icon="screwdriver-wrench"/>
         Fix Attempt Count
       </b-button>
-      <p class="m-0">Counts attempts in your Attempt history, and rewrites the value stored in the splitfile if it's incorrect.</p>
+      <p class="m-0">
+        Counts attempts in your Attempt history, and rewrites the value stored in the splitfile if it's incorrect.
+      </p>
     </collapsible-card>
     <collapsible-card title="Delete Attempts">
       <attempt-selector v-model="currentAttemptNumber" :attempts="attempts" :use-to-display="false"/>
@@ -20,7 +25,10 @@
         <font-awesome-icon icon="trash"/>
         Delete all attempts up to #{{ currentAttemptNumber }}
       </b-button>
-      <p class="m-0">Delete all attempts up to and including the currently selected one above. If your PB is in this range it will not be deleted.</p>
+      <p class="m-0">
+        Delete all attempts up to and including the currently selected one above. If your PB is in this range it will
+        not be deleted.
+      </p>
     </collapsible-card>
     <collapsible-card title="Extract Splits">
       <p class="m-0">Extract a subset of splits and download them into their own splitfile.</p>
@@ -38,8 +46,7 @@
           <multiselect v-model="extractEndSplit" :options="splitNames" track-by="index" label="label"/>
         </b-col>
       </b-row>
-      <div v-if="validSubset" class="mt-4" v-b-tooltip.hover 
-           :title="`The generated splitfile contains ${extractEndSplit.index - extractStartSplit.index} splits, from ${extractStartSplit.label} to ${extractEndSplit.label}`">
+      <div v-if="validSubset" class="mt-4" v-b-tooltip.hover :title="downloadSplitsLabel">
         <b-button @click="downloadSplits" variant="success">
           <font-awesome-icon icon="floppy-disk"/>
           Download splitfile
@@ -61,7 +68,7 @@ import {
 }                                                      from '~/util/splits';
 import {secondsToLivesplitFormat, stringTimeToSeconds} from '~/util/durations';
 import {withLoad}                                      from '~/util/loading';
-import {xmlBuilder}                                    from '~/util/xml';
+import {xmlBuilder, xmlParser}                         from '~/util/xml';
 import {Component, Prop, Vue, Watch}                   from 'nuxt-property-decorator';
 import {GlobalEventEmitter}                            from '~/util/globalEvents';
 import store                                           from '~/util/store';
@@ -69,6 +76,7 @@ import {offload}                                       from '~/util/offloadWorke
 import {OffloadWorkerOperation}                        from '~/util/offloadworkerTypes';
 import {FilterDetails}                                 from '~/util/filter';
 import Multiselect                                     from 'vue-multiselect';
+import {asArray}                                       from '~/util/util';
 
 @Component({components: {Multiselect}})
 export default class ToolboxTab extends Vue {
@@ -76,7 +84,7 @@ export default class ToolboxTab extends Vue {
 
   @Prop()
   pb!: Attempt | null;
-  
+
   @Prop()
   parsedSplits!: SplitFile;
 
@@ -94,12 +102,7 @@ export default class ToolboxTab extends Vue {
   }
 
   get splitNames() {
-    const out: FilterDetails[] = [];
-    this.splits.forEach((split, index) => {
-      out.push({label: split.Name, index: index});
-    });
-
-    return out;
+    return this.splits.map((split, index) => ({label: split.Name, index: index}));
   }
 
   reconstructAttemptTime(id: number) {
@@ -158,22 +161,50 @@ export default class ToolboxTab extends Vue {
   }
 
   get validSubset() {
-    if(!this.extractStartSplit?.label) return false;
+    if (!this.extractStartSplit.label.length) return false;
+    if (!this.extractEndSplit.label.length) return false;
 
-    if(!this.extractEndSplit?.label) return false;
-
-    if(this.extractStartSplit.index == this.extractEndSplit.index) return false;
-
-    return true;
+    return this.extractStartSplit.index != this.extractEndSplit.index;
   }
 
   get newSplits() {
-    let out: SplitFile = Object.create(this.parsedSplits);
-    if(this.validSubset) {
-      out.Run.Segments.Segment = out.Run.Segments.Segment.slice(this.extractStartSplit.index, this.extractEndSplit.index);
+    // Deep copy
+    let out: SplitFile = xmlParser.parse(xmlBuilder.build(this.parsedSplits));
+
+    if (!this.validSubset) return out;
+
+    let segments = out.Run.Segments.Segment;
+
+    let removeInitialTime: Segment | null = null;
+    if (this.extractStartSplit.index > 0)
+      removeInitialTime = segments[this.extractStartSplit.index - 1];
+
+    out.Run.Segments.Segment = [...segments.slice(this.extractStartSplit.index, this.extractEndSplit.index + 1)];
+
+    if (removeInitialTime) {
+      out.Run.Segments.Segment = out.Run.Segments.Segment.map(segment => {
+        const outSegment                = segment;
+        outSegment.SplitTimes.SplitTime = asArray(outSegment.SplitTimes.SplitTime).map((splitTime, index) => {
+          const outSplit          = splitTime;
+          const matchingSplitTime = removeInitialTime!.SplitTimes.SplitTime[index];
+
+          if (outSplit.GameTime && matchingSplitTime?.GameTime)
+            outSplit.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(outSplit.GameTime) - stringTimeToSeconds(matchingSplitTime.GameTime));
+          if (outSplit.RealTime && matchingSplitTime?.RealTime)
+            outSplit.RealTime = secondsToLivesplitFormat(stringTimeToSeconds(outSplit.RealTime) - stringTimeToSeconds(matchingSplitTime.RealTime));
+
+          return outSplit;
+        });
+
+        return outSegment;
+      });
     }
 
     return out;
+  }
+
+  get downloadSplitsLabel() {
+    return `The generated splitfile contains ${this.extractEndSplit.index - this.extractStartSplit.index + 1} splits, from ${this.extractStartSplit.label} to ${this.extractEndSplit.label}`;
   }
 
   fixPB() {
@@ -279,12 +310,8 @@ export default class ToolboxTab extends Vue {
   @Watch('extractStartSplit')
   @Watch('extractEndSplit')
   swapSplits() {
-    if(this.extractStartSplit.index && this.extractEndSplit.index) {
-      if(this.extractStartSplit.index != -1 &&  this.extractEndSplit.index != -1) {
-        if(this.extractStartSplit.index > this.extractEndSplit.index)
-          [this.extractStartSplit, this.extractEndSplit] = [this.extractEndSplit, this.extractStartSplit];
-      }
-    }
+    if (this.validSubset && this.extractStartSplit.index > this.extractEndSplit.index)
+      [this.extractStartSplit, this.extractEndSplit] = [this.extractEndSplit, this.extractStartSplit];
   }
 }
 </script>

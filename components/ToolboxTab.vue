@@ -186,6 +186,7 @@ export default class ToolboxTab extends Vue {
         const outSegment                = segment;
         outSegment.SplitTimes.SplitTime = asArray(outSegment.SplitTimes.SplitTime).map(splitTime => {
           const outSplit          = splitTime;
+          // @ts-ignore Sonar can detect that removeInitialTime is not null, but Typescript can't because it's an idiot
           const matchingSplitTime = asArray(removeInitialTime.SplitTimes.SplitTime).find(st => st['@_name'] === splitTime['@_name']);
 
           if (outSplit.GameTime && matchingSplitTime?.GameTime)

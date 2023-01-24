@@ -10,6 +10,6 @@ export interface Filter {
 }
 
 export interface FilterDetails {
-  label?: string,
-  index?: number
+  label: string,
+  index: number
 }

@@ -1,6 +1,7 @@
 <template>
   <div>
     <attempt-detail-card v-for="(attempt, index) in attemptsLatestToOldest"
+                         :key="`attempt-detail-card_${index}`"
                          :attempt="attempt"
                          :game-cover="gameCover"
                          :last-split="lastSplitByAttempt[index]"

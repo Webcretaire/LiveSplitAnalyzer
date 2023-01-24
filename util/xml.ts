@@ -12,7 +12,7 @@ export const xmlParser: XMLParser = new XMLParser({
   ...globalOptions
 });
 
-export const xmlBuilder = new XMLBuilder({
+export const xmlBuilder: XMLBuilder = new XMLBuilder({
   suppressBooleanAttributes: false,
   format: true,
   ...globalOptions

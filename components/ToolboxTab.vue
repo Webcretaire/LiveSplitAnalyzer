@@ -184,9 +184,9 @@ export default class ToolboxTab extends Vue {
     if (removeInitialTime) {
       out.Run.Segments.Segment = out.Run.Segments.Segment.map(segment => {
         const outSegment                = segment;
-        outSegment.SplitTimes.SplitTime = asArray(outSegment.SplitTimes.SplitTime).map((splitTime, index) => {
+        outSegment.SplitTimes.SplitTime = asArray(outSegment.SplitTimes.SplitTime).map(splitTime => {
           const outSplit          = splitTime;
-          const matchingSplitTime = removeInitialTime!.SplitTimes.SplitTime[index];
+          const matchingSplitTime = asArray(removeInitialTime!.SplitTimes.SplitTime).find(st => st['@_name'] === splitTime['@_name']);
 
           if (outSplit.GameTime && matchingSplitTime?.GameTime)
             outSplit.GameTime = secondsToLivesplitFormat(stringTimeToSeconds(outSplit.GameTime) - stringTimeToSeconds(matchingSplitTime.GameTime));

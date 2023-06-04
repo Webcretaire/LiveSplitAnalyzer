@@ -55,7 +55,8 @@ export default class AttemptOverview extends Vue {
   layout = {margin: {'t': 0, 'b': 0, 'l': 0, 'r': 0}};
 
   get titleAttempt() {
-    return `${this.isPb ? 'Personal Best' : `Attempt n°${this.attempt['@_id']}`} overview (${secondsToFormattedString(this.attemptTime)} total)`;
+    const attemptStr = this.isPb ? 'Personal Best' : `Attempt n°${this.attempt['@_id']}`;
+    return `${attemptStr} overview (${secondsToFormattedString(this.attemptTime)} total)`;
   }
 
   get titleTimesave() {

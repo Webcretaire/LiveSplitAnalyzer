@@ -1,8 +1,15 @@
 /*!
- * Vue.js v2.7.14
- * (c) 2014-2022 Evan You
+ * Vue.js v2.7.15
+ * (c) 2014-2023 Evan You
  * Released under the MIT License.
  */
+
+
+/**
+  * vue-class-component v7.0.1
+  * (c) 2015-present Evan You
+  * @license MIT
+  */
 
 
 /*
@@ -60,12 +67,6 @@ object-assign
  * Licensed under the MIT License.
  */
 
-/**
-  * vue-class-component v7.0.1
-  * (c) 2015-present Evan You
-  * @license MIT
-  */
-
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -87,6 +88,13 @@ PERFORMANCE OF THIS SOFTWARE.
   * (c) 2015-present Evan You
   * @license MIT
   */
+
+
+/*!
+ * Vue.js v2.7.15
+ * (c) 2014-2023 Evan You
+ * Released under the MIT License.
+ */
 
 
 /*!
@@ -151,19 +159,11 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 
-/*!
- * Vue.js v2.7.14
- * (c) 2014-2022 Evan You
- * Released under the MIT License.
+/*
+ * @copyright 2016 Sean Connelly (@voidqk), http://syntheti.cc
+ * @license MIT
+ * @preserve Project Home: https://github.com/voidqk/polybooljs
  */
-
-
-/**
-  * vue-class-component v7.0.1
-  * (c) 2015-present Evan You
-  * @license MIT
-  */
-
 
 /**
   * vue-class-component v7.0.1

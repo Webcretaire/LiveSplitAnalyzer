@@ -6,20 +6,20 @@ import {
   MEDIAN_COLOR,
   yTicksFromSecondsValues,
   XYRange
-}                                                                  from '~/util/plot';
+}                                                  from '~/util/plot';
 import {
   formatTime,
   secondsToFormattedString,
   stringTimeToSeconds,
   formatDate
-}                                                                  from '~/util/durations';
-import {Component, Prop, Vue, Watch}                               from 'nuxt-property-decorator';
-import {SegmentHistoryTime, selectTime, SplitFile}                 from '~/util/splits';
-import {XYCoordinates}                                             from '~/util/util';
-import store                                                       from '~/util/store';
-import {offload}                                                   from '~/util/offloadWorker';
-import {OffloadWorkerOperation}                                    from '~/util/offloadworkerTypes';
-import {DetailedSegment}                                           from '~/util/splitProcessing';
+}                                                  from '~/util/durations';
+import {Component, Prop, Vue, Watch}               from 'nuxt-property-decorator';
+import {SegmentHistoryTime, selectTime, SplitFile} from '~/util/splits';
+import {XYCoordinates}                             from '~/util/util';
+import store                                       from '~/util/store';
+import {offload}                                   from '~/util/offloadWorker';
+import {OffloadWorkerOperation}                    from '~/util/offloadworkerTypes';
+import {DetailedSegment}                           from '~/util/splitProcessing';
 
 @Component
 export default class BaseLinePlotComponent extends Vue {
@@ -73,7 +73,7 @@ export default class BaseLinePlotComponent extends Vue {
 
   /**
    * For some reason layout needs to be a data property or a function (a computed property will be cached and never
-   * change), and it needs to be an arrow function otherwise we get `_vm.layout is not a function`
+   * change), and it can't be an arrow function otherwise we get `_vm.layout is not a function`
    */
   @Watch('gold')
   @Watch('timesToPlot')
@@ -253,7 +253,7 @@ export default class BaseLinePlotComponent extends Vue {
   }
 
   get goldDate() {
-    const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+    const attempts        = this.parsedSplits.Run.AttemptHistory.Attempt;
     const matchingAttempt = attempts.find(a => this.timesToPlot[this.gold.x]['@_id'] === a['@_id']);
     if (matchingAttempt) {
       return formatDate(matchingAttempt['@_started'], false);
@@ -264,7 +264,7 @@ export default class BaseLinePlotComponent extends Vue {
     let dateList: (string | undefined)[] = [];
     if (this.plotByDate) {
       dateList = this.timesToPlot.map(t => {
-        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const attempts        = this.parsedSplits.Run.AttemptHistory.Attempt;
         const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
         if (matchingAttempt)
           return formatDate(matchingAttempt['@_started'], false);
@@ -276,7 +276,7 @@ export default class BaseLinePlotComponent extends Vue {
       if (!time) return '';
 
       if (this.plotByDate) {
-        const attempts = this.parsedSplits.Run.AttemptHistory.Attempt;
+        const attempts        = this.parsedSplits.Run.AttemptHistory.Attempt;
         const matchingAttempt = attempts.find(a => a['@_id'] === t['@_id']);
         if (matchingAttempt) {
           return `${formatTime(time)} (${formatDate(matchingAttempt['@_started'], true)})`;
@@ -291,7 +291,7 @@ export default class BaseLinePlotComponent extends Vue {
         x: this.plotByDate ? dateList : Array.from({length: this.timesToPlot.length}, (v, k) => k),
         y: this.timesSeconds,
         text: text_val,
-        type: this.barPlot ? "bar" : "scatter",
+        type: this.barPlot ? 'bar' : 'scatter',
         hoverinfo: 'text',
         mode: this.scatterType.join('+'),
         marker: {

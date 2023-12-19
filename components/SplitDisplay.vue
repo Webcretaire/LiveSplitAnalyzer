@@ -55,11 +55,15 @@ import {Plotly}                  from 'vue-plotly';
 
 @Component({components: {'Plotly': Plotly}})
 export default class SplitDisplay extends mixins(BaseLinePlotComponent) {
-  @Prop()
-  segmentsHolder!: Segments;
+  get segmentsHolder(): Segments {
+    return this.parsedSplits.Run.Segments;
+  }
 
   fixGoldsModal() {
-    GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal', {split: this.split});
+    GlobalEventEmitter.$emit('openModal', 'ManualGoldUpdateModal', {
+      splits: this.segmentsHolder.Segment,
+      currentSplitIndex: this.splitIndex
+    });
   }
 
   moveTimeModal() {

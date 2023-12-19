@@ -29,7 +29,6 @@
         <splits-display-tab v-if="attemptsExist"
                             :detailed-segments="detailedSegments"
                             :attempts="parsedSplits.Run.AttemptHistory.Attempt"
-                            :segments-holder="parsedSplits.Run.Segments"
                             :parsed-splits="parsedSplits"/>
         <div v-else>
           <p>No attempts available</p>

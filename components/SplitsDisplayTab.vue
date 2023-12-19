@@ -92,9 +92,6 @@ export default class SplitsDisplayTab extends Vue {
   detailedSegments!: DetailedSegment[];
 
   @Prop()
-  segmentsHolder!: Segments;
-
-  @Prop()
   parsedSplits!: SplitFile;
 
   cumulatedSplitTimes: SegmentHistoryTime[][] = [];
@@ -103,6 +100,10 @@ export default class SplitsDisplayTab extends Vue {
 
   get PB() {
     return this.globalState.PB;
+  }
+
+  get segmentsHolder(): Segments {
+    return this.parsedSplits.Run.Segments;
   }
 
   $refs!: {

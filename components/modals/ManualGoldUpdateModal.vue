@@ -9,7 +9,7 @@
         <template #cell(actions)="data">
           <b-button pill variant="danger" size="sm" @click="deleteAttempt(data.item)" v-b-tooltip:hover
                     title="Delete this attempt">
-            <font-awesome-icon icon="trash"/>
+            <font-awesome-icon icon="trash" />
           </b-button>
         </template>
       </b-table>
@@ -30,13 +30,20 @@ export default class ManualGoldUpdateModal extends mixins(BaseModal) {
   modalRef: string = 'ManualGoldUpdateModal';
 
   @Prop()
-  split!: Segment;
+  splits!: Segment[];
+
+  @Prop()
+  currentSplitIndex!: number;
 
   fields = [
     {key: '@_id', label: 'Attempt #'},
     {key: 'time', label: 'Time'},
     {key: 'actions', label: 'Actions'}
   ];
+
+  get split(): Segment {
+    return this.splits[this.currentSplitIndex];
+  }
 
   get history() {
     // Make a copy otherwise sort acts in place and messes up the whole page

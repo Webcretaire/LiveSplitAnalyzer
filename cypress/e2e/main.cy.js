@@ -12,7 +12,7 @@ const openCard = () => {
 
 const cleanText = text => text.replaceAll(/\s*\n\s*/g, ' ').trim();
 
-describe('Main page', () => {
+describe('Split file from file upload', () => {
   beforeEach(() => {
     cy.visit(BASE_URL);
     cy.get('input.custom-file-input').attachFile('hkmeme_myla.lss');
@@ -115,17 +115,22 @@ describe('Main page', () => {
       cy.get('h4.card-title').first().should('have.text', 'Personal Best overview (21m31.58s total)');
     });
   });
+});
 
-  it('Loading splits from splits.io works', () => {
-    // Load file using form
-    cy.get('input[type=text]').type(SPLITSIO_ID_ALL_SKILLS);
+describe('Split file from splits.io', () => {
+  it('Loading splits from text input works', () => {
+    cy.visit(BASE_URL);
+
+    cy.get('input[type=text]').first().type(SPLITSIO_ID_ALL_SKILLS);
     cy.get('.input-group-append button').click();
     cy.get('#RunOverviewCard h4.card-title', {timeout: 10000}).first().should('have.text', 'Hollow Knight - All Skills');
     cy.get('img.logo').should('have.attr', 'src')
       .then(src => expect(src.includes('schy')).to.be.false);
+  });
 
-    // Load file from URL
+  it('Loading splits from URL works', () => {
     cy.visit(`${BASE_URL}?splitsio=${SPLITSIO_ID_POP}`);
+
     cy.get('#RunOverviewCard h4.card-title', {timeout: 10000}).first().should('have.text', 'Hollow Knight - Path of Pain');
     cy.get('img.logo').should('have.attr', 'src')
       .then(src => expect(src.includes('schy')).to.be.true);

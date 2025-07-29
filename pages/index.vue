@@ -15,15 +15,6 @@
               drop-placeholder="Drop file here..."
               class="mb-3"
             ></b-form-file>
-            <p>or import splits from splits.io:</p>
-            <b-form @submit.prevent="getSplitsFromID" class="mb-4" inline>
-              <b-input-group prepend="https://splits.io/" class="m-auto">
-                <b-form-input v-model="splitsID" placeholder="Enter ID here"/>
-                <b-input-group-append>
-                  <b-button type="submit" variant="info" :disabled="emptyID">Get splits</b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-form>
             <tabs-container v-if="parsedSplits"
                             :parsed-splits="parsedSplits"
                             :detailed-segments="detailedSegments"
@@ -88,8 +79,6 @@ export default class IndexPage extends Vue {
 
   confirmCallback: Function | null = null;
 
-  splitsID: string = '';
-
   fileInput: File | null = null;
 
   splitFile: string | null = null;
@@ -116,10 +105,6 @@ export default class IndexPage extends Vue {
 
   get logoClasses() {
     return this.parsedSplits ? ['logo', 'logo-small', 'mt-3', 'mb-2'] : ['logo', 'mt-5', 'mb-4'];
-  }
-
-  get emptyID() {
-    return this.splitsID.trim() === '';
   }
 
   get isPopFileLoaded() {
@@ -167,35 +152,9 @@ export default class IndexPage extends Vue {
     }
   }
 
-  getSplitsFromID() {
-    this.fileInput = null;
-
-    if (this.splitsID !== this.$route.query.splitsio) {
-      const qp = new URLSearchParams();
-      qp.set('splitsio', this.splitsID);
-      history.replaceState(null, '', `?${qp}`);
-    }
-
-    const splitsURL = `https://splits.io/${this.splitsID}/export/livesplit?blank=0`;
-    withLoad(() =>
-      fetch(splitsURL)
-        .then(response => response.text())
-        .then(fileString => this.splitFile = fileString)
-        .catch(() => {
-          this.$bvToast.toast(`${this.splitsID} is not a valid ID`, {
-            title: 'Invalid ID',
-            autoHideDelay: 5000,
-            appendToast: false,
-            variant: 'danger'
-          });
-        })
-    );
-  }
-
   @Watch('fileInput')
   splitFileSet(newFileInputVal: File | null) {
     newFileInputVal?.text().then(t => {
-      this.splitsID = '';
       history.replaceState(null, '', '#');
 
       this.splitFile = t;
@@ -289,15 +248,6 @@ export default class IndexPage extends Vue {
       if (this.globalState.savedSettings[key] === undefined)
         Vue.set(this.globalState.savedSettings, key, defaultSettings[key]);
     });
-  }
-
-  mounted() {
-    const queryParam = this.$route.query.splitsio;
-
-    if (queryParam && typeof queryParam === 'string') {
-      this.splitsID = queryParam;
-      this.getSplitsFromID();
-    }
   }
 }
 </script>
